@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智能漫剧三端功能清单与数据模型</title>
+  <style>
+    :root{
+      --bg:#f6f8ff;--panel:#fff;--ink:#111827;--muted:#64748b;--line:#dbe7ff;
+      --blue:#2563eb;--purple:#7c3aed;--green:#16a34a;--orange:#f97316;--red:#dc2626;
+      --shadow:0 18px 48px rgba(37,99,235,.08);--radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#f7faff,#fff 42%,#f7faff);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.65}
+    a{color:inherit}
+    .wrap{width:min(1240px,calc(100% - 40px));margin:0 auto}
+    header{padding:66px 0 34px;background:radial-gradient(circle at 80% 0,rgba(124,58,237,.16),transparent 32%),radial-gradient(circle at 10% 10%,rgba(37,99,235,.12),transparent 30%)}
+    .kicker,.tag{display:inline-flex;align-items:center;border-radius:999px;font-size:12px;font-weight:900}
+    .kicker{padding:8px 12px;background:rgba(37,99,235,.09);color:var(--blue)}
+    h1{max-width:900px;margin:18px 0 14px;font-size:clamp(40px,6vw,78px);line-height:1.02;letter-spacing:-.06em}
+    h2{margin:0 0 12px;font-size:32px;line-height:1.2;letter-spacing:-.035em}
+    h3{margin:0 0 8px;font-size:20px}
+    p{margin:0;color:var(--muted)}
+    .hero-copy{max-width:760px;font-size:18px}
+    .hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+    .hero-meta span{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.76);color:var(--muted);font-size:12px;font-weight:800}
+    section{padding:34px 0}
+    .section-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:18px}
+    .section-head p{max-width:720px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .entity-card{position:relative;overflow:hidden;min-height:250px}
+    .entity-card:before{content:"";position:absolute;right:-50px;top:-50px;width:150px;height:150px;border-radius:50%;background:rgba(37,99,235,.08)}
+    .entity-card strong{display:block;margin-bottom:10px;color:var(--blue);font-size:13px}
+    .entity-card ul,.clean-list{margin:14px 0 0;padding:0;list-style:none}
+    .entity-card li,.clean-list li{padding:8px 0;border-bottom:1px dashed rgba(100,116,139,.24);color:#334155}
+    .entity-card li:last-child,.clean-list li:last-child{border-bottom:0}
+    .priority-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .tag{padding:5px 9px}
+    .p0{background:#dcfce7;color:#166534}.p1{background:#dbeafe;color:#1d4ed8}.p2{background:#f3e8ff;color:#6d28d9}.risk{background:#ffedd5;color:#c2410c}
+    .mini-note{margin-top:12px;padding:12px 14px;border-radius:16px;background:#f8fafc;border:1px solid var(--line);color:var(--muted);font-size:13px}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:collapse;min-width:980px}
+    th,td{padding:13px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+    th{background:#f8fbff;color:#475569;font-size:12px;white-space:nowrap}
+    td{color:#334155;font-size:13px}
+    tr:last-child td{border-bottom:0}
+    td b{color:#111827}
+    .priority-cell{white-space:nowrap}
+    .schema-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .schema-card h3{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .schema-card small{color:var(--muted);font-weight:600}
+    .field-list{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:7px}
+    .field-list li{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:8px 10px;border-radius:12px;background:#f8fafc;color:#475569;font-size:12px}
+    .field-list b{color:#0f172a}
+    .relation-map{display:grid;gap:10px}
+    .relation-row{display:grid;grid-template-columns:1fr 40px 1fr;gap:12px;align-items:center}
+    .relation-row div{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;color:#334155}
+    .relation-row span{text-align:center;color:var(--purple);font-weight:950}
+    .flow-board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .flow-col{padding:18px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#fff,#f8fbff)}
+    .flow-col h3{color:var(--blue)}
+    .flow-item{margin-top:10px;padding:12px;border:1px solid #e7eefc;border-radius:15px;background:#fff}
+    .flow-item b{display:block;font-size:13px}
+    .flow-item span{display:block;margin-top:3px;color:var(--muted);font-size:12px}
+    .mvp-box{border:1px solid #bbf7d0;background:linear-gradient(135deg,#f0fdf4,#ecfeff);border-radius:26px;padding:24px;box-shadow:var(--shadow)}
+    .mvp-box h2{color:#14532d}
+    .mvp-steps{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:18px}
+    .mvp-steps div{padding:13px 12px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid rgba(34,197,94,.22)}
+    .mvp-steps b{display:block;color:#166534;font-size:12px}
+    .mvp-steps span{display:block;margin-top:4px;color:#334155;font-size:12px}
+    .footer{padding:36px 0 60px;color:var(--muted);font-size:13px}
+    @media(max-width:980px){.grid-3,.grid-2,.schema-grid,.flow-board{grid-template-columns:1fr}.mvp-steps{grid-template-columns:repeat(2,1fr)}.section-head{align-items:flex-start;flex-direction:column}.relation-row{grid-template-columns:1fr}.relation-row span{text-align:left}}
+    @media(max-width:620px){.wrap{width:calc(100% - 24px)}.mvp-steps{grid-template-columns:1fr}.field-list li{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <span class="kicker">产品规划底稿｜三端实体 + 最小闭环</span>
+      <h1>官网、Portal、NeoTV&Neowow 的功能清单与数据模型</h1>
+      <p class="hero-copy">目标是先拆出最小可上线单元：官网负责获客与创作入口，Portal 负责数据查看与用户权限，NeoTV&Neowow 负责案例内容、技能能力与生成服务供给。</p>
+      <div class="hero-meta">
+        <span>P0：必须上线，形成闭环</span>
+        <span>P1：可上线后增强转化与效率</span>
+        <span>P2：锦上添花或后续商业化</span>
+        <span>版本：MVP 规划稿</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>一、三个实体的边界</h2>
+            <p>先把责任边界切清楚，避免官网、后台和能力平台互相长出重复功能。</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="card entity-card">
+            <strong>实体 1｜官网</strong>
+            <h3>面向创作者的前台产品</h3>
+            <p>承担访问、理解、注册、模板/案例浏览、创作、购买、个人中心等用户旅程。</p>
+            <ul>
+              <li>展示产品价值、案例和价格</li>
+              <li>引导免费生成第一集</li>
+              <li>承载模板中心、案例中心、工作台、投放包</li>
+              <li>展示项目、积分、订单、授权与资产</li>
+            </ul>
+            <div class="priority-strip"><span class="tag p0">P0 转化闭环</span><span class="tag p1">P1 内容增强</span></div>
+          </article>
+          <article class="card entity-card">
+            <strong>实体 2｜Portal</strong>
+            <h3>面向内部运营的后台</h3>
+            <p>第一阶段不做复杂工单，只做数据查看、今日对比、用户启禁用、权限与用户导出。</p>
+            <ul>
+              <li>查看注册、项目、生成、支付数据</li>
+              <li>今日 vs 昨日的核心指标对比</li>
+              <li>用户角色、启用/禁用、全部字段导出</li>
+              <li>生成失败、待复核状态只记录不处理</li>
+            </ul>
+            <div class="priority-strip"><span class="tag p0">P0 只读看板</span><span class="tag p0">P0 权限管理</span></div>
+          </article>
+          <article class="card entity-card">
+            <strong>实体 3｜NeoTV&Neowow</strong>
+            <h3>内容案例与能力供给端</h3>
+            <p>NeoTV 提供可展示的案例内容和数据样本；Neowow 提供技能、工作流、生成任务和结果回传。</p>
+            <ul>
+              <li>案例库、封面、标签、题材和展示素材</li>
+              <li>剧本、分镜、投放、合规等创作技能</li>
+              <li>生成任务、状态、成本、失败原因</li>
+              <li>输出资产、项目档案、投放素材包</li>
+            </ul>
+            <div class="priority-strip"><span class="tag p0">P0 技能调用</span><span class="tag p1">P1 案例同步</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="mvp-box">
+          <h2>最小可上线闭环</h2>
+          <p>最小单元不是“所有页面都完整”，而是用户能完成一次真实创作意图，后台能看到这次行为，能力端能返回结果。</p>
+          <div class="mvp-steps">
+            <div><b>1 官网访问</b><span>首页 / 案例 / 模板 / 价格</span></div>
+            <div><b>2 注册登录</b><span>领取试用积分</span></div>
+            <div><b>3 创建项目</b><span>一句话、模板或案例同款</span></div>
+            <div><b>4 调用技能</b><span>剧本策划 P0，其他阶段可占位</span></div>
+            <div><b>5 返回结果</b><span>项目档案、消耗、任务状态</span></div>
+            <div><b>6 后台可见</b><span>数据看板、用户状态、导出</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>二、使用场景与功能优先级</h2>
+            <p>功能按实体落位，同时标记 P0 / P1 / P2，方便开发先做最小闭环。</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>实体</th>
+                <th>使用场景</th>
+                <th>用户/角色</th>
+                <th>功能点</th>
+                <th>优先级</th>
+                <th>最小验收标准</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>官网</b></td><td>理解产品价值</td><td>访客</td><td>首页、产品功能、案例中心、价格页、抖音投放包入口</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>访客能在 3 分钟内理解“从故事到成片”的路径，并进入注册或工作台</td></tr>
+              <tr><td><b>官网</b></td><td>浏览案例并建立信任</td><td>访客 / 创作者</td><td>案例中心按 NeoTV 案例展开，展示题材、制作重点、适合人群</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>至少 6 个案例卡片，图片、标题、标签、方法说明齐全</td></tr>
+              <tr><td><b>官网</b></td><td>从模板开始</td><td>新手创作者</td><td>题材模板 + 创作指引，模板筛选与“做同款”入口</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>选择模板后能进入创建项目或工作台</td></tr>
+              <tr><td><b>官网</b></td><td>注册与领取试用</td><td>新用户</td><td>登录注册、领取试用积分、记录来源渠道</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>创建 user、credit_wallet、event 三类记录</td></tr>
+              <tr><td><b>官网</b></td><td>免费生成第一集</td><td>新手 / 个人创作者</td><td>项目向导、成本预估、创建项目、进入引导式创作台</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>能生成项目记录，并发起至少一个剧本策划任务</td></tr>
+              <tr><td><b>官网</b></td><td>引导式创作</td><td>新手 / 进阶 / 高手</td><td>工作台三种控制深度、七阶段导航、步骤回退、成本与产物提示</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>P0 只需完成剧本策划阶段的完整交互；其余阶段可显示未解锁</td></tr>
+              <tr><td><b>官网</b></td><td>购买与权益到账</td><td>付费用户</td><td>价格页、订单确认、支付成功、权益同步</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>订单、积分、会员状态能进入个人中心与后台</td></tr>
+              <tr><td><b>官网</b></td><td>个人中心管理</td><td>登录用户</td><td>项目、资产、积分、订单、发票、商用授权</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>能查看项目进度、积分余额、订单和授权记录</td></tr>
+              <tr><td><b>官网</b></td><td>投放素材增长</td><td>内容团队 / 品牌方</td><td>标题、封面、钩子、投放素材包、复盘建议</td><td class="priority-cell"><span class="tag p1">P1</span></td><td>能基于项目生成投放包草稿并记录消耗</td></tr>
+              <tr><td><b>官网</b></td><td>团队协作</td><td>工作室 / 内容机构</td><td>团队空间、成员权限、共享积分、审核流</td><td class="priority-cell"><span class="tag p2">P2</span></td><td>后续在付费团队版中实现</td></tr>
+              <tr><td><b>Portal</b></td><td>查看经营数据</td><td>运营管理员</td><td>只读数据看板，访问、新增用户、项目、生成任务，今日对比昨日</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>所有指标可按当天聚合，显示昨天对比</td></tr>
+              <tr><td><b>Portal</b></td><td>查看项目与任务</td><td>运营 / 管理员</td><td>项目记录、生成任务、失败与待复核状态</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>只读展示，不做工单处理</td></tr>
+              <tr><td><b>Portal</b></td><td>用户与权限管理</td><td>超级管理员 / 运营管理员</td><td>角色切换、启用/禁用用户、导出全部用户字段</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>禁用后前台登录/生成接口应被拦截；导出字段完整</td></tr>
+              <tr><td><b>Portal</b></td><td>内容与模板管理</td><td>运营</td><td>案例上下架、模板排序、价格展示配置</td><td class="priority-cell"><span class="tag p1">P1</span></td><td>先可用静态配置，后续做后台管理</td></tr>
+              <tr><td><b>Portal</b></td><td>风控与合规</td><td>审核人员</td><td>敏感内容记录、版权授权查看、合规材料下载</td><td class="priority-cell"><span class="tag p1">P1</span></td><td>优先记录状态，人工处理后置</td></tr>
+              <tr><td><b>Portal</b></td><td>工单处理</td><td>客服 / 运营</td><td>用户问题、失败任务补偿、退款申请</td><td class="priority-cell"><span class="tag p2">P2</span></td><td>第一阶段不做，避免扩大后台复杂度</td></tr>
+              <tr><td><b>NeoTV&Neowow</b></td><td>案例内容供给</td><td>官网访客 / 运营</td><td>NeoTV 案例库、封面图、题材标签、案例拆解字段</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>至少支持官网案例中心读取固定案例数据</td></tr>
+              <tr><td><b>NeoTV&Neowow</b></td><td>创作技能调用</td><td>工作台用户</td><td>剧本策划技能、输入结构、输出结构、版本与失败策略</td><td class="priority-cell"><span class="tag p0">P0</span></td><td>P0 只需跑通剧本策划技能；任务有状态、成本、结果</td></tr>
+              <tr><td><b>NeoTV&Neowow</b></td><td>资产与结果回传</td><td>创作者 / 官网</td><td>项目档案、角色设定、分镜、视频、封面、投放素材</td><td class="priority-cell"><span class="tag p1">P1</span></td><td>优先回传文本与图片资产；视频生成可后续接入</td></tr>
+              <tr><td><b>NeoTV&Neowow</b></td><td>工作流编排</td><td>高手 / 内部配置</td><td>技能组合、模型路由、成本预估、重试策略</td><td class="priority-cell"><span class="tag p1">P1</span></td><td>先做固定流程，后续开放可配置</td></tr>
+              <tr><td><b>NeoTV&Neowow</b></td><td>能力市场</td><td>内容团队 / 技能作者</td><td>更多技能、版本订阅、收益分成</td><td class="priority-cell"><span class="tag p2">P2</span></td><td>不进入 MVP</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>三、核心数据表结构</h2>
+            <p>表结构按“用户/权限、项目/创作、交易/积分、内容/能力、运营日志”五组组织。</p>
+          </div>
+        </div>
+        <div class="schema-grid">
+          <article class="card schema-card">
+            <h3>users 用户表 <small>P0</small></h3>
+            <p>官网与 Portal 共用的用户主表。</p>
+            <ul class="field-list">
+              <li><b>id</b><span>用户唯一编号</span></li>
+              <li><b>phone / email</b><span>手机号、邮箱</span></li>
+              <li><b>name / avatar</b><span>昵称与头像</span></li>
+              <li><b>status</b><span>启用、禁用、注销</span></li>
+              <li><b>source_channel</b><span>首页、模板、案例、投放包</span></li>
+              <li><b>created_at / last_active_at</b><span>注册与最近活跃时间</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>roles / user_roles 权限表 <small>P0</small></h3>
+            <p>Portal 用于角色控制，官网用于拦截禁用用户。</p>
+            <ul class="field-list">
+              <li><b>role_id</b><span>超级管理员、运营管理员、只读运营、创作者</span></li>
+              <li><b>permission_keys</b><span>看板查看、用户管理、导出用户</span></li>
+              <li><b>user_id</b><span>绑定用户</span></li>
+              <li><b>assigned_by</b><span>操作管理员</span></li>
+              <li><b>assigned_at</b><span>授权时间</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>projects 项目表 <small>P0</small></h3>
+            <p>创作工作台的核心业务对象。</p>
+            <ul class="field-list">
+              <li><b>id</b><span>项目编号</span></li>
+              <li><b>owner_user_id</b><span>项目归属用户</span></li>
+              <li><b>title / synopsis</b><span>项目名、故事简介</span></li>
+              <li><b>source_type</b><span>一句话、剧本、模板、案例同款</span></li>
+              <li><b>current_stage</b><span>剧本、视觉、资产、分镜、视频、后期、投放</span></li>
+              <li><b>progress / status</b><span>进度与状态</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>project_steps 阶段步骤表 <small>P0</small></h3>
+            <p>用于工作台七阶段与每阶段内部步骤。</p>
+            <ul class="field-list">
+              <li><b>project_id</b><span>所属项目</span></li>
+              <li><b>stage_key</b><span>script、visual、asset、storyboard、video、preview、launch</span></li>
+              <li><b>step_key</b><span>当前步骤标识</span></li>
+              <li><b>input_snapshot</b><span>用户选择与输入快照</span></li>
+              <li><b>output_artifact_id</b><span>产物编号</span></li>
+              <li><b>status</b><span>未开始、进行中、完成、失败</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>creative_jobs 生成任务表 <small>P0</small></h3>
+            <p>官网发起，Neowow 执行，Portal 查看。</p>
+            <ul class="field-list">
+              <li><b>id</b><span>任务编号</span></li>
+              <li><b>project_id / user_id</b><span>项目与用户</span></li>
+              <li><b>skill_id / workflow_id</b><span>调用的技能与流程</span></li>
+              <li><b>status</b><span>排队、运行、成功、失败、待复核</span></li>
+              <li><b>credit_cost</b><span>预计/实际积分</span></li>
+              <li><b>error_code / retry_count</b><span>失败原因与重试次数</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>artifacts / assets 产物资产表 <small>P0/P1</small></h3>
+            <p>保存剧本、项目档案、图片、封面、视频、投放素材。</p>
+            <ul class="field-list">
+              <li><b>artifact_id</b><span>产物编号</span></li>
+              <li><b>project_id</b><span>所属项目</span></li>
+              <li><b>type</b><span>剧本、角色、分镜、视频、封面、投放包</span></li>
+              <li><b>content_url / json_payload</b><span>文件地址或结构化内容</span></li>
+              <li><b>version</b><span>版本号</span></li>
+              <li><b>source_job_id</b><span>由哪个任务产生</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>credit_wallets / credit_ledger 积分表 <small>P0</small></h3>
+            <p>支持试用积分、会员赠送、充值、消耗、失败返还。</p>
+            <ul class="field-list">
+              <li><b>wallet_id / user_id</b><span>钱包与用户</span></li>
+              <li><b>balance</b><span>当前余额</span></li>
+              <li><b>ledger_type</b><span>发放、购买、消耗、返还</span></li>
+              <li><b>amount</b><span>积分变化数量</span></li>
+              <li><b>related_order_id / job_id</b><span>关联订单或任务</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>orders / products 交易表 <small>P0</small></h3>
+            <p>价格页、订单确认、支付成功和个人中心使用。</p>
+            <ul class="field-list">
+              <li><b>product_id</b><span>会员、积分包、项目包、投放包</span></li>
+              <li><b>order_id / user_id</b><span>订单与用户</span></li>
+              <li><b>amount / status</b><span>金额与支付状态</span></li>
+              <li><b>entitlement_snapshot</b><span>购买后权益快照</span></li>
+              <li><b>invoice_status</b><span>发票状态</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>cases / templates 案例模板表 <small>P0</small></h3>
+            <p>官网案例中心与模板中心读取，也可来自 NeoTV。</p>
+            <ul class="field-list">
+              <li><b>case_id / template_id</b><span>案例或模板编号</span></li>
+              <li><b>title / category</b><span>标题、题材分类</span></li>
+              <li><b>cover_url</b><span>封面图</span></li>
+              <li><b>method_summary</b><span>制作方法、适合人群</span></li>
+              <li><b>source</b><span>NeoTV、内部上传、运营配置</span></li>
+              <li><b>status</b><span>草稿、上线、下线</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>skills / workflows 技能流程表 <small>P0/P1</small></h3>
+            <p>来自 Neowow 的技能定义和工作流版本。</p>
+            <ul class="field-list">
+              <li><b>skill_id</b><span>剧本创作、分镜、投放、合规</span></li>
+              <li><b>version</b><span>技能版本</span></li>
+              <li><b>input_schema</b><span>输入结构</span></li>
+              <li><b>output_schema</b><span>输出结构</span></li>
+              <li><b>cost_rule</b><span>积分预估规则</span></li>
+              <li><b>status</b><span>可用、停用、灰度</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>events / audit_logs 事件日志表 <small>P0</small></h3>
+            <p>Portal 的数据看板和权限审计依赖。</p>
+            <ul class="field-list">
+              <li><b>event_id</b><span>事件编号</span></li>
+              <li><b>user_id / session_id</b><span>用户或访客会话</span></li>
+              <li><b>event_name</b><span>访问、注册、创建项目、购买、生成</span></li>
+              <li><b>payload</b><span>事件详情</span></li>
+              <li><b>created_at</b><span>发生时间</span></li>
+            </ul>
+          </article>
+          <article class="card schema-card">
+            <h3>exports 导出记录表 <small>P0</small></h3>
+            <p>Portal 导出用户字段需要留痕。</p>
+            <ul class="field-list">
+              <li><b>export_id</b><span>导出编号</span></li>
+              <li><b>operator_user_id</b><span>操作人</span></li>
+              <li><b>export_type</b><span>全部用户、订单、项目等</span></li>
+              <li><b>field_scope</b><span>导出字段范围</span></li>
+              <li><b>file_url</b><span>文件地址</span></li>
+              <li><b>created_at</b><span>导出时间</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>四、表关系总览</h2>
+            <p>这组关系决定后端接口怎么拆，避免每个页面都各自存一份数据。</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>主业务关系</h3>
+            <div class="relation-map">
+              <div class="relation-row"><div>users 用户</div><span>1:N</span><div>projects 项目</div></div>
+              <div class="relation-row"><div>projects 项目</div><span>1:N</span><div>project_steps 阶段步骤</div></div>
+              <div class="relation-row"><div>projects 项目</div><span>1:N</span><div>creative_jobs 生成任务</div></div>
+              <div class="relation-row"><div>creative_jobs 生成任务</div><span>1:N</span><div>artifacts / assets 产物资产</div></div>
+              <div class="relation-row"><div>skills / workflows 技能流程</div><span>1:N</span><div>creative_jobs 生成任务</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>商业与运营关系</h3>
+            <div class="relation-map">
+              <div class="relation-row"><div>users 用户</div><span>1:1</span><div>credit_wallets 钱包</div></div>
+              <div class="relation-row"><div>credit_wallets 钱包</div><span>1:N</span><div>credit_ledger 积分流水</div></div>
+              <div class="relation-row"><div>users 用户</div><span>1:N</span><div>orders 订单</div></div>
+              <div class="relation-row"><div>products 商品</div><span>1:N</span><div>orders 订单</div></div>
+              <div class="relation-row"><div>users / portal users</div><span>1:N</span><div>audit_logs / exports 审计与导出</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mini-note">建议：所有页面都不要直接保存“临时假数据”。统一从 users、projects、jobs、artifacts、wallet、orders、events 这几类核心表读取，前端页面只决定展示方式。</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>五、三个实体的数据传输模型</h2>
+            <p>以下是三端之间最小需要交换的数据，不是接口命名，而是后端边界。</p>
+          </div>
+        </div>
+        <div class="flow-board">
+          <div class="flow-col">
+            <h3>官网 → Portal</h3>
+            <div class="flow-item"><b>访问与转化事件</b><span>页面访问、按钮点击、注册、模板选择、案例点击、价格点击</span></div>
+            <div class="flow-item"><b>用户与权益数据</b><span>用户信息、来源渠道、会员状态、积分余额、禁用状态同步</span></div>
+            <div class="flow-item"><b>项目与任务状态</b><span>项目创建、当前阶段、生成任务、失败/待复核状态</span></div>
+            <div class="flow-item"><b>订单与授权</b><span>订单、支付状态、发票、商用授权记录</span></div>
+          </div>
+          <div class="flow-col">
+            <h3>官网 ↔ NeoTV&Neowow</h3>
+            <div class="flow-item"><b>案例与模板读取</b><span>案例图片、题材、创作方法、模板预设</span></div>
+            <div class="flow-item"><b>技能任务请求</b><span>项目上下文、用户选择、目标平台、预算与输出要求</span></div>
+            <div class="flow-item"><b>任务状态回传</b><span>排队、运行、成功、失败、预计耗时、积分消耗</span></div>
+            <div class="flow-item"><b>创作产物回传</b><span>剧本方向、大纲、项目档案、分镜、封面、视频和投放素材</span></div>
+          </div>
+          <div class="flow-col">
+            <h3>Portal ↔ NeoTV&Neowow</h3>
+            <div class="flow-item"><b>能力健康状态</b><span>技能是否可用、失败率、平均耗时、队列积压</span></div>
+            <div class="flow-item"><b>内容供给状态</b><span>案例上线/下线、模板版本、素材来源</span></div>
+            <div class="flow-item"><b>异常记录查看</b><span>失败任务、待复核任务、失败原因和重试次数</span></div>
+            <div class="flow-item"><b>后续运营配置</b><span>P1 后可配置案例排序、模板推荐、技能灰度</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>六、接口与数据事件建议</h2>
+            <p>开发时可以先按事件驱动拆，页面只发起事件，后台和能力端订阅状态。</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>事件/接口</th><th>发起实体</th><th>接收实体</th><th>关键字段</th><th>优先级</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b>用户注册/登录</b></td><td>官网</td><td>Portal / 用户服务</td><td>phone、email、source_channel、consent</td><td><span class="tag p0">P0</span></td><td>生成用户、会话、试用积分记录</td></tr>
+              <tr><td><b>创建项目</b></td><td>官网</td><td>项目服务 / Portal</td><td>user_id、source_type、template_id、case_id、story_input</td><td><span class="tag p0">P0</span></td><td>项目进入工作台，后台可见</td></tr>
+              <tr><td><b>发起生成任务</b></td><td>官网工作台</td><td>Neowow</td><td>project_id、skill_id、input_snapshot、estimated_cost</td><td><span class="tag p0">P0</span></td><td>MVP 先接剧本策划技能</td></tr>
+              <tr><td><b>生成任务状态回传</b></td><td>Neowow</td><td>官网 / Portal</td><td>job_id、status、progress、actual_cost、error_code</td><td><span class="tag p0">P0</span></td><td>官网显示进度，Portal 记录异常</td></tr>
+              <tr><td><b>产物保存</b></td><td>Neowow</td><td>项目服务</td><td>project_id、artifact_type、content_url、json_payload、version</td><td><span class="tag p0">P0</span></td><td>至少保存项目档案与剧本结果</td></tr>
+              <tr><td><b>积分扣减/返还</b></td><td>任务服务</td><td>钱包服务 / Portal</td><td>user_id、job_id、amount、ledger_type</td><td><span class="tag p0">P0</span></td><td>失败任务自动返还或记录为 0 消耗</td></tr>
+              <tr><td><b>订单支付成功</b></td><td>官网支付</td><td>订单/权益/Portal</td><td>order_id、product_id、amount、entitlement_snapshot</td><td><span class="tag p0">P0</span></td><td>同步会员、积分、项目包权益</td></tr>
+              <tr><td><b>用户禁用/启用</b></td><td>Portal</td><td>用户服务 / 官网</td><td>user_id、status、operator_id、reason</td><td><span class="tag p0">P0</span></td><td>禁用用户不能登录、下单或发起生成</td></tr>
+              <tr><td><b>导出用户字段</b></td><td>Portal</td><td>导出服务</td><td>operator_id、field_scope、filter、file_format</td><td><span class="tag p0">P0</span></td><td>需要写入 exports 与 audit_logs</td></tr>
+              <tr><td><b>案例/模板同步</b></td><td>NeoTV&Neowow</td><td>官网 / Portal</td><td>case_id、template_id、cover_url、tags、status</td><td><span class="tag p1">P1</span></td><td>MVP 可先静态配置</td></tr>
+              <tr><td><b>投放包生成</b></td><td>官网</td><td>Neowow</td><td>project_id、asset_ids、platform、material_count</td><td><span class="tag p1">P1</span></td><td>标题、封面、钩子、复盘建议</td></tr>
+              <tr><td><b>工单/补偿</b></td><td>Portal</td><td>客服/订单/钱包</td><td>ticket_id、user_id、job_id、compensation</td><td><span class="tag p2">P2</span></td><td>第一阶段不做</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>七、开发拆分建议</h2>
+            <p>按最小闭环，后端先做少量稳定表与接口，前端先跑通真实状态流。</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="panel">
+            <h3>P0 第一阶段</h3>
+            <ul class="clean-list">
+              <li>用户注册登录、状态启禁用</li>
+              <li>官网页面与创建项目入口</li>
+              <li>剧本策划技能任务调用</li>
+              <li>项目档案与任务结果保存</li>
+              <li>积分发放、扣减、失败返还</li>
+              <li>Portal 只读看板、用户管理、导出</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>P1 第二阶段</h3>
+            <ul class="clean-list">
+              <li>案例与模板后台配置</li>
+              <li>投放包生成与项目资产关联</li>
+              <li>更多创作阶段接入：视觉、资产、分镜</li>
+              <li>内容合规记录与授权材料下载</li>
+              <li>能力健康看板与失败率统计</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>P2 后续增强</h3>
+            <ul class="clean-list">
+              <li>团队空间与多人协作审核</li>
+              <li>工单、退款、补偿后台</li>
+              <li>技能市场与工作流编排器</li>
+              <li>投放数据回流与智能复盘</li>
+              <li>企业级私有资产库和接口对接</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <div class="wrap">说明：这份 HTML 是产品与后端沟通底稿，优先用于确认范围、数据边界和 P0 最小闭环。</div>
+  </div>
+</body>
+</html>

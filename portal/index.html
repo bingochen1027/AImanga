@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智能漫剧最小运营后台</title>
+  <link rel="stylesheet" href="assets/portal.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span>漫</span><div><b>智能漫剧数据看板</b><small>只读记录版本</small></div></div>
+    <nav>
+      <a href="#dashboard" class="active">数据看板</a>
+      <a href="#user-admin">用户与权限</a>
+    </nav>
+    <div class="sidebar-card">
+      <b>当前范围</b>
+      <p>业务数据只读；仅支持用户角色、启用状态和用户数据导出。</p>
+    </div>
+  </aside>
+
+  <main class="main mvp-main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">第一阶段后台</p>
+        <h1>只读数据看板</h1>
+        <p class="mvp-subtitle">记录用户从注册、创建项目到第一次生成的关键数据。</p>
+      </div>
+      <div class="actions">
+        <span class="live-badge"><i></i> 数据持续记录中</span>
+      </div>
+    </header>
+
+    <section id="dashboard" class="section">
+      <div class="section-title"><div><h2>数据概览</h2><p>查看今日访问、用户、项目和生成记录。</p></div><span class="mvp-mark">只读</span></div>
+      <div class="metrics" id="metrics"></div>
+      <div class="live-panel" id="live-journey"></div>
+      <div class="mvp-alerts read-only-note">
+        <div><b>异常记录</b><span id="attention-count">2 项</span></div>
+        <p>第一阶段只记录失败与待复核状态，不在后台发起处理。</p>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="section-title"><div><h2>项目记录</h2><p>查看项目当前阶段、进度与状态。</p></div><span class="mvp-mark">只读</span></div>
+      <div class="table-wrap">
+        <table class="mvp-table"><thead><tr><th>项目</th><th>用户</th><th>当前阶段</th><th>进度</th><th>状态</th></tr></thead><tbody id="project-rows"></tbody></table>
+      </div>
+    </section>
+
+    <section id="jobs" class="section">
+      <div class="section-title"><div><h2>生成记录</h2><p>查看生成中、失败和待复核的任务数据。</p></div><span class="mvp-mark">只读</span></div>
+      <div class="task-summary">
+        <div><small>生成中</small><b id="running-total">0</b></div>
+        <div><small>失败</small><b id="failed-total">0</b></div>
+        <div><small>待复核</small><b id="review-total">0</b></div>
+      </div>
+      <div class="table-wrap">
+        <table class="mvp-table"><thead><tr><th>任务编号</th><th>项目</th><th>任务类型</th><th>状态</th><th>积分</th></tr></thead><tbody id="job-rows"></tbody></table>
+      </div>
+    </section>
+
+    <section id="users" class="section">
+      <div class="section-title"><div><h2>用户与积分记录</h2><p>查看用户当前方案和可用积分，不进行人工修改。</p></div><span class="mvp-mark">只读</span></div>
+      <div class="grid-3 mvp-user-grid">
+        <div class="panel"><span class="mini-label">用户</span><h2 id="user-name">演示用户</h2><p id="user-contact">尚未登录</p></div>
+        <div class="panel"><span class="mini-label">当前权益</span><h2 id="user-plan">免费试用</h2><p>可创建项目并完成首次低成本生成。</p></div>
+        <div class="panel"><span class="mini-label">可用积分</span><h2 id="user-credits">0</h2><p>展示前台同步的当前积分余额。</p></div>
+      </div>
+    </section>
+
+    <section id="user-admin" class="section user-admin-section">
+      <div class="section-title">
+        <div><h2>用户与权限管理</h2><p>维护用户角色和启用状态，并导出全部用户字段。</p></div>
+        <button class="export-button" id="export-users">导出全部用户</button>
+      </div>
+      <div class="permission-summary">
+        <div><b>超级管理员</b><span>全部数据与用户管理</span></div>
+        <div><b>运营管理员</b><span>查看数据、管理用户、导出</span></div>
+        <div><b>只读运营</b><span>查看数据与导出</span></div>
+        <div><b>创作者</b><span>不可进入运营后台</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="user-table">
+          <thead><tr><th>用户编号</th><th>用户名称</th><th>手机号</th><th>邮箱</th><th>角色</th><th>状态</th><th>方案</th><th>积分</th><th>项目数</th><th>注册时间</th><th>最近活跃</th><th>来源</th><th>管理</th></tr></thead>
+          <tbody id="user-rows"></tbody>
+        </table>
+      </div>
+      <p class="field-note">导出文件包含表格中的全部用户字段，便于后续分析和留档。</p>
+    </section>
+
+    <section class="section">
+      <div class="section-title"><div><h2>最近数据记录</h2><p>按时间查看前台产生的访问、注册、项目和生成事件。</p></div><span class="mvp-mark">只读</span></div>
+      <div id="activity-list" class="activity-list"></div>
+    </section>
+  </main>
+
+  <script src="assets/portal.js"></script>
+</body>
+</html>

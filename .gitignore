@@ -1,0 +1,12 @@
+.DS_Store
+**/.DS_Store
+
+# Local/generated scratch output
+tmp/
+.deck-render/
+output/
+outputs/
+
+# Dependency folders if future tooling is added
+node_modules/
+

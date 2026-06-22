@@ -1,0 +1,9 @@
+页面,文件,用户动作,后台模块,Skill/能力,核心数据
+首页,frontend/index.html,点击免费生成/查看模板,CMS/活动追踪,推荐入口,source/campaign/cta_event
+登录注册,frontend/login.html,手机号/微信登录,用户中心/试用权益,身份态,user/trial_credits
+剧本向导,frontend/wizard.html,输入创意/上传剧本,项目管理/任务中心,剧本框架/内容填充,project/script_parse_result
+编辑器Guide,frontend/editor-guide.html,确认资产/分镜,阶段状态/资产库,角色资产/分镜导演,asset/storyboard_shot
+创作工作台,frontend/studio.html,生成视频/查看队列,生成任务中心/积分账本,视频生成/model routing,job/credit_ledger/video_asset
+抖音投放包,frontend/launch-kit.html,生成标题/封面/Hook,投放素材管理,投放素材Skill,launch_creative/ab_group
+价格/订单,frontend/pricing.html,开通会员/购买积分,订单/支付/发票,权益策略,order/payment/entitlement
+个人中心,frontend/account.html,查看项目/授权/合规,客户成功/合规/授权,合规审核Skill,license/compliance_record

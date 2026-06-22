@@ -1,0 +1,162 @@
+{
+  "metrics": {
+    "visitors": 1284,
+    "new_users": 126,
+    "projects_created": 48,
+    "running_jobs": 17,
+    "failed_jobs": 3,
+    "paid_amount": "¥8,932",
+    "credits_consumed": 42680,
+    "launch_exports": 21
+  },
+  "journey": [
+    {
+      "stage": "访问/认知",
+      "front": "index.html / showcase.html / templates.html",
+      "portal": "CMS、活动、来源追踪",
+      "signal": "CTA点击率、模板浏览",
+      "next": "登录/免费生成"
+    },
+    {
+      "stage": "登录/试用",
+      "front": "login.html",
+      "portal": "用户中心、试用积分发放",
+      "signal": "注册渠道、试用权益",
+      "next": "创建项目"
+    },
+    {
+      "stage": "项目创建",
+      "front": "wizard.html",
+      "portal": "项目管理、剧本框架Skill",
+      "signal": "题材、平台、集数、预算",
+      "next": "AI解析"
+    },
+    {
+      "stage": "资产确认",
+      "front": "editor-guide.html / studio.html",
+      "portal": "资产库、角色/场景Skill",
+      "signal": "一致性评分、锁定资产",
+      "next": "分镜"
+    },
+    {
+      "stage": "分镜/视频",
+      "front": "studio.html",
+      "portal": "任务队列、模型路由、积分扣减",
+      "signal": "Job状态、失败原因",
+      "next": "投放包"
+    },
+    {
+      "stage": "投放素材",
+      "front": "launch-kit.html",
+      "portal": "投放Skill、A/B素材、导出记录",
+      "signal": "标题/封面/Hook评分",
+      "next": "付费导出"
+    },
+    {
+      "stage": "支付转化",
+      "front": "pricing.html / checkout.html / payment-success.html",
+      "portal": "订单、支付、权益、发票",
+      "signal": "套餐、金额、权益到账",
+      "next": "个人中心留存"
+    },
+    {
+      "stage": "留存复购",
+      "front": "account.html",
+      "portal": "客户成功、合规、复盘、续费",
+      "signal": "项目进度、投放数据、风险",
+      "next": "下一集/升级"
+    }
+  ],
+  "skills": [
+    {
+      "name": "剧本框架 Skill",
+      "key": "script_framework",
+      "status": "Active",
+      "plan": "Free+",
+      "credits": "60/次",
+      "success": "96.2%"
+    },
+    {
+      "name": "内容填充 Skill",
+      "key": "content_fill",
+      "status": "Active",
+      "plan": "Creator+",
+      "credits": "30/段",
+      "success": "94.8%"
+    },
+    {
+      "name": "角色资产 Skill",
+      "key": "character_assets",
+      "status": "Active",
+      "plan": "Creator+",
+      "credits": "120/角色",
+      "success": "91.5%"
+    },
+    {
+      "name": "分镜导演 Skill",
+      "key": "storyboard_director",
+      "status": "Active",
+      "plan": "Pro+",
+      "credits": "120/集",
+      "success": "93.1%"
+    },
+    {
+      "name": "视频生成 Skill",
+      "key": "video_generation",
+      "status": "Queue High",
+      "plan": "Pro+",
+      "credits": "280/集起",
+      "success": "88.7%"
+    },
+    {
+      "name": "投放素材 Skill",
+      "key": "launch_creative",
+      "status": "Active",
+      "plan": "Launch Pack",
+      "credits": "80/包",
+      "success": "95.4%"
+    },
+    {
+      "name": "合规审核 Skill",
+      "key": "compliance_review",
+      "status": "Manual Review",
+      "plan": "Project+",
+      "credits": "20/次",
+      "success": "97.0%"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "JOB-2401",
+      "project": "重生后我成了首富千金",
+      "skill": "视频生成",
+      "status": "Running",
+      "progress": 72,
+      "cost": 280
+    },
+    {
+      "id": "JOB-2402",
+      "project": "霸总契约婚姻",
+      "skill": "投放素材",
+      "status": "Succeeded",
+      "progress": 100,
+      "cost": 80
+    },
+    {
+      "id": "JOB-2403",
+      "project": "末世便利店",
+      "skill": "角色资产",
+      "status": "Failed",
+      "progress": 0,
+      "cost": 0
+    },
+    {
+      "id": "JOB-2404",
+      "project": "国风修仙录",
+      "skill": "合规审核",
+      "status": "Manual Review",
+      "progress": 55,
+      "cost": 20
+    }
+  ]
+}
