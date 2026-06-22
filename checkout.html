@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>订单确认 | 漫剧工场</title>
+<link href="assets/styles.css?v=20260622-3" rel="stylesheet"/>
+<meta content="漫剧工场订单确认页：选择套餐、确认权益、选择微信支付、支付宝或企业转账。" name="description"/>
+</head>
+<body data-page="checkout">
+<header class="site-header">
+<div class="container nav">
+<a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
+<nav class="nav-links"><a href="index.html">首页</a><a href="features.html">产品功能</a><a href="templates.html">模板中心</a><a href="showcase.html">案例中心</a><a href="pricing.html">价格</a><a href="account.html">个人中心</a><a href="creator-studio.html">工作台</a><a href="launch-kit.html">抖音投放包</a></nav>
+<div class="nav-actions">
+<button aria-label="切换主题" class="icon-btn" data-theme-toggle="">🌙</button>
+<a class="btn secondary" href="login.html">登录</a>
+<a class="btn primary" href="wizard.html">免费生成第一集</a>
+<button class="icon-btn mobile-toggle" data-mobile-toggle="">☰</button>
+</div>
+</div>
+</header>
+<main class="section checkout-page">
+<div class="container">
+  <div class="section-head">
+    <div class="copy">
+      <span class="page-kicker">订单确认</span>
+      <h1>确认方案、发票与支付方式</h1>
+      <p>这是完整付费闭环的第二步：从价格页或个人中心进入，确认当前购买方案、权益、金额、发票和支付方式，支付后同步到个人中心。</p>
+    </div>
+    <a class="btn secondary" href="pricing.html">返回价格页</a>
+  </div>
+  <div class="payment-flow">
+    <div class="flow-step done"><b>1</b><span>选择方案</span></div>
+    <div class="flow-step active"><b>2</b><span>确认订单</span></div>
+    <div class="flow-step active"><b>3</b><span>选择支付</span></div>
+    <div class="flow-step"><b>4</b><span>支付完成</span></div>
+    <div class="flow-step"><b>5</b><span>回到个人中心</span></div>
+  </div>
+  <p class="flow-note">当前原型支持低门槛付费方案：创作者会员、专业会员、团队会员、积分充值包、首集试制包、连载包、投放素材包和企业版咨询。免费试用仍回到登录注册页领取额度，不进入支付页。</p>
+
+  <div class="checkout-grid">
+    <section class="panel order-panel">
+      <span class="mini-tag">当前订单</span>
+      <h2 id="checkout-plan-name">创作者专业版</h2>
+      <p id="checkout-plan-desc">适合个人创作者和小团队持续创作。</p>
+      <div class="plan-switch" data-plan-switch>
+        <button class="tab-btn active" data-plan="creator">创作者会员</button>
+        <button class="tab-btn" data-plan="pro">专业会员</button>
+        <button class="tab-btn" data-plan="team">团队会员</button>
+        <button class="tab-btn" data-plan="credits">积分包</button>
+        <button class="tab-btn" data-plan="launchpack">投放包</button>
+        <button class="tab-btn" data-plan="enterprise">企业版</button>
+      </div>
+      <table class="compare-table order-table">
+        <tr><th>权益</th><th>说明</th></tr>
+        <tbody id="checkout-plan-benefits"><tr><td>高清导出</td><td>含去水印与基础商用授权</td></tr></tbody>
+      </table>
+      <div class="flow-note" id="checkout-flow-note">支付完成后，会员、积分、订单、发票和商用授权都会回写到个人中心。</div>
+    </section>
+    <aside class="order-summary-card">
+      <span class="mini-tag">订单摘要</span>
+      <div class="line"><span>购买方案</span><strong id="summary-plan-name">创作者专业版</strong></div>
+      <div class="line"><span>服务周期</span><strong id="summary-cycle">1 个月</strong></div>
+      <div class="line"><span>优惠</span><strong id="summary-discount">首月体验价已计算</strong></div>
+      <div class="line"><span>发票</span><strong>可在个人中心申请</strong></div>
+      <div class="total"><span>应付金额</span><b id="checkout-plan-price">¥199</b></div>
+      <div class="qr-box"><div class="qr-grid" aria-hidden="true"></div><small>静态原型二维码占位</small></div>
+    </aside>
+    <aside class="panel payment-panel">
+      <span class="mini-tag">支付方式</span>
+      <h2>选择支付渠道</h2>
+      <div class="pay-methods" data-pay-methods>
+        <button class="pay-method active" data-method="wechat"><span>💬</span><b>微信支付</b><small>适合个人创作者与小团队</small></button>
+        <button class="pay-method" data-method="alipay"><span>💙</span><b>支付宝</b><small>支持花呗分期和快捷支付</small></button>
+        <button class="pay-method" data-method="bank"><span>🏦</span><b>企业转账</b><small>适合项目包、投放包和企业版</small></button>
+      </div>
+      <div class="field"><label>发票类型</label><select><option>暂不开票</option><option>普通电子发票</option><option>增值税专用发票</option></select></div>
+      <div class="field"><label>企业抬头（可选）</label><input placeholder="请输入企业名称"/></div>
+      <div class="field"><label>联系人手机</label><input placeholder="用于接收订单与发票通知"/></div>
+      <div class="coupon-line"><input placeholder="输入优惠码"/><button class="btn secondary small">使用</button></div>
+      <label class="agreement"><input type="checkbox" checked/> <span>我已阅读并同意《服务协议》《积分消耗规则》《商用授权说明》，并确认生成内容需遵守平台内容合规要求。</span></label>
+      <a class="btn primary block" id="pay-now" href="payment-success.html?plan=creator">确认支付</a>
+      <p class="small-note">静态原型中点击后进入支付成功页；真实系统需接入微信支付、支付宝和企业转账审核。</p>
+    </aside>
+  </div>
+</div>
+</main>
+<footer class="footer">
+<div class="container footer-grid">
+<div>
+<a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
+<p style="margin-top:14px;max-width:430px">面向中国创作者、内容机构、版权方和短剧团队的智能漫剧生产与投放增长平台。浅色官网承接转化，工作台支持深浅主题。</p>
+</div>
+<div><h4>产品</h4><a href="features.html">产品功能</a><a href="templates.html">模板中心</a><a href="launch-kit.html">抖音投放包</a></div>
+<div><h4>商业化</h4><a href="pricing.html">价格方案</a><a href="checkout.html?plan=creator">订单确认</a><a href="account.html">个人中心</a><a href="showcase.html">案例中心</a></div>
+<div><h4>开始</h4><a href="login.html">登录注册</a><a href="wizard.html">剧本生成向导</a><a href="creator-studio.html">创作工作台</a></div>
+</div>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>
