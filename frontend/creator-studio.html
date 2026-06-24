@@ -7,108 +7,104 @@
   <meta content="轻松创作、进阶控制、专业编排三种控制深度共享同一条智能漫剧创作产线。" name="description"/>
   <link href="assets/styles.css?v=20260623-1" rel="stylesheet"/>
 </head>
-<body class="creator-studio-page" data-page="creator-studio" data-experience="basic">
-  <header class="studio-globalbar">
-    <div class="studio-entry">
-      <button class="studio-return-btn" id="studio-return" type="button">← 返回上一页</button>
-      <a class="studio-brand" href="index.html"><span class="logo-mark">漫</span><b>漫剧工场</b></a>
-    </div>
-    <div class="project-crumb"><a href="account.html#projects">我的项目</a><span>/</span><strong>未命名项目</strong><small>自动保存于刚刚</small></div>
+<body class="creator-studio-page nami-workbench" data-page="creator-studio" data-stage="0">
+  <header class="studio-globalbar studio-sitebar">
+    <a class="studio-brand logo" href="index.html"><span class="logo-mark">漫</span><b>漫剧工场</b></a>
+    <nav class="nav-links studio-main-nav" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="features.html">产品功能</a>
+      <a href="templates.html">模板中心</a>
+      <a href="showcase.html">案例中心</a>
+      <a href="pricing.html">价格</a>
+      <a href="account.html">个人中心</a>
+      <a class="is-active" href="creator-studio.html">工作台</a>
+    </nav>
     <div class="studio-top-actions">
+      <button class="asset-header-buy" id="asset-buy-top" type="button">立即抢购</button>
       <a class="studio-login-link" href="login.html">登录</a>
       <button class="icon-btn" data-theme-toggle aria-label="切换主题">🌙</button>
-      <div class="experience-switch" aria-label="控制深度">
-        <button class="active" data-mode="basic"><small>入门</small>轻松创作</button>
-        <button data-mode="medium"><small>进阶</small>进阶控制</button>
-        <button data-mode="high"><small>专业</small>专业编排</button>
+      <div class="studio-flow-actions">
+        <div class="storyboard-count"><span>分镜数量:</span><button id="shot-count-toggle" type="button">自动</button></div>
+        <button class="btn secondary studio-back" id="studio-back" disabled>上一步</button>
+        <button class="btn primary vc-header-next-step" id="studio-next">下一步：视频设定</button>
       </div>
-      <div class="cost-summary"><small>本步预计</small><b id="studio-cost">0 积分</b></div>
-      <button class="btn secondary studio-back" id="studio-back" disabled>← 上一步</button>
-      <button class="btn primary" id="studio-next">生成 3 个方向 →</button>
+      <button aria-label="打开导航" class="icon-btn mobile-toggle" data-mobile-toggle>☰</button>
     </div>
   </header>
 
   <main class="creator-workbench">
     <aside class="studio-dock" aria-label="全局工具">
       <a href="index.html" title="首页">⌂<span>首页</span></a>
-      <a class="active" href="creator-studio.html" title="制作">◫<span>制作</span></a>
-      <a href="templates.html" title="技能工具箱">◇<span>技能</span></a>
-      <a href="account.html#projects" title="项目">▣<span>项目</span></a>
-      <a href="account.html#assets" title="资产">◉<span>资产</span></a>
+      <a class="active" href="creator-studio.html" title="制作大片">◫<span>制作大片</span></a>
+      <a href="templates.html" title="工具箱">◇<span>工具箱</span></a>
+      <a href="account.html#projects" title="我的项目">▣<span>我的项目</span></a>
+      <a href="creator-studio.html?menuKey=assets&id=1729382256911763547" title="资产管理" data-view-link="assets">◉<span>资产管理</span></a>
     </aside>
 
     <aside class="production-rail">
-      <div class="rail-heading"><span>项目产线</span><b id="stage-progress">1 / 7</b></div>
+      <div class="rail-heading"><span>项目产线</span><b id="stage-progress">1 / 6</b></div>
       <nav class="production-stages">
-        <button class="active" data-stage="1"><b>1</b><span>剧本策划<small>进行中 · 1/4</small></span><i>●</i></button>
-        <button data-stage="2"><b>2</b><span>视觉设定<small>未开始</small></span><i></i></button>
-        <button data-stage="3"><b>3</b><span>角色 / 场景 / 道具<small>未开始</small></span><i></i></button>
-        <button data-stage="4"><b>4</b><span>分镜脚本<small>未开始</small></span><i></i></button>
-        <button data-stage="5"><b>5</b><span>视频生成<small>未开始</small></span><i></i></button>
-        <button data-stage="6"><b>6</b><span>后期与预览<small>未开始</small></span><i></i></button>
-        <button data-stage="7"><b>7</b><span>发布与投放<small>未开始</small></span><i></i></button>
+        <button class="active" data-stage="0"><b>1</b><span>剧本编辑<small>进行中</small></span><i>●</i></button>
+        <button data-stage="1"><b>2</b><span>视频设定<small>未开始</small></span><i></i></button>
+        <button data-stage="2"><b>3</b><span>场景角色道具<small>未开始</small></span><i></i></button>
+        <button data-stage="3"><b>4</b><span>分镜脚本<small>未开始</small></span><i></i></button>
+        <button data-stage="4"><b>5</b><span>分镜视频<small>未开始</small></span><i></i></button>
+        <button data-stage="5"><b>6</b><span>视频预览<small>未开始</small></span><i></i></button>
       </nav>
-      <div class="rail-resume"><span>总体进度</span><b>8%</b><div class="progress"><span style="width:8%"></span></div><button>保存并退出</button></div>
+      <div class="rail-resume"><span>总体进度</span><b id="rail-percent">16%</b><div class="progress"><span id="rail-progress" style="width:16%"></span></div><button id="save-exit" type="button">保存并退出</button></div>
     </aside>
 
     <section class="task-canvas">
       <div class="task-heading">
-        <div><span class="task-kicker" id="micro-label">剧本策划 · 核心信息 1/5</span><h1 id="task-title">你想做多长的作品？</h1><p id="task-desc">先确定作品长度，我会自动匹配合适的大纲形式和制作成本。</p></div>
-        <span class="skill-runtime">智能创作技能 · 剧本创作 2.0 版</span>
+        <div><span class="task-kicker" id="micro-label">1 / 6 · 剧本编辑</span><h1 id="task-title">剧本编辑</h1><p id="task-desc">粘贴或上传剧本内容。当前版本建议上传单集，生成效果更佳。</p></div>
+        <span class="skill-runtime" id="save-state">自动保存于刚刚</span>
       </div>
 
-      <section class="guided-task" id="guided-task">
-        <div class="question-progress"><span style="width:20%" id="question-progress-bar"></span></div>
-        <div class="choice-grid" id="choice-grid">
-          <button class="choice-card" data-value="30秒"><span>快速试想法</span><b>30 秒</b><small>适合广告、钩子测试</small></button>
-          <button class="choice-card selected" data-value="1-3分钟"><span>推荐新手</span><b>1–3 分钟</b><small>适合第一集试制</small></button>
-          <button class="choice-card" data-value="10-30分钟"><span>完整单集</span><b>10–30 分钟</b><small>适合系列内容</small></button>
-          <button class="choice-card" data-value="系列"><span>连续项目</span><b>多集系列</b><small>先规划前 3 集</small></button>
-        </div>
-        <label class="custom-answer"><span>或者自己描述</span><input id="custom-answer" placeholder="例如：每集 90 秒，共 10 集"/></label>
-      </section>
-
-      <section class="medium-panel medium-only">
-        <div class="panel-title"><div><span>进阶控制</span><h2>关键创作变量</h2></div><small>这些设置会影响下一步的方向卡</small></div>
-        <div class="control-grid">
-          <label>大纲形式<select><option>自动推荐</option><option>故事梗概</option><option>千字大纲</option><option>分集大纲</option></select></label>
-          <label>对标风格规律<input placeholder="输入作品名，可稍后确认规律"/></label>
-          <label>差异轴<select><option>稍后选择</option><option>稳健与大胆</option><option>主角与事件</option></select></label>
-          <label>版本策略<select><option>保留所有版本</option><option>仅保留锁定版本</option></select></label>
-        </div>
-      </section>
-
-      <section class="high-panel high-only">
-        <div class="panel-title"><div><span>技能检查器</span><h2>专业编排参数</h2></div><button>查看技能文档</button></div>
-        <div class="inspector-grid">
-          <div><small>技能标识</small><code>剧本创作</code></div><div><small>版本</small><code>2.0 · 2026-04-26</code></div>
-          <div><small>上下文</small><code>项目档案 + 风格规律</code></div><div><small>模型路由</small><code>自动选择 / 质量优先</code></div>
-          <div><small>失败策略</small><code>失败重试两次 → 人工复核</code></div><div><small>输出结构</small><code>创作方向卡片列表</code></div>
-        </div>
-        <div class="advanced-actions"><button>编辑输入结构</button><button>设置检查点</button><button>保存为工作流</button></div>
-      </section>
+      <section class="guided-task nami-stage-panel" id="guided-task"></section>
 
       <section class="output-contract">
-        <div><span>这一步会得到</span><b id="output-name">3 个差异化创作方向</b></div>
-        <div><span>预计耗时</span><b id="output-time">约 20 秒</b></div>
-        <div><span>完成标准</span><b id="output-gate">选择一个方向</b></div>
+        <div><span>当前阶段</span><b id="output-name">剧本编辑</b></div>
+        <div><span>完成状态</span><b id="output-time">待输入内容</b></div>
+        <div><span>下一步</span><b id="output-gate">视频设定</b></div>
       </section>
     </section>
 
-    <aside class="ai-guide-panel">
-      <div class="guide-avatar">智</div><span class="guide-label">智能引导</span>
-      <h2 id="guide-title">先别急着写剧本</h2>
-      <p id="guide-copy">作品长度会影响大纲结构、镜头数量和视频成本。第一次尝试建议选择 1–3 分钟，先验证故事是否成立。</p>
-      <div class="guide-recommend"><b>推荐选择</b><span id="guide-recommendation">1–3 分钟 · 风险最低</span><small>你仍然可以随时改动。</small></div>
-      <div class="guide-risk"><b>当前待确认</b><ul id="guide-risks"><li>目标平台</li><li>目标受众</li><li>核心情绪</li></ul></div>
-      <div class="mode-explanation">
-        <b id="mode-title">轻松创作模式</b>
-        <p id="mode-copy">我会替你使用推荐设置，只在关键决策时询问你。</p>
-      </div>
-      <button class="guide-question">不懂这一步？询问智能助手</button>
-    </aside>
   </main>
+  <div class="nami-login-modal" id="nami-login-modal" aria-hidden="true">
+    <div class="nami-login-card">
+      <button class="modal-close" id="login-close" type="button" aria-label="关闭">×</button>
+      <div class="nami-login-tabs">
+        <button class="active" type="button" data-login-tab="qr">扫码登录</button>
+        <button type="button" data-login-tab="sms">短信登录</button>
+        <button type="button" data-login-tab="account">账号登录</button>
+      </div>
+      <div class="nami-login-content">
+        <div class="login-tab-panel active" data-login-panel="qr">
+          <div class="nami-qr-box">微信扫一扫更方便</div>
+          <p>更多方式：QQ/支付宝</p>
+        </div>
+        <div class="login-tab-panel" data-login-panel="sms">
+          <label><span>+86</span><input type="text" placeholder="手机号"/></label>
+          <div class="login-code-row"><input type="text" placeholder="验证码"/><button type="button">获取验证码</button></div>
+          <input type="text" placeholder="短信验证码"/>
+          <button class="nami-login-submit" type="button" data-login-submit>登录</button>
+          <p>未注册手机号验证后自动登录，且代表您已同意《360用户服务条款》 《360用户隐私政策》</p>
+          <small>快速注册&nbsp;&nbsp;找回密码</small>
+        </div>
+        <div class="login-tab-panel" data-login-panel="account">
+          <input type="text" placeholder="手机号/用户名/邮箱"/>
+          <input type="password" placeholder="密码"/>
+          <input type="text" placeholder="验证码"/>
+          <button class="nami-login-submit" type="button" data-login-submit>登录</button>
+          <p>已仔细阅读并同意《360用户服务条款》 《360用户隐私政策》</p>
+          <small>快速注册&nbsp;&nbsp;找回密码</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="assets/site-overrides.js"></script>
   <script src="assets/app.js"></script>
   <script src="assets/creator-studio.js"></script>
+  <script src="assets/easy-edit.js"></script>
 </body>
 </html>

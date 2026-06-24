@@ -15,8 +15,15 @@ python3 -m http.server 4173
 - 运营 Portal：`http://localhost:4173/portal/`
 - 产品方案：`docs/customer_journey_portal_plan.md`
 - API 草案：`docs/api_contract.md`
+- 界面修改入口：`http://localhost:4173/frontend/edit.html`
 
 建议通过本地服务预览，不要直接双击 HTML；这样前台和 Portal 才能稳定共享演示状态。
+
+## 方便修改界面
+
+- 打开 `frontend/edit.html`，选择页面后点击蓝色虚线区域，可以临时修改文字、按钮和部分图片路径。
+- 页面右下角点击“导出修改”，会复制一段 JSON；把它写入 `frontend/assets/site-overrides.js` 后，修改会固定生效。
+- 复杂结构调整仍建议直接改对应 HTML；工作台步骤改 `frontend/assets/creator-studio.js`，全站样式改 `frontend/assets/styles.css`。
 
 ## 推荐演示路径
 
