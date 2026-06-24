@@ -125,6 +125,9 @@
     project:{name:'项目服务',category:'项目包',price:'¥999 起',cycle:'按项目交付',discount:'含交付范围确认',desc:'适合内容机构、工作室、版权方和品牌方，按集数、素材数量和交付范围打包。',benefits:[['交付范围','试制包、连载包和品牌剧情包'],['协作能力','团队权限、项目空间、成本测算和进度管理'],['商业保障','合同、发票、商用授权书和合规材料包'],['到账位置','个人中心 / 我的项目、订单发票和商用授权同步更新']]},
     enterprise:{name:'企业版咨询',category:'企业版',price:'定制报价',cycle:'年度合同',discount:'客户成功顾问跟进',desc:'适合长期合作客户，提供多席位、接口对接、私有资产库、服务保障和专属客户成功支持。',benefits:[['部署方式','企业空间、私有资产库和权限管理'],['系统能力','接口对接、服务保障、数据安全和合规支持'],['服务模式','年度合同、专属客户成功和项目复盘'],['到账位置','个人中心 / 企业合作记录生成，客户成功团队后续跟进']]}
   };
+  Object.entries(window.MD_PLAN_OVERRIDES||{}).forEach(([key,value])=>{
+    plans[key]={...(plans[key]||{}),...value};
+  });
   const params=new URLSearchParams(location.search);
   const current=params.get('plan')||'creator';
   const applyPlan=(key)=>{
