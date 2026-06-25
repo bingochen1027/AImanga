@@ -1,7 +1,16 @@
 (function(){
   const STORAGE_KEY='md-nami-workbench';
+  const CONNECTED_KEY='md-connected-state';
+  const INVITE_KEY='md-invite-codes';
   const MAX_SCRIPT_LENGTH=10000;
+  const VIDEO_DURATION_SECONDS=60;
+  const VIDEO_CREDIT_COST=60;
   const DEFAULT_PROJECT_ID='1729382256911763547';
+  const defaultInvites=[
+    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
+    {code:'AIMANGA60',label:'60秒短视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段短视频生成'},
+    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
+  ];
   const body=document.body;
   const state=loadState();
   const initialParams=new URLSearchParams(location.search);
@@ -49,13 +58,13 @@
       name:'视频设定',
       next:'场景角色道具',
       title:'视频设定',
-      desc:'确认画面比例、视觉风格、镜头密度和分镜数量，后续阶段会沿用这些设定。',
+      desc:'确认 60 秒短视频的画面比例、视觉风格、镜头密度和输出策略，后续阶段会沿用这些设定。',
       guideTitle:'先确定视频基础参数',
-      guideCopy:'参考页顶部保留“分镜数量：自动”，本地页同步使用自动分镜作为默认策略。',
+      guideCopy:'第一阶段固定生成 60 秒竖屏短视频，先验证从剧本到首集预览的最小闭环。',
       action:'确认视频参数',
-      status:()=>state.videoConfirmed?'视频参数已确认':'使用默认推荐参数',
-      rules:['分镜数量默认自动','参数可返回修改','下一步生成资产清单'],
-      preview:['画面比例','视觉风格','镜头密度'],
+      status:()=>state.videoConfirmed?'60 秒短视频参数已确认':'使用默认 60 秒短视频参数',
+      rules:['时长固定 60 秒','分镜数量默认自动','下一步生成资产清单'],
+      preview:['60 秒时长','画面比例','视觉风格'],
       image:'assets/images/story-cases/case-xingchao-archive.png'
     },
     {
@@ -88,26 +97,26 @@
       name:'分镜视频',
       next:'视频预览',
       title:'分镜视频',
-      desc:'生成每条分镜对应的视频片段，并检查失败、重试和待处理状态。',
+      desc:'生成 60 秒短视频任务，并检查片段状态、失败重试和待处理状态。',
       guideTitle:'生成分镜视频',
-      guideCopy:'参考页的生成类动作会要求登录；本地页点击生成会显示同样的登录拦截，同时保留演示状态推进。',
-      action:'生成或确认分镜视频',
-      status:()=>state.videoGenerated?'分镜视频已生成':'待生成视频',
-      rules:['可一键生成全部视频','生成动作会触发登录面板','完成后进入预览'],
-      preview:['生成状态','失败重试','片段预览'],
+      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建 60 秒短视频演示任务，并同步到后台记录。',
+      action:'生成 60 秒短视频',
+      status:()=>state.videoGenerated?'60 秒短视频已生成':'待生成 60 秒短视频',
+      rules:['必须邀请码登录','固定生成 60 秒','完成后进入预览'],
+      preview:['60 秒任务','生成状态','片段预览'],
       image:'assets/images/story-cases/case-redline-chase.png'
     },
     {
       name:'视频预览',
       next:'',
       title:'视频预览',
-      desc:'检查成片节奏、字幕、音效和发布信息。这里是整条产线的最后一步。',
+      desc:'检查 60 秒短视频节奏、字幕、音效和发布信息。这里是第一阶段产线的最后一步。',
       guideTitle:'完成视频预览',
       guideCopy:'最后阶段提供导出、发布和返回修改入口。未登录时导出和发布会显示登录面板。',
-      action:'预览、导出或发布',
-      status:()=>state.previewChecked?'预览已确认':'待确认预览',
-      rules:['可返回任意已完成阶段修改','导出发布需要登录','完成后保存项目版本'],
-      preview:['成片预览','导出发布','版本保存'],
+      action:'预览并确认 60 秒短视频',
+      status:()=>state.previewChecked?'60 秒预览已确认':'待确认 60 秒预览',
+      rules:['可返回任意已完成阶段修改','导出发布需要邀请码登录','完成后保存项目版本'],
+      preview:['60 秒成片预览','导出发布','版本保存'],
       image:'assets/images/story-cases/case-icefield-echo.png'
     }
   ];
@@ -330,6 +339,124 @@
   }
   function setText(node,value){
     if(node) node.textContent=value;
+  }
+  function normalizeInvite(value){
+    return String(value||'').trim().toUpperCase().replace(/\s+/g,'');
+  }
+  function maskPhone(phone){
+    return phone.slice(0,3)+'****'+phone.slice(-4);
+  }
+  function readConnected(){
+    const initial={user:null,credits:0,projects:[],events:[]};
+    try{return {...initial,...JSON.parse(localStorage.getItem(CONNECTED_KEY)||'{}')}}catch(_){return initial}
+  }
+  function writeConnected(data){
+    localStorage.setItem(CONNECTED_KEY,JSON.stringify(data));
+  }
+  function readInvites(){
+    let invites;
+    try{invites=JSON.parse(localStorage.getItem(INVITE_KEY)||'null')}catch(_){invites=null}
+    if(!Array.isArray(invites)||!invites.length){
+      invites=defaultInvites.map(item=>({...item}));
+      localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
+    }
+    return invites;
+  }
+  function saveInvites(invites){
+    localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
+  }
+  function validateInvite(code){
+    const normalized=normalizeInvite(code);
+    const invite=readInvites().find(item=>normalizeInvite(item.code)===normalized);
+    if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
+    if(invite.status!=='启用') return {ok:false,message:'该邀请码已停用，请联系运营重新开通。'};
+    if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
+    return {ok:true,invite};
+  }
+  function consumeInvite(code,phone){
+    const normalized=normalizeInvite(code);
+    const invites=readInvites();
+    const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
+    if(!invite) return null;
+    invite.users=Array.isArray(invite.users)?invite.users:[];
+    if(!invite.users.includes(phone)){
+      invite.used=Number(invite.used||0)+1;
+      invite.users.push(phone);
+    }
+    invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
+    invite.lastUser=phone;
+    saveInvites(invites);
+    return invite;
+  }
+  function hasInviteSession(){
+    const connected=readConnected();
+    return Boolean(connected.user&&connected.user.inviteCode);
+  }
+  function loginWithInvite(){
+    const phone=document.getElementById('studio-login-phone')?.value.trim()||'';
+    const code=document.getElementById('studio-login-code')?.value.trim()||'';
+    const inviteCode=document.getElementById('studio-login-invite')?.value.trim()||'';
+    const message=document.getElementById('studio-login-message');
+    const setMessage=text=>{if(message) message.textContent=text;};
+    if(!/^1\d{10}$/.test(phone)||!/^\d{6}$/.test(code)){
+      setMessage('请输入有效手机号和 6 位验证码。');
+      return;
+    }
+    const result=validateInvite(inviteCode);
+    if(!result.ok){
+      setMessage(result.message);
+      return;
+    }
+    const maskedPhone=maskPhone(phone);
+    const invite=consumeInvite(inviteCode,maskedPhone)||result.invite;
+    const connected=readConnected();
+    connected.user={id:'USR-DEMO-01',phone:maskedPhone,name:'漫剧创作者',plan:'免费试用',inviteCode:normalizeInvite(invite.code)};
+    connected.events=[...(connected.events||[]),{name:'invite_login',meta:{inviteCode:normalizeInvite(invite.code)},path:'creator-studio.html',at:new Date().toISOString()}].slice(-80);
+    if(!connected.events.some(event=>event.name==='trial_credits_granted')){
+      connected.credits=(connected.credits||0)+500;
+      connected.events.push({name:'trial_credits_granted',meta:{credits:500,inviteCode:normalizeInvite(invite.code)},path:'creator-studio.html',at:new Date().toISOString()});
+    }
+    writeConnected(connected);
+    closeLogin();
+    toast('邀请码登录成功');
+  }
+  function syncShortVideoGeneration(){
+    const connected=readConnected();
+    const project=(connected.projects&&connected.projects[0])||{
+      id:'项目-'+currentProjectId.slice(-6),
+      title:'第一集 60 秒短视频',
+      stage:'视频预览',
+      progress:100,
+      platform:'抖音 9:16',
+      createdAt:new Date().toISOString()
+    };
+    if(!connected.projects||!connected.projects.length) connected.projects=[project];
+    const already=(connected.events||[]).some(event=>event.name==='short_video_generated'&&event.meta&&event.meta.projectId===project.id);
+    if(!already){
+      connected.credits=Math.max(0,Number(connected.credits||0)-VIDEO_CREDIT_COST);
+      connected.events=[...(connected.events||[]),{
+        name:'short_video_generated',
+        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:'9:16'},
+        path:'creator-studio.html',
+        at:new Date().toISOString()
+      }].slice(-80);
+      writeConnected(connected);
+    }
+  }
+  function completeShortVideoGeneration(){
+    if(!hasInviteSession()){
+      openLogin('请先使用邀请码登录');
+      return false;
+    }
+    state.videoGenerated=true;
+    state.videoDuration=VIDEO_DURATION_SECONDS;
+    state.videoCost=VIDEO_CREDIT_COST;
+    state.videoGeneratedAt=new Date().toISOString();
+    syncShortVideoGeneration();
+    save();
+    render();
+    toast('60 秒短视频已生成');
+    return true;
   }
   function openLogin(extraMessage){
     if(extraMessage) toast(extraMessage);
@@ -768,10 +895,10 @@
   function renderVideoPanel(){
     return `
       <div class="nami-settings-grid">
+        ${settingCard('成片时长','60 秒','第一阶段固定短视频时长')}
         ${settingCard('画面比例','竖屏 9:16','适合短视频平台')}
         ${settingCard('视频风格','电影感国漫','保持人物和场景统一')}
-        ${settingCard('分镜数量','自动','系统按剧本长度拆分')}
-        ${settingCard('节奏强度','中高节奏','优先保证前三秒钩子')}
+        ${settingCard('预计消耗',VIDEO_CREDIT_COST+' 积分','登录后创建生成任务')}
       </div>
       <div class="nami-action-row"><button class="nami-green-btn" id="confirm-video" type="button">确认视频设定</button><button type="button" data-stage-reset="video">恢复默认</button></div>
     `;
@@ -802,26 +929,30 @@
   }
   function renderVideoGeneratePanel(){
     return `
+      <div class="nami-video-limit">
+        <div><span>第一阶段输出</span><b>60 秒短视频</b></div>
+        <p>固定竖屏 9:16，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
+      </div>
       <div class="nami-table-list">
         ${state.storyboards.map((item,index)=>`
           <div class="nami-shot-card">
             <b>${escapeHtml(item.shot)}</b>
-            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'视频片段已生成，可进入预览。':'等待生成视频片段。'}</p><small>${state.videoGenerated?'Succeeded':'Waiting'}</small></div>
+            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'60 秒短视频片段已生成，可进入预览。':'等待生成 60 秒短视频片段。'}</p><small>${state.videoGenerated?'Succeeded':'Waiting'}</small></div>
             <i>${state.videoGenerated?'✓':'待生成'}</i>
           </div>
         `).join('')}
       </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成全部视频</button><button type="button" data-login-action>失败重试</button></div>
+      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成 60 秒短视频</button><button type="button" data-login-action>失败重试</button></div>
     `;
   }
   function renderPreviewPanel(){
     return `
       <div class="nami-preview-final">
-        <div class="nami-video-frame"><span>▶</span><b>第一集预览</b></div>
+        <div class="nami-video-frame"><span>▶</span><b>第一集 60 秒预览</b><small>9:16 · ${VIDEO_DURATION_SECONDS}s</small></div>
         <div>
-          <h3>视频预览</h3>
-          <p>检查成片节奏、字幕、音效和导出信息。确认后会保存为当前项目版本。</p>
-          <div class="nami-action-row"><button class="nami-green-btn" id="confirm-preview" type="button">确认预览</button><button type="button" data-login-action>导出视频</button><button type="button" data-login-action>发布投放</button></div>
+          <h3>60 秒短视频预览</h3>
+          <p>检查成片节奏、字幕、音效和导出信息。确认后会保存为当前项目版本，并在后台生成记录中显示。</p>
+          <div class="nami-action-row"><button class="nami-green-btn" id="confirm-preview" type="button">确认 60 秒预览</button><button type="button" data-login-action>导出视频</button><button type="button" data-login-action>发布投放</button></div>
         </div>
       </div>
     `;
@@ -851,7 +982,13 @@
         renderStatusOnly();
       });
     }
-    document.getElementById('ai-create')?.addEventListener('click',()=>openLogin('创建会话失败'));
+    document.getElementById('ai-create')?.addEventListener('click',()=>{
+      if(!hasInviteSession()) return openLogin('请先使用邀请码登录');
+      state.script='根据你的想法生成的 60 秒短视频剧本：\n\n1. 开场 3 秒抛出反转钩子。\n2. 主角发现关键线索并进入冲突。\n3. 结尾留下悬念，引导继续观看下一集。';
+      save();
+      render();
+      toast('已生成 60 秒短视频剧本草稿');
+    });
     document.querySelectorAll('[data-editor-action]').forEach(button=>button.addEventListener('click',()=>{
       const action=button.dataset.editorAction;
       if(action==='copy'){
@@ -866,7 +1003,7 @@
         return toast('已清空');
       }
       if(action==='upload') return scriptFile?.click();
-      if(action==='history') return openLogin('请先登录');
+      if(action==='history') return openLogin('请先使用邀请码登录');
     }));
     scriptFile?.addEventListener('change',()=>{
       const file=scriptFile.files?.[0];
@@ -879,9 +1016,9 @@
     document.getElementById('confirm-video')?.addEventListener('click',()=>{state.videoConfirmed=true;save();render();toast('已确认视频设定');});
     document.getElementById('confirm-assets')?.addEventListener('click',()=>{state.assetsConfirmed=true;save();render();toast('已确认资产清单');});
     document.getElementById('regen-storyboard')?.addEventListener('click',()=>{state.storyboards=[];ensureStoryboards();save();render();toast('已重新生成分镜');});
-    document.getElementById('generate-videos')?.addEventListener('click',()=>{state.videoGenerated=true;save();render();openLogin('创建会话失败');});
+    document.getElementById('generate-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
     document.getElementById('confirm-preview')?.addEventListener('click',()=>{state.previewChecked=true;save();render();toast('预览已确认');});
-    document.querySelectorAll('[data-login-action]').forEach(button=>button.addEventListener('click',()=>openLogin('请先登录')));
+    document.querySelectorAll('[data-login-action]').forEach(button=>button.addEventListener('click',()=>openLogin('请先使用邀请码登录')));
   }
   function renderStatusOnly(){
     const stage=stages[state.stage];
@@ -895,7 +1032,7 @@
     if(state.stage===1) state.videoConfirmed=true;
     if(state.stage===2) state.assetsConfirmed=true;
     if(state.stage===3) ensureStoryboards();
-    if(state.stage===4) state.videoGenerated=true;
+    if(state.stage===4&&!completeShortVideoGeneration()) return false;
     if(state.stage===5) state.previewChecked=true;
     save();
     return true;
@@ -933,10 +1070,10 @@
   document.getElementById('shot-count-toggle')?.addEventListener('click',()=>toast('分镜数量：自动'));
   document.getElementById('asset-buy-top')?.addEventListener('click',()=>{
     if(currentView==='assets') return toast('请先登录后购买');
-    openLogin('cookie parse error');
+    openLogin('请先使用邀请码登录');
   });
   document.getElementById('save-exit')?.addEventListener('click',()=>toast('已保存项目'));
-  document.getElementById('guide-question')?.addEventListener('click',()=>openLogin('请先登录'));
+  document.getElementById('guide-question')?.addEventListener('click',()=>openLogin('请先使用邀请码登录'));
   const assetLink=document.querySelector('[data-view-link="assets"]');
   if(assetLink) assetLink.setAttribute('href',assetUrl());
   assetLink?.addEventListener('click',event=>{
@@ -953,14 +1090,10 @@
   els.loginModal?.addEventListener('click',event=>{
     if(event.target===els.loginModal) closeLogin();
   });
-  document.querySelectorAll('[data-login-tab]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const tab=button.dataset.loginTab;
-      document.querySelectorAll('[data-login-tab]').forEach(item=>item.classList.toggle('active',item===button));
-      document.querySelectorAll('[data-login-panel]').forEach(panel=>panel.classList.toggle('active',panel.dataset.loginPanel===tab));
-    });
+  document.getElementById('studio-invite-login')?.addEventListener('click',loginWithInvite);
+  document.getElementById('studio-login-invite')?.addEventListener('keydown',event=>{
+    if(event.key==='Enter') loginWithInvite();
   });
-  document.querySelectorAll('[data-login-submit]').forEach(button=>button.addEventListener('click',()=>toast('请先登录')));
   document.querySelectorAll('.production-stages [data-stage]').forEach(button=>{
     button.addEventListener('click',()=>goToStage(Number(button.dataset.stage)));
   });
