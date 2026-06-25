@@ -8,14 +8,15 @@
 </head>
 <body>
   <aside class="sidebar">
-    <div class="brand"><span>漫</span><div><b>智能漫剧数据看板</b><small>只读记录版本</small></div></div>
+    <div class="brand"><span>漫</span><div><b>智能漫剧运营后台</b><small>第一阶段 MVP</small></div></div>
     <nav>
       <a href="#dashboard" class="active">数据看板</a>
+      <a href="#invites">邀请码管理</a>
       <a href="#user-admin">用户与权限</a>
     </nav>
     <div class="sidebar-card">
       <b>当前范围</b>
-      <p>业务数据只读；仅支持用户角色、启用状态和用户数据导出。</p>
+      <p>第一阶段支持邀请码注册、用户状态、数据记录和 60 秒短视频生成记录。</p>
     </div>
   </aside>
 
@@ -23,8 +24,8 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">第一阶段后台</p>
-        <h1>只读数据看板</h1>
-        <p class="mvp-subtitle">记录用户从注册、创建项目到第一次生成的关键数据。</p>
+        <h1>第一阶段运营后台</h1>
+        <p class="mvp-subtitle">记录用户从邀请码注册、创建项目到第一次生成 60 秒短视频的关键数据。</p>
       </div>
       <div class="actions">
         <span class="live-badge"><i></i> 数据持续记录中</span>
@@ -69,6 +70,27 @@
       </div>
     </section>
 
+    <section id="invites" class="section invite-section">
+      <div class="section-title">
+        <div><h2>邀请码管理</h2><p>新增、启用、停用邀请码，并查看使用次数。前台注册必须输入有效邀请码。</p></div>
+        <span class="mvp-mark">可管理</span>
+      </div>
+      <div class="invite-summary" id="invite-summary"></div>
+      <div class="invite-create-panel">
+        <div class="field"><label for="invite-code">邀请码</label><input id="invite-code" maxlength="24" placeholder="例如 ESALES2026"/></div>
+        <div class="field"><label for="invite-quota">可用次数</label><input id="invite-quota" inputmode="numeric" maxlength="4" value="20"/></div>
+        <div class="field"><label for="invite-note">用途备注</label><input id="invite-note" maxlength="40" placeholder="例如 首批内测用户"/></div>
+        <button class="export-button" id="create-invite" type="button">新增邀请码</button>
+      </div>
+      <p class="field-note" id="invite-message" role="status">默认内测码：ESALES2026、AIMANGA60、TEAMTEST。正式上线后应迁移到真实后端数据库。</p>
+      <div class="table-wrap">
+        <table class="invite-table">
+          <thead><tr><th>邀请码</th><th>名称</th><th>状态</th><th>已用 / 上限</th><th>最近使用</th><th>最近用户</th><th>备注</th><th>管理</th></tr></thead>
+          <tbody id="invite-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
     <section id="user-admin" class="section user-admin-section">
       <div class="section-title">
         <div><h2>用户与权限管理</h2><p>维护用户角色和启用状态，并导出全部用户字段。</p></div>
@@ -82,7 +104,7 @@
       </div>
       <div class="table-wrap">
         <table class="user-table">
-          <thead><tr><th>用户编号</th><th>用户名称</th><th>手机号</th><th>邮箱</th><th>角色</th><th>状态</th><th>方案</th><th>积分</th><th>项目数</th><th>注册时间</th><th>最近活跃</th><th>来源</th><th>管理</th></tr></thead>
+          <thead><tr><th>用户编号</th><th>用户名称</th><th>手机号</th><th>邮箱</th><th>角色</th><th>状态</th><th>方案</th><th>积分</th><th>项目数</th><th>注册时间</th><th>最近活跃</th><th>邀请码</th><th>来源</th><th>管理</th></tr></thead>
           <tbody id="user-rows"></tbody>
         </table>
       </div>

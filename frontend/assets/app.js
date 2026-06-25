@@ -34,29 +34,82 @@
 // Connected demo: persist a lightweight customer journey across all pages.
 (function(){
   const KEY='md-connected-state';
+  const INVITE_KEY='md-invite-codes';
   const initial={user:null,credits:0,projects:[],events:[]};
+  const defaultInvites=[
+    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
+    {code:'AIMANGA60',label:'60秒短视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段短视频生成'},
+    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
+  ];
   const read=()=>{try{return {...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...initial}}};
   const write=(state)=>localStorage.setItem(KEY,JSON.stringify(state));
   const track=(name,meta={})=>{const state=read();state.events=[...(state.events||[]),{name,meta,path:location.pathname.split('/').pop()||'index.html',at:new Date().toISOString()}].slice(-80);write(state)};
   const toast=(title,detail)=>{const node=document.createElement('div');node.className='demo-toast';node.innerHTML=`<b>${title}</b><span>${detail}</span>`;document.body.appendChild(node);setTimeout(()=>node.remove(),2800)};
+  const normalizeInvite=value=>String(value||'').trim().toUpperCase().replace(/\s+/g,'');
+  const readInvites=()=>{
+    let invites;
+    try{invites=JSON.parse(localStorage.getItem(INVITE_KEY)||'null')}catch(e){invites=null}
+    if(!Array.isArray(invites)||!invites.length){
+      invites=defaultInvites.map(item=>({...item}));
+      localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
+    }
+    return invites;
+  };
+  const saveInvites=invites=>localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
+  const findInvite=code=>readInvites().find(item=>normalizeInvite(item.code)===normalizeInvite(code));
+  const validateInvite=code=>{
+    const invite=findInvite(code);
+    if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
+    if(invite.status!=='启用') return {ok:false,message:'该邀请码已停用，请联系运营重新开通。'};
+    if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
+    return {ok:true,invite};
+  };
+  const consumeInvite=(code,phone)=>{
+    const normalized=normalizeInvite(code);
+    const invites=readInvites();
+    const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
+    if(!invite) return null;
+    invite.users=Array.isArray(invite.users)?invite.users:[];
+    if(!invite.users.includes(phone)){
+      invite.used=Number(invite.used||0)+1;
+      invite.users.push(phone);
+    }
+    invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
+    invite.lastUser=phone;
+    saveInvites(invites);
+    return invite;
+  };
 
   track('page_view',{referrer:document.referrer||'direct'});
   document.querySelectorAll('a.btn').forEach(a=>a.addEventListener('click',()=>track('cta_click',{label:a.textContent.trim(),href:a.getAttribute('href')})));
 
   const login=document.querySelector('[data-demo-login]');
-  if(login&&new URLSearchParams(location.search).get('next')==='wizard') login.setAttribute('href','wizard.html');
+  if(login){
+    const next=new URLSearchParams(location.search).get('next');
+    if(next==='wizard') login.setAttribute('href','wizard.html');
+    if(next==='studio'||next==='creator-studio') login.setAttribute('href','creator-studio.html');
+  }
   if(login) login.addEventListener('click',(event)=>{
     const phone=document.getElementById('login-phone').value.trim();
     const code=document.getElementById('login-code').value.trim();
+    const inviteCode=document.getElementById('login-invite').value.trim();
+    const inviteResult=validateInvite(inviteCode);
     if(!/^1\d{10}$/.test(phone)||!/^\d{6}$/.test(code)){
       event.preventDefault();
       document.getElementById('login-message').textContent='请输入有效手机号和 6 位验证码。';
       return;
     }
+    if(!inviteResult.ok){
+      event.preventDefault();
+      document.getElementById('login-message').textContent=inviteResult.message;
+      return;
+    }
+    const invite=consumeInvite(inviteCode,phone.slice(0,3)+'****'+phone.slice(-4))||inviteResult.invite;
     const state=read();
-    state.user={id:'USR-DEMO-01',phone:phone.slice(0,3)+'****'+phone.slice(-4),name:'漫剧创作者',plan:'免费试用'};
+    state.user={id:'USR-DEMO-01',phone:phone.slice(0,3)+'****'+phone.slice(-4),name:'漫剧创作者',plan:'免费试用',inviteCode:normalizeInvite(invite.code)};
     if(!state.events.some(x=>x.name==='trial_credits_granted')) state.credits=(state.credits||0)+500;
-    state.events.push({name:'trial_credits_granted',meta:{credits:500},path:'login.html',at:new Date().toISOString()});
+    state.events.push({name:'invite_login',meta:{inviteCode:normalizeInvite(invite.code)},path:'login.html',at:new Date().toISOString()});
+    state.events.push({name:'trial_credits_granted',meta:{credits:500,inviteCode:normalizeInvite(invite.code)},path:'login.html',at:new Date().toISOString()});
     write(state);
   });
 

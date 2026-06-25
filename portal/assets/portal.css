@@ -16,6 +16,9 @@
 @media(max-width:900px){.permission-summary{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.permission-summary{grid-template-columns:1fr}.user-admin-section .section-title{align-items:flex-start;flex-direction:column}.export-button{width:100%}}
 
+/* 邀请码管理 */
+.invite-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}.invite-summary>div{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border:1px solid var(--line);border-radius:16px;background:#fff}.invite-summary small{color:var(--muted)}.invite-summary b{font-size:22px}.invite-create-panel{display:grid;grid-template-columns:1.1fr .6fr 1.4fr auto;gap:12px;align-items:end;margin-bottom:8px;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fff}.invite-create-panel .field{display:grid;gap:7px}.invite-create-panel label{font-size:13px;font-weight:800;color:#475569}.invite-create-panel input{height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:inherit}.invite-table{min-width:1160px}.invite-table td:last-child{display:flex;gap:8px;white-space:nowrap}@media(max-width:900px){.invite-create-panel{grid-template-columns:1fr 1fr}.invite-create-panel .export-button{grid-column:1/-1}.invite-summary{grid-template-columns:1fr}}@media(max-width:600px){.invite-create-panel{grid-template-columns:1fr}}
+
 /* ESales brand */
 :root{--brand:#1e2a91;--brand2:#2841b8}
 .brand span{width:142px;height:56px;border-radius:0;background:url("brand-logo.jpg") center/contain no-repeat;color:transparent}
