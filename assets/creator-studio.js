@@ -107,6 +107,32 @@
       image:'assets/images/story-cases/case-redline-chase.png'
     }
   ];
+  const assetBlueprints=[
+    {
+      key:'role',
+      title:'人物资产',
+      examples:'主角、对手、关键线索人物',
+      views:['正面','侧面','背面','表情'],
+      checklist:['身份关系','年龄气质','发型服装','表情动作'],
+      output:'人物四视图'
+    },
+    {
+      key:'scene',
+      title:'场景资产',
+      examples:'街道、旧照相馆、雨夜天桥',
+      views:['全景','近景','夜景','细节'],
+      checklist:['空间结构','时代地点','光线天气','镜头质感'],
+      output:'场景多视图'
+    },
+    {
+      key:'prop',
+      title:'道具资产',
+      examples:'旧照片、录音笔、门禁卡',
+      views:['正面','侧面','细节','使用状态'],
+      checklist:['外形材质','尺寸比例','关键纹理','剧情用途'],
+      output:'道具多视图'
+    }
+  ];
   const assetViewState={folderId:'root',previewId:null,dialog:null};
   const assetSessionMedia={};
   const assetFolderInfo={
@@ -293,6 +319,8 @@
         prop:'核心道具：旧照片、录音笔、门禁卡。需要清晰轮廓、材质细节和可复用视角。'
       },
       assetRegenerated:false,
+      assetGenerated:{},
+      assetUploads:{},
       storyboards:[],
       clipRegenerated:{},
       videoGenerated:false,
@@ -304,6 +332,8 @@
       const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{};
       const merged=Object.assign(fallback,saved,{
         assetPrompts:Object.assign({},fallback.assetPrompts,saved.assetPrompts||{}),
+        assetGenerated:Object.assign({},fallback.assetGenerated,saved.assetGenerated||{}),
+        assetUploads:Object.assign({},fallback.assetUploads,saved.assetUploads||{}),
         clipRegenerated:Object.assign({},fallback.clipRegenerated,saved.clipRegenerated||{}),
         postEdit:Object.assign({},fallback.postEdit,saved.postEdit||{})
       });
@@ -923,12 +953,19 @@
   }
   function renderAssetPanel(){
     return `
-      <div class="nami-asset-prompt-grid">
-        ${assetPromptCard('role','人物资产','主角、对手、关键线索人物','人物四视图：正面 / 侧面 / 背面 / 表情')}
-        ${assetPromptCard('scene','场景资产','街道、旧照相馆、雨夜天桥','多视图：全景 / 近景 / 夜景 / 细节')}
-        ${assetPromptCard('prop','道具资产','旧照片、录音笔、门禁卡','多视图：正面 / 侧面 / 细节 / 使用状态')}
+      <div class="nami-asset-flow">
+        <div><span>剧本资产拆分</span><b>人物</b><small>确认角色一致性</small></div>
+        <div><span>空间资产拆分</span><b>场景</b><small>统一画面环境</small></div>
+        <div><span>线索资产拆分</span><b>道具</b><small>保证剧情物件可复用</small></div>
       </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="regen-assets" type="button">按提示词重新生成资产</button><button type="button" id="confirm-assets">确认资产清单</button></div>
+      <div class="nami-asset-prompt-grid">
+        ${assetBlueprints.map(assetPromptCard).join('')}
+      </div>
+      <div class="nami-asset-confirm-strip">
+        <div><b>${assetReadyCount()} / ${assetBlueprints.length}</b><span>类资产已生成或上传参考</span></div>
+        <button class="nami-green-btn" id="regen-assets" type="button">按提示词重新生成全部资产</button>
+        <button type="button" id="confirm-assets">确认资产清单</button>
+      </div>
     `;
   }
   function renderStoryboardPanel(){
@@ -977,15 +1014,38 @@
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
     return `<button class="nami-setting-card ${selected?'selected':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}"><span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
   }
-  function assetPromptCard(key,title,items,viewText){
+  function assetPromptCard(config){
+    const key=config.key;
     const prompt=state.assetPrompts[key]||'';
+    const generated=Boolean(state.assetGenerated[key]);
+    const upload=state.assetUploads[key]||'';
     return `
-      <article class="nami-asset-prompt-card">
-        <header><span>${escapeHtml(title)}</span><b>${escapeHtml(items)}</b><small>${escapeHtml(viewText)}</small></header>
+      <article class="nami-asset-prompt-card ${generated||upload?'ready':''}">
+        <header>
+          <span>${escapeHtml(config.title)}</span>
+          <b>${escapeHtml(config.examples)}</b>
+          <small>${escapeHtml(config.output)}：${config.views.map(escapeHtml).join(' / ')}</small>
+        </header>
+        <div class="nami-asset-checklist">${config.checklist.map(item=>`<em>${escapeHtml(item)}</em>`).join('')}</div>
         <textarea data-asset-prompt="${escapeHtml(key)}">${escapeHtml(prompt)}</textarea>
-        <div class="nami-view-tags">${viewText.split('：').pop().split('/').map(item=>`<em>${escapeHtml(item.trim())}</em>`).join('')}</div>
+        <div class="nami-asset-preview-slots">
+          ${config.views.map((view,index)=>`<div class="${generated||upload?'filled':''}"><b>${escapeHtml(view)}</b><small>${generated?'已生成':(upload?'参考已上传':'待生成')}</small><i>${index+1}</i></div>`).join('')}
+        </div>
+        <div class="nami-view-tags">${config.views.map(item=>`<em>${escapeHtml(item)}</em>`).join('')}</div>
+        <div class="nami-asset-card-actions">
+          <button type="button" data-generate-asset="${escapeHtml(key)}">${generated?'重新生成':'生成资产'}</button>
+          <button type="button" data-upload-asset="${escapeHtml(key)}">${upload?'更换参考':'上传参考'}</button>
+          <input type="file" accept="image/*" hidden data-asset-file="${escapeHtml(key)}"/>
+        </div>
+        <p class="nami-asset-status">${upload?`参考图：${escapeHtml(upload)}`:(generated?'已按当前提示词生成，可继续确认':'建议先检查提示词，再生成或上传参考图。')}</p>
       </article>
     `;
+  }
+  function assetReadyCount(){
+    return assetBlueprints.filter(item=>state.assetGenerated[item.key]||state.assetUploads[item.key]).length;
+  }
+  function assetTitle(key){
+    return assetBlueprints.find(item=>item.key===key)?.title||'资产';
   }
   function exportShotVideo(shotId){
     if(!state.videoGenerated) return toast('请先生成分镜视频');
@@ -1083,7 +1143,33 @@
       renderStatusOnly();
     }));
     document.getElementById('confirm-video')?.addEventListener('click',()=>{state.videoConfirmed=true;save();render();toast('已确认视频设定');});
-    document.getElementById('regen-assets')?.addEventListener('click',()=>{state.assetRegenerated=true;state.assetsConfirmed=false;save();render();toast('已按提示词重新生成资产');});
+    document.querySelectorAll('[data-generate-asset]').forEach(button=>button.addEventListener('click',()=>{
+      state.assetGenerated[button.dataset.generateAsset]=new Date().toISOString();
+      state.assetsConfirmed=false;
+      save();
+      render();
+      toast('已生成'+assetTitle(button.dataset.generateAsset));
+    }));
+    document.querySelectorAll('[data-upload-asset]').forEach(button=>button.addEventListener('click',()=>{
+      document.querySelector(`[data-asset-file="${button.dataset.uploadAsset}"]`)?.click();
+    }));
+    document.querySelectorAll('[data-asset-file]').forEach(input=>input.addEventListener('change',()=>{
+      const file=input.files?.[0];
+      if(!file) return;
+      state.assetUploads[input.dataset.assetFile]=file.name;
+      state.assetsConfirmed=false;
+      save();
+      render();
+      toast('已上传'+assetTitle(input.dataset.assetFile)+'参考图');
+    }));
+    document.getElementById('regen-assets')?.addEventListener('click',()=>{
+      assetBlueprints.forEach(item=>{state.assetGenerated[item.key]=new Date().toISOString();});
+      state.assetRegenerated=true;
+      state.assetsConfirmed=false;
+      save();
+      render();
+      toast('已按提示词重新生成全部资产');
+    });
     document.getElementById('confirm-assets')?.addEventListener('click',()=>{state.assetsConfirmed=true;save();render();toast('已确认资产清单');});
     document.getElementById('regen-storyboard')?.addEventListener('click',()=>{state.storyboards=[];ensureStoryboards();save();render();toast('已重新生成分镜');});
     document.getElementById('generate-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
