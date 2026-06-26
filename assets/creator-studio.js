@@ -3,12 +3,12 @@
   const CONNECTED_KEY='md-connected-state';
   const INVITE_KEY='md-invite-codes';
   const MAX_SCRIPT_LENGTH=10000;
-  const VIDEO_DURATION_SECONDS=60;
-  const VIDEO_CREDIT_COST=60;
+  const VIDEO_DURATION_SECONDS=15;
+  const VIDEO_CREDIT_COST=15;
   const DEFAULT_PROJECT_ID='1729382256911763547';
   const defaultInvites=[
     {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
-    {code:'AIMANGA60',label:'60秒短视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段短视频生成'},
+    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
     {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
   ];
   const body=document.body;
@@ -58,13 +58,13 @@
       name:'视频设定',
       next:'场景角色道具',
       title:'视频设定',
-      desc:'确认 60 秒短视频的画面比例、视觉风格、镜头密度和输出策略，后续阶段会沿用这些设定。',
+      desc:'确认单条分镜视频的画面比例、视觉风格、镜头密度和输出策略，后续阶段会沿用这些设定。',
       guideTitle:'先确定视频基础参数',
-      guideCopy:'第一阶段固定 60 秒时长，可选择竖屏 9:16 或横屏 16:9，并选择 2D、3D、仿真人等画面风格。',
+      guideCopy:'第一阶段单条分镜视频上限为 15 秒，可选择竖屏 9:16 或横屏 16:9，并选择都市写实、古风写实、赛博朋克等画面风格。',
       action:'确认视频参数',
-      status:()=>state.videoConfirmed?`60 秒 · ${state.videoRatio} · ${state.videoStyle}`:'待确认视频参数',
-      rules:['时长固定 60 秒','支持 9:16 / 16:9','支持多种视频风格'],
-      preview:['60 秒时长','画面比例','视频风格'],
+      status:()=>state.videoConfirmed?`15 秒上限 · ${state.videoRatio} · ${state.videoStyle}`:'待确认视频参数',
+      rules:['单条分镜视频上限 15 秒','支持 9:16 / 16:9','支持指定视频风格'],
+      preview:['15 秒上限','画面比例','视频风格'],
       image:'assets/images/story-cases/case-xingchao-archive.png'
     },
     {
@@ -95,29 +95,16 @@
     },
     {
       name:'分镜视频',
-      next:'视频预览',
-      title:'分镜视频',
-      desc:'生成 60 秒短视频任务，并检查片段状态、失败重试和单条分镜重生成。',
-      guideTitle:'生成分镜视频',
-      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建 60 秒短视频演示任务，并支持单条分镜视频重生成。',
-      action:'生成 60 秒短视频',
-      status:()=>state.videoGenerated?'60 秒短视频已生成':'待生成 60 秒短视频',
-      rules:['必须邀请码登录','固定生成 60 秒','单条分镜可重生成'],
-      preview:['60 秒任务','生成状态','片段预览'],
-      image:'assets/images/story-cases/case-redline-chase.png'
-    },
-    {
-      name:'视频预览',
       next:'',
-      title:'视频预览',
-      desc:'检查 60 秒短视频节奏、字幕、音效和自动拼接状态。这里是第一阶段产线的最后一步。',
-      guideTitle:'完成视频预览',
-      guideCopy:'最后阶段展示单条片段裁剪、字幕、音效和 AI 自动拼接状态，确认后保存当前版本。',
-      action:'预览并确认 60 秒短视频',
-      status:()=>state.previewChecked?'60 秒预览已确认':'待确认 60 秒预览',
-      rules:['可返回任意已完成阶段修改','可标记裁剪/字幕/音效','AI 自动拼接为成片'],
-      preview:['60 秒成片预览','自动拼接','版本保存'],
-      image:'assets/images/story-cases/case-icefield-echo.png'
+      title:'分镜视频',
+      desc:'生成单条分镜视频任务，并检查片段状态、失败重试、单条分镜重生成和单条导出。',
+      guideTitle:'生成分镜视频',
+      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建分镜视频演示任务，单个分镜视频上限 15 秒，并支持单条重生成和导出。',
+      action:'生成分镜视频',
+      status:()=>state.videoGenerated?'分镜视频已生成':'待生成分镜视频',
+      rules:['必须邀请码登录','单个分镜上限 15 秒','支持单条分镜重生成和导出'],
+      preview:['15 秒分镜','生成状态','单条导出'],
+      image:'assets/images/story-cases/case-redline-chase.png'
     }
   ];
   const assetViewState={folderId:'root',previewId:null,dialog:null};
@@ -297,7 +284,7 @@
       idea:'',
       script:'',
       videoRatio:'9:16',
-      videoStyle:'2D 国漫',
+      videoStyle:'都市写实',
       videoConfirmed:false,
       assetsConfirmed:false,
       assetPrompts:{
@@ -315,11 +302,15 @@
     };
     try{
       const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{};
-      return Object.assign(fallback,saved,{
+      const merged=Object.assign(fallback,saved,{
         assetPrompts:Object.assign({},fallback.assetPrompts,saved.assetPrompts||{}),
         clipRegenerated:Object.assign({},fallback.clipRegenerated,saved.clipRegenerated||{}),
         postEdit:Object.assign({},fallback.postEdit,saved.postEdit||{})
       });
+      merged.stage=Math.min(Math.max(Number(merged.stage)||0,0),4);
+      const allowedStyles=['都市写实','古风写实','暗黑悬疑','国漫现代（2d）','国漫古风（2d）','赛博朋克','3D动漫','90年代写实','90年代漫画风'];
+      if(!allowedStyles.includes(merged.videoStyle)) merged.videoStyle='都市写实';
+      return merged;
     }catch(_){
       return fallback;
     }
@@ -363,6 +354,15 @@
       invites=defaultInvites.map(item=>({...item}));
       localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
     }
+    let updated=false;
+    invites.forEach(invite=>{
+      if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
+        invite.label='15秒分镜视频体验码';
+        invite.note='用于体验第一阶段分镜视频生成';
+        updated=true;
+      }
+    });
+    if(updated) saveInvites(invites);
     return invites;
   }
   function saveInvites(invites){
@@ -427,8 +427,8 @@
     const connected=readConnected();
     const project=(connected.projects&&connected.projects[0])||{
       id:'项目-'+currentProjectId.slice(-6),
-      title:'第一集 60 秒短视频',
-      stage:'视频预览',
+      title:'第一条 15 秒分镜视频',
+      stage:'分镜视频',
       progress:100,
       platform:state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16',
       createdAt:new Date().toISOString()
@@ -458,7 +458,7 @@
     syncShortVideoGeneration();
     save();
     render();
-    toast('60 秒短视频已生成');
+    toast('15 秒分镜视频已生成');
     return true;
   }
   function openLogin(extraMessage){
@@ -494,12 +494,12 @@
     if(state.stage>=3) ensureStoryboards();
     body.dataset.stage=String(state.stage);
     setDockActive('creator');
-    els.micro.textContent=(state.stage+1)+' / 6 · '+stage.name;
+    els.micro.textContent=(state.stage+1)+' / '+stages.length+' · '+stage.name;
     els.title.textContent=stage.title;
     els.desc.textContent=stage.desc;
     els.next.textContent=stage.next?'下一步：'+stage.next:'完成制作';
     els.back.disabled=state.stage===0;
-    els.stageProgress.textContent=(state.stage+1)+' / 6';
+    els.stageProgress.textContent=(state.stage+1)+' / '+stages.length;
     const percent=Math.round((state.stage+1)/stages.length*100);
     els.railPercent.textContent=percent+'%';
     els.railProgress.style.width=percent+'%';
@@ -859,8 +859,7 @@
       renderVideoPanel,
       renderAssetPanel,
       renderStoryboardPanel,
-      renderVideoGeneratePanel,
-      renderPreviewPanel
+      renderVideoGeneratePanel
     ];
     els.panel.innerHTML=templates[state.stage]();
   }
@@ -895,7 +894,7 @@
   function renderVideoPanel(){
     return `
       <div class="nami-option-section">
-        <div class="nami-option-heading"><span>成片时长</span><b>60 秒</b><small>第一阶段固定生成 60 秒短视频。</small></div>
+        <div class="nami-option-heading"><span>单条上限</span><b>15 秒</b><small>单个分镜视频生成时长上限为 15 秒。</small></div>
         <div class="nami-option-heading"><span>预计消耗</span><b>${VIDEO_CREDIT_COST} 积分</b><small>登录后创建生成任务，失败会保留重试入口。</small></div>
       </div>
       <div class="nami-option-section">
@@ -908,12 +907,15 @@
       <div class="nami-option-section">
         <h3>视频风格</h3>
         <div class="nami-settings-grid style-grid">
-          ${settingOption('style','2D 国漫','2D 国漫','线条清晰，适合连载漫剧与爽文题材。')}
-          ${settingOption('style','3D 卡通','3D 卡通','角色体积感更强，适合轻喜剧和儿童向内容。')}
-          ${settingOption('style','仿真人','仿真人','接近真人短剧质感，适合都市、情感与职场题材。')}
-          ${settingOption('style','写实电影','写实电影','光影和镜头更偏电影感，适合悬疑、科幻与剧情向。')}
-          ${settingOption('style','水墨国风','水墨国风','留白、宣纸质感，适合古风、仙侠和文化题材。')}
-          ${settingOption('style','Q版治愈','Q版治愈','人物比例可爱，适合轻松、治愈和社交传播。')}
+          ${settingOption('style','都市写实','都市写实','现代城市、情感、职场和悬疑题材的写实质感。')}
+          ${settingOption('style','古风写实','古风写实','适合古装、权谋、仙侠和历史感内容。')}
+          ${settingOption('style','暗黑悬疑','暗黑悬疑','低调光影和强反差，适合反转、惊悚和犯罪题材。')}
+          ${settingOption('style','国漫现代（2d）','国漫现代（2d）','线条清晰，适合现代连载漫剧和爽文题材。')}
+          ${settingOption('style','国漫古风（2d）','国漫古风（2d）','国漫线稿与古风服化道结合，适合东方幻想。')}
+          ${settingOption('style','赛博朋克','赛博朋克','霓虹、高科技和未来都市视觉。')}
+          ${settingOption('style','3D动漫','3D动漫','角色体积感更强，适合轻喜剧、冒险和儿童向内容。')}
+          ${settingOption('style','90年代写实','90年代写实','胶片色彩和年代环境，适合怀旧剧情。')}
+          ${settingOption('style','90年代漫画风','90年代漫画风','复古漫画质感，适合强情绪和风格化叙事。')}
         </div>
       </div>
       <div class="nami-action-row"><button class="nami-green-btn" id="confirm-video" type="button">确认视频设定</button><button type="button" data-stage-reset="video">恢复默认</button></div>
@@ -946,43 +948,19 @@
   function renderVideoGeneratePanel(){
     return `
       <div class="nami-video-limit">
-        <div><span>第一阶段输出</span><b>60 秒短视频</b></div>
+        <div><span>第一阶段输出</span><b>15 秒分镜视频</b></div>
         <p>${state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16'} · ${escapeHtml(state.videoStyle)}，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
       </div>
       <div class="nami-table-list">
         ${state.storyboards.map((item,index)=>`
           <div class="nami-shot-card">
             <b>${escapeHtml(item.shot)}</b>
-            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'60 秒短视频片段已生成，可进入预览。':'等待生成 60 秒短视频片段。'}</p><small>${state.videoGenerated?(state.clipRegenerated[item.shot]?'Regenerated':'Succeeded'):'Waiting'}</small></div>
-            <div class="nami-shot-actions"><i>${state.videoGenerated?'✓':'待生成'}</i><button type="button" data-regenerate-shot="${escapeHtml(item.shot)}">重新生成</button></div>
+            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'本条 15 秒分镜视频已生成，可单独导出。':'等待生成本条 15 秒分镜视频。'}</p><small>${state.videoGenerated?(state.clipRegenerated[item.shot]?'Regenerated':'Succeeded'):'Waiting'}</small></div>
+            <div class="nami-shot-actions"><i>${state.videoGenerated?'✓':'待生成'}</i><button type="button" data-regenerate-shot="${escapeHtml(item.shot)}">重新生成</button><button type="button" data-export-shot="${escapeHtml(item.shot)}">导出</button></div>
           </div>
         `).join('')}
       </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成 60 秒短视频</button><button type="button" id="retry-videos">失败重试</button></div>
-    `;
-  }
-  function renderPreviewPanel(){
-    return `
-      <div class="nami-preview-final">
-        <div class="nami-video-frame"><span>▶</span><b>第一集 60 秒预览</b><small>${escapeHtml(state.videoRatio)} · ${VIDEO_DURATION_SECONDS}s</small></div>
-        <div>
-          <h3>60 秒短视频预览</h3>
-          <p>检查成片节奏、字幕、音效和自动拼接状态。确认后会保存为当前项目版本，并在后台生成记录中显示。</p>
-          <div class="nami-post-tools">
-            ${postTool('crop','单条分镜裁剪','可进入当前片段做开始/结束点调整')}
-            ${postTool('subtitle','字幕','可手动修改字幕文本，也可保持 AI 自动字幕')}
-            ${postTool('sound','音效','可手动添加提示音、氛围声和转场声')}
-            ${postTool('stitch','AI 自动拼接','系统将分镜片段自动拼接为 60 秒成片')}
-          </div>
-          <div class="nami-stitch-steps">
-            ${stitchStep('1','片段检查',state.videoGenerated)}
-            ${stitchStep('2','字幕对齐',state.postEdit.subtitle)}
-            ${stitchStep('3','音效混合',state.postEdit.sound)}
-            ${stitchStep('4','自动拼接',state.postEdit.stitch)}
-          </div>
-          <div class="nami-action-row compact"><button class="nami-green-btn" id="confirm-preview" type="button">确认 60 秒预览</button><button type="button" data-post-action="crop">裁剪当前分镜</button><button type="button" data-post-action="subtitle">编辑字幕</button><button type="button" data-post-action="sound">添加音效</button><button type="button" data-post-action="stitch">重新自动拼接</button></div>
-        </div>
-      </div>
+      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成分镜视频</button><button type="button" id="retry-videos">失败重试</button></div>
     `;
   }
   function renderScriptVisualization(){
@@ -1009,12 +987,28 @@
       </article>
     `;
   }
-  function postTool(key,title,copy){
-    const active=Boolean(state.postEdit[key]);
-    return `<article class="${active?'active':''}"><span>${active?'已开启':'待处理'}</span><b>${escapeHtml(title)}</b><small>${escapeHtml(copy)}</small></article>`;
-  }
-  function stitchStep(index,title,done){
-    return `<div class="${done?'done':''}"><b>${escapeHtml(index)}</b><span>${escapeHtml(title)}</span></div>`;
+  function exportShotVideo(shotId){
+    if(!state.videoGenerated) return toast('请先生成分镜视频');
+    const shot=state.storyboards.find(item=>item.shot===shotId);
+    const content=[
+      `分镜 ${shotId||''} 15 秒视频导出记录`,
+      `画面比例：${state.videoRatio}`,
+      `视频风格：${state.videoStyle}`,
+      `镜头：${shot?.scene||'未命名分镜'}`,
+      `画面：${shot?.image||'暂无画面描述'}`,
+      `台词：${shot?.line||'暂无台词'}`,
+      `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`
+    ].join('\n');
+    const blob=new Blob(['\ufeff',content],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=`分镜${shotId||'视频'}_15秒导出记录.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('已导出本条 15 秒分镜视频');
   }
   function bindPanelEvents(){
     const idea=document.getElementById('idea-input');
@@ -1036,8 +1030,8 @@
       });
     }
     document.getElementById('ai-create')?.addEventListener('click',()=>{
-      const ideaText=state.idea.trim()||'主角发现异常线索，进入一场必须在 60 秒内讲清楚的悬疑故事。';
-      state.script=`第一集 60 秒短视频剧本：${ideaText}\n\n开场 0-3 秒：主角在熟悉的地点发现一个不合常理的细节，镜头快速推近，抛出“为什么只有我看见？”的钩子。\n\n发展 4-25 秒：主角顺着线索找到关键人物或关键道具，对方只说半句话就消失，冲突从日常转为危险。\n\n反转 26-45 秒：主角以为自己在追查别人，实际证据指向自己。画面切换到旧照片、录音或门禁记录，强化悬疑感。\n\n结尾 46-60 秒：主角打开最后一道门，看见和自己有关的真相，画面停在震惊表情并留下下一集问题。`;
+      const ideaText=state.idea.trim()||'主角发现异常线索，进入一场悬疑故事。';
+      state.script=`第一集分镜视频剧本：${ideaText}\n\n开场：主角在熟悉的地点发现一个不合常理的细节，镜头快速推近，抛出“为什么只有我看见？”的钩子。\n\n发展：主角顺着线索找到关键人物或关键道具，对方只说半句话就消失，冲突从日常转为危险。\n\n反转：主角以为自己在追查别人，实际证据指向自己。画面切换到旧照片、录音或门禁记录，强化悬疑感。\n\n结尾：主角打开最后一道门，看见和自己有关的真相，画面停在震惊表情并留下下一集问题。`;
       state.generatedFromIdea=ideaText;
       save();
       render();
@@ -1076,7 +1070,7 @@
     }));
     document.querySelector('[data-stage-reset="video"]')?.addEventListener('click',()=>{
       state.videoRatio='9:16';
-      state.videoStyle='2D 国漫';
+      state.videoStyle='都市写实';
       state.videoConfirmed=false;
       save();
       render();
@@ -1095,22 +1089,13 @@
     document.getElementById('generate-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
     document.getElementById('retry-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
     document.querySelectorAll('[data-regenerate-shot]').forEach(button=>button.addEventListener('click',()=>{
-      if(!state.videoGenerated) return toast('请先生成 60 秒短视频');
+      if(!state.videoGenerated) return toast('请先生成分镜视频');
       state.clipRegenerated[button.dataset.regenerateShot]=new Date().toISOString();
       save();
       render();
       toast('已重新生成本条分镜视频');
     }));
-    document.getElementById('confirm-preview')?.addEventListener('click',()=>{state.previewChecked=true;save();render();toast('预览已确认');});
-    document.querySelectorAll('[data-post-action]').forEach(button=>button.addEventListener('click',()=>{
-      const action=button.dataset.postAction;
-      if(action&&state.postEdit){
-        state.postEdit[action]=true;
-        save();
-        render();
-        toast(action==='stitch'?'已重新自动拼接':'已更新后期设置');
-      }
-    }));
+    document.querySelectorAll('[data-export-shot]').forEach(button=>button.addEventListener('click',()=>exportShotVideo(button.dataset.exportShot)));
     document.querySelectorAll('[data-login-action]').forEach(button=>button.addEventListener('click',()=>openLogin('请先使用邀请码登录')));
   }
   function renderStatusOnly(){
@@ -1126,7 +1111,6 @@
     if(state.stage===2) state.assetsConfirmed=true;
     if(state.stage===3) ensureStoryboards();
     if(state.stage===4&&!completeShortVideoGeneration()) return false;
-    if(state.stage===5) state.previewChecked=true;
     save();
     return true;
   }
