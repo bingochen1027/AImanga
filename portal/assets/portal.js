@@ -26,7 +26,7 @@ const DEFAULT_USERS=[
 const INVITE_KEY='md-invite-codes';
 const DEFAULT_INVITES=[
   {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
-  {code:'AIMANGA60',label:'60秒短视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段短视频生成'},
+  {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
   {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
 ];
 const normalizeInvite=value=>String(value||'').trim().toUpperCase().replace(/\s+/g,'');
@@ -38,6 +38,15 @@ function readInvites(){
     invites=DEFAULT_INVITES.map(invite=>({...invite}));
     saveInvites(invites);
   }
+  let updated=false;
+  invites.forEach(invite=>{
+    if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
+      invite.label='15秒分镜视频体验码';
+      invite.note='用于体验第一阶段分镜视频生成';
+      updated=true;
+    }
+  });
+  if(updated) saveInvites(invites);
   return invites;
 }
 
@@ -144,7 +153,7 @@ function loadMvp(){
   const jobs=[...SAMPLE.jobs];
   if(queued) jobs.unshift({id:'任务-前台',project:latest?latest.title:'新项目',type:'剧本解析',status:'生成中',cost:60});
   shortVideos.slice(-3).reverse().forEach((event,index)=>{
-    jobs.unshift({id:`短视频-${String(index+1).padStart(2,'0')}`,project:event.meta?.title||latest?.title||'第一集 60 秒短视频',type:'60秒短视频',status:'已完成',cost:event.meta?.cost||60});
+    jobs.unshift({id:`分镜视频-${String(index+1).padStart(2,'0')}`,project:event.meta?.title||latest?.title||'第一条 15 秒分镜视频',type:'15秒分镜视频',status:'已完成',cost:event.meta?.cost||15});
   });
   document.getElementById('job-rows').innerHTML=jobs.map(job=>`<tr><td>${job.id}</td><td>${job.project}</td><td>${job.type}</td><td><span class="status-pill ${statusClass(job.status)}">${job.status}</span></td><td>${job.cost}</td></tr>`).join('');
   document.getElementById('running-total').textContent=jobs.filter(job=>job.status==='生成中').length;
@@ -158,7 +167,7 @@ function loadMvp(){
   }
   document.getElementById('user-credits').textContent=connected.credits||0;
 
-  const labels={page_view:'页面访问',cta_click:'按钮点击',invite_login:'邀请码登录注册',trial_credits_granted:'注册并发放试用积分',project_created:'创建项目',job_queued:'创建生成任务',short_video_generated:'生成 60 秒短视频',launch_kit_viewed:'查看投放素材',purchase_completed:'完成购买',account_viewed:'进入个人中心',studio_viewed:'进入工作台'};
+  const labels={page_view:'页面访问',cta_click:'按钮点击',invite_login:'邀请码登录注册',trial_credits_granted:'注册并发放试用积分',project_created:'创建项目',job_queued:'创建生成任务',short_video_generated:'生成 15 秒分镜视频',launch_kit_viewed:'查看投放素材',purchase_completed:'完成购买',account_viewed:'进入个人中心',studio_viewed:'进入工作台'};
   const pages={'index.html':'首页','login.html':'登录注册','wizard.html':'项目向导','creator-studio.html':'引导创作台','studio.html':'创作工作台','launch-kit.html':'投放包','pricing.html':'价格','account.html':'个人中心'};
   const events=[...(connected.events||[])].reverse().slice(0,8);
   document.getElementById('activity-list').innerHTML=events.length

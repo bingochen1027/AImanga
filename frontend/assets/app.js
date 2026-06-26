@@ -38,7 +38,7 @@
   const initial={user:null,credits:0,projects:[],events:[]};
   const defaultInvites=[
     {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
-    {code:'AIMANGA60',label:'60秒短视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段短视频生成'},
+    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
     {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
   ];
   const read=()=>{try{return {...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...initial}}};
@@ -53,6 +53,15 @@
       invites=defaultInvites.map(item=>({...item}));
       localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
     }
+    let updated=false;
+    invites.forEach(invite=>{
+      if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
+        invite.label='15秒分镜视频体验码';
+        invite.note='用于体验第一阶段分镜视频生成';
+        updated=true;
+      }
+    });
+    if(updated) saveInvites(invites);
     return invites;
   };
   const saveInvites=invites=>localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
