@@ -6,6 +6,29 @@
   const VIDEO_DURATION_SECONDS=15;
   const VIDEO_CREDIT_COST=15;
   const DEFAULT_PROJECT_ID='1729382256911763547';
+  const styleVisuals={
+    '都市写实':{slug:'urban-realistic',tag:'城市夜景',target:'assets/images/video-styles/style-urban-realistic.jpg'},
+    '古风写实':{slug:'ancient-realistic',tag:'古风庭院',target:'assets/images/video-styles/style-ancient-realistic.jpg'},
+    '暗黑悬疑':{slug:'dark-suspense',tag:'雨夜线索',target:'assets/images/video-styles/style-dark-suspense.jpg'},
+    '国漫现代（2d）':{slug:'modern-guoman-2d',tag:'现代国漫',target:'assets/images/video-styles/style-modern-guoman-2d.jpg'},
+    '国漫古风（2d）':{slug:'ancient-guoman-2d',tag:'东方国漫',target:'assets/images/video-styles/style-ancient-guoman-2d.jpg'},
+    '赛博朋克':{slug:'cyberpunk',tag:'霓虹未来',target:'assets/images/video-styles/style-cyberpunk.jpg'},
+    '3D动漫':{slug:'3d-animation',tag:'3D 动画',target:'assets/images/video-styles/style-3d-animation.jpg'},
+    '90年代写实':{slug:'nineties-realistic',tag:'胶片年代',target:'assets/images/video-styles/style-nineties-realistic.jpg'},
+    '90年代漫画风':{slug:'nineties-comic',tag:'复古漫画',target:'assets/images/video-styles/style-nineties-comic.jpg'}
+  };
+  const presetStyleOptions=[
+    {value:'都市写实',label:'都市写实',copy:'现代城市、情感、职场和悬疑题材的写实质感。'},
+    {value:'古风写实',label:'古风写实',copy:'适合古装、权谋、仙侠和历史感内容。'},
+    {value:'暗黑悬疑',label:'暗黑悬疑',copy:'低调光影和强反差，适合反转、惊悚和犯罪题材。'},
+    {value:'国漫现代（2d）',label:'国漫现代（2d）',copy:'线条清晰，适合现代连载漫剧和爽文题材。'},
+    {value:'国漫古风（2d）',label:'国漫古风（2d）',copy:'国漫线稿与古风服化道结合，适合东方幻想。'},
+    {value:'赛博朋克',label:'赛博朋克',copy:'霓虹、高科技和未来都市视觉。'},
+    {value:'3D动漫',label:'3D动漫',copy:'角色体积感更强，适合轻喜剧、冒险和儿童向内容。'},
+    {value:'90年代写实',label:'90年代写实',copy:'胶片色彩和年代环境，适合怀旧剧情。'},
+    {value:'90年代漫画风',label:'90年代漫画风',copy:'复古漫画质感，适合强情绪和风格化叙事。'}
+  ];
+  const CUSTOM_STYLE_VALUE='自定义风格';
   const defaultInvites=[
     {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
     {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
@@ -62,7 +85,7 @@
       guideTitle:'先确定视频基础参数',
       guideCopy:'第一阶段单条分镜视频上限为 15 秒，可选择竖屏 9:16 或横屏 16:9，并选择都市写实、古风写实、赛博朋克等画面风格。',
       action:'确认视频参数',
-      status:()=>state.videoConfirmed?`15 秒上限 · ${state.videoRatio} · ${state.videoStyle}`:'待确认视频参数',
+      status:()=>state.videoConfirmed?`15 秒上限 · ${state.videoRatio} · ${currentVideoStyleLabel()}`:'待确认视频参数',
       rules:['单条分镜视频上限 15 秒','支持 9:16 / 16:9','支持指定视频风格'],
       preview:['15 秒上限','画面比例','视频风格'],
       image:'assets/images/story-cases/case-xingchao-archive.png'
@@ -319,6 +342,8 @@
       scriptModel:'Deepseek',
       videoRatio:'9:16',
       videoStyle:'都市写实',
+      videoCustomStyleName:'',
+      videoCustomStylePrompt:'',
       videoConfirmed:false,
       assetsConfirmed:false,
       assetPrompts:{
@@ -346,8 +371,10 @@
         postEdit:Object.assign({},fallback.postEdit,saved.postEdit||{})
       });
       merged.stage=Math.min(Math.max(Number(merged.stage)||0,0),4);
-      const allowedStyles=['都市写实','古风写实','暗黑悬疑','国漫现代（2d）','国漫古风（2d）','赛博朋克','3D动漫','90年代写实','90年代漫画风'];
+      const allowedStyles=presetStyleOptions.map(item=>item.value).concat(CUSTOM_STYLE_VALUE);
       if(!allowedStyles.includes(merged.videoStyle)) merged.videoStyle='都市写实';
+      merged.videoCustomStyleName=String(merged.videoCustomStyleName||'').slice(0,40);
+      merged.videoCustomStylePrompt=String(merged.videoCustomStylePrompt||'').slice(0,500);
       if(!scriptModelOptions.some(item=>item.value===merged.scriptModel)) merged.scriptModel='Deepseek';
       return merged;
     }catch(_){
@@ -358,6 +385,13 @@
     state.lastSaved='自动保存于刚刚';
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
     if(els.saveState) els.saveState.textContent=state.lastSaved;
+  }
+  function currentVideoStyleLabel(){
+    if(state.videoStyle!==CUSTOM_STYLE_VALUE) return state.videoStyle;
+    return state.videoCustomStyleName.trim()||CUSTOM_STYLE_VALUE;
+  }
+  function currentVideoStylePrompt(){
+    return state.videoStyle===CUSTOM_STYLE_VALUE?(state.videoCustomStylePrompt.trim()||'按自定义风格描述生成画面。'):'';
   }
   function escapeHtml(value){
     return String(value).replace(/[&<>"']/g,match=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -478,7 +512,7 @@
       connected.credits=Math.max(0,Number(connected.credits||0)-VIDEO_CREDIT_COST);
       connected.events=[...(connected.events||[]),{
         name:'short_video_generated',
-        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:state.videoRatio,style:state.videoStyle},
+        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:state.videoRatio,style:currentVideoStyleLabel(),stylePrompt:currentVideoStylePrompt()},
         path:'creator-studio.html',
         at:new Date().toISOString()
       }].slice(-80);
@@ -934,9 +968,8 @@
   }
   function renderVideoPanel(){
     return `
-      <div class="nami-option-section">
-        <div class="nami-option-heading"><span>单条上限</span><b>15 秒</b><small>单个分镜视频生成时长上限为 15 秒。</small></div>
-        <div class="nami-option-heading"><span>预计消耗</span><b>${VIDEO_CREDIT_COST} 积分</b><small>登录后创建生成任务，失败会保留重试入口。</small></div>
+      <div class="nami-option-section video-basics">
+        <div class="nami-option-heading video-limit-card"><span>单条上限</span><b>15 秒</b><small>单个分镜视频生成时长上限为 15 秒，后续会按分镜逐条生成，方便单条重试和导出。</small></div>
       </div>
       <div class="nami-option-section">
         <h3>画面比例</h3>
@@ -948,16 +981,9 @@
       <div class="nami-option-section">
         <h3>视频风格</h3>
         <div class="nami-settings-grid style-grid">
-          ${settingOption('style','都市写实','都市写实','现代城市、情感、职场和悬疑题材的写实质感。')}
-          ${settingOption('style','古风写实','古风写实','适合古装、权谋、仙侠和历史感内容。')}
-          ${settingOption('style','暗黑悬疑','暗黑悬疑','低调光影和强反差，适合反转、惊悚和犯罪题材。')}
-          ${settingOption('style','国漫现代（2d）','国漫现代（2d）','线条清晰，适合现代连载漫剧和爽文题材。')}
-          ${settingOption('style','国漫古风（2d）','国漫古风（2d）','国漫线稿与古风服化道结合，适合东方幻想。')}
-          ${settingOption('style','赛博朋克','赛博朋克','霓虹、高科技和未来都市视觉。')}
-          ${settingOption('style','3D动漫','3D动漫','角色体积感更强，适合轻喜剧、冒险和儿童向内容。')}
-          ${settingOption('style','90年代写实','90年代写实','胶片色彩和年代环境，适合怀旧剧情。')}
-          ${settingOption('style','90年代漫画风','90年代漫画风','复古漫画质感，适合强情绪和风格化叙事。')}
+          ${presetStyleOptions.map(item=>settingOption('style',item.value,item.label,item.copy)).join('')}
         </div>
+        ${customStylePanel()}
       </div>
       <div class="nami-action-row"><button class="nami-green-btn" id="confirm-video" type="button">确认视频设定</button><button type="button" data-stage-reset="video">恢复默认</button></div>
     `;
@@ -997,7 +1023,7 @@
     return `
       <div class="nami-video-limit">
         <div><span>第一阶段输出</span><b>15 秒分镜视频</b></div>
-        <p>${state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16'} · ${escapeHtml(state.videoStyle)}，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
+        <p>${state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16'} · ${escapeHtml(currentVideoStyleLabel())}，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
       </div>
       <div class="nami-table-list">
         ${state.storyboards.map((item,index)=>`
@@ -1011,9 +1037,35 @@
       <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成分镜视频</button><button type="button" id="retry-videos">失败重试</button></div>
     `;
   }
+  function customStylePanel(){
+    const active=state.videoStyle===CUSTOM_STYLE_VALUE;
+    const customName=state.videoCustomStyleName.trim();
+    const customPrompt=state.videoCustomStylePrompt.trim();
+    return `
+      <div class="nami-custom-style-panel ${active?'active':''}">
+        <div class="nami-custom-style-head">
+          <div><span>自定义视频风格</span><b>创建专属画面风格</b><small>适合品牌定制、特殊题材和参考图风格迁移。</small></div>
+          <button type="button" data-use-custom-style>${active?'已使用':'使用自定义'}</button>
+        </div>
+        <div class="nami-custom-style-body">
+          <div class="nami-custom-style-fields">
+            <label><span>风格名称</span><input data-custom-style-field="name" maxlength="40" value="${escapeHtml(state.videoCustomStyleName)}" placeholder="例如：蓝调港风悬疑"/></label>
+            <label><span>画面描述</span><textarea data-custom-style-field="prompt" maxlength="500" placeholder="描述色彩、光影、镜头、人物质感、年代感或参考方向。">${escapeHtml(state.videoCustomStylePrompt)}</textarea></label>
+          </div>
+          <div class="nami-custom-style-preview">
+            <div class="nami-custom-style-thumb"><em>图片占位</em><i>${escapeHtml(customName||'专属风格')}</i></div>
+            <p><b>${escapeHtml(active?currentVideoStyleLabel():'未启用自定义')}</b><small>${escapeHtml(customPrompt||'填写描述后点击使用自定义风格，后续资产和分镜视频会沿用该方向。')}</small></p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
   function settingOption(group,value,label,copy){
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
-    return `<button class="nami-setting-card ${selected?'selected':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}"><span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
+    const isStyle=group==='style';
+    const visual=isStyle?styleVisuals[value]:null;
+    const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}"><em>图片占位</em><i>${escapeHtml(visual.tag)}</i></div>`:'';
+    return `<button class="nami-setting-card ${selected?'selected':''} ${isStyle?'nami-style-card':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}">${styleVisual}<span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
   }
   function assetPromptCard(config){
     const key=config.key;
@@ -1054,7 +1106,7 @@
     const content=[
       `分镜 ${shotId||''} 15 秒视频导出记录`,
       `画面比例：${state.videoRatio}`,
-      `视频风格：${state.videoStyle}`,
+      `视频风格：${currentVideoStyleLabel()}`,
       `镜头：${shot?.scene||'未命名分镜'}`,
       `画面：${shot?.image||'暂无画面描述'}`,
       `台词：${shot?.line||'暂无台词'}`,
@@ -1136,9 +1188,30 @@
       save();
       render();
     }));
+    document.querySelectorAll('[data-custom-style-field]').forEach(input=>input.addEventListener('input',()=>{
+      if(input.dataset.customStyleField==='name') state.videoCustomStyleName=input.value.slice(0,40);
+      if(input.dataset.customStyleField==='prompt') state.videoCustomStylePrompt=input.value.slice(0,500);
+      state.videoConfirmed=false;
+      save();
+      renderStatusOnly();
+    }));
+    document.querySelector('[data-use-custom-style]')?.addEventListener('click',()=>{
+      const nameInput=document.querySelector('[data-custom-style-field="name"]');
+      const promptInput=document.querySelector('[data-custom-style-field="prompt"]');
+      state.videoCustomStyleName=(nameInput?.value||state.videoCustomStyleName||'').trim().slice(0,40);
+      state.videoCustomStylePrompt=(promptInput?.value||state.videoCustomStylePrompt||'').trim().slice(0,500);
+      if(!state.videoCustomStyleName&&!state.videoCustomStylePrompt) return toast('请先填写自定义视频风格');
+      state.videoStyle=CUSTOM_STYLE_VALUE;
+      state.videoConfirmed=false;
+      save();
+      render();
+      toast('已使用自定义视频风格');
+    });
     document.querySelector('[data-stage-reset="video"]')?.addEventListener('click',()=>{
       state.videoRatio='9:16';
       state.videoStyle='都市写实';
+      state.videoCustomStyleName='';
+      state.videoCustomStylePrompt='';
       state.videoConfirmed=false;
       save();
       render();
@@ -1150,7 +1223,13 @@
       save();
       renderStatusOnly();
     }));
-    document.getElementById('confirm-video')?.addEventListener('click',()=>{state.videoConfirmed=true;save();render();toast('已确认视频设定');});
+    document.getElementById('confirm-video')?.addEventListener('click',()=>{
+      if(state.videoStyle===CUSTOM_STYLE_VALUE&&!state.videoCustomStyleName.trim()&&!state.videoCustomStylePrompt.trim()) return toast('请先填写自定义视频风格');
+      state.videoConfirmed=true;
+      save();
+      render();
+      toast('已确认视频设定');
+    });
     document.querySelectorAll('[data-generate-asset]').forEach(button=>button.addEventListener('click',()=>{
       state.assetGenerated[button.dataset.generateAsset]=new Date().toISOString();
       state.assetsConfirmed=false;
