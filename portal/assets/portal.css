@@ -23,3 +23,4 @@
 :root{--brand:#1e2a91;--brand2:#2841b8}
 .brand span{width:142px;height:56px;border-radius:0;background:url("brand-logo.jpg") center/contain no-repeat;color:transparent}
 .brand div b{font-size:15px}.brand{align-items:center}
+.credit-control{display:flex;align-items:center;gap:8px}.credit-control input{width:92px;height:34px;border:1px solid var(--line);border-radius:10px;padding:0 9px;color:var(--text);font:inherit}

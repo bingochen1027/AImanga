@@ -89,10 +89,18 @@ function readUsers(connected){
 }
 
 function saveUsers(users){localStorage.setItem('md-portal-users',JSON.stringify(users))}
+function saveConnected(data){localStorage.setItem('md-connected-state',JSON.stringify(data))}
+function syncConnectedCredits(user){
+  const connected=readConnected();
+  if(connected.user&&connected.user.phone===user.phone){
+    connected.credits=Number(user.credits||0);
+    saveConnected(connected);
+  }
+}
 
 function renderUsers(users){
   const roles=['超级管理员','运营管理员','只读运营','创作者'];
-  document.getElementById('user-rows').innerHTML=users.map(user=>`<tr data-user-id="${user.id}"><td>${user.id}</td><td><b>${user.name}</b></td><td>${user.phone}</td><td>${user.email}</td><td><select class="role-select" aria-label="${user.name}的角色">${roles.map(role=>`<option ${role===user.role?'selected':''}>${role}</option>`).join('')}</select></td><td><span class="account-status ${user.status==='启用'?'enabled':'disabled'}">${user.status}</span></td><td>${user.plan}</td><td>${user.credits}</td><td>${user.projects}</td><td>${user.createdAt}</td><td>${user.lastActive}</td><td>${user.inviteCode||'未记录'}</td><td>${user.source}</td><td><button class="user-toggle ${user.status==='启用'?'disable':'enable'}" data-user-toggle="${user.id}">${user.status==='启用'?'禁用':'启用'}</button></td></tr>`).join('');
+  document.getElementById('user-rows').innerHTML=users.map(user=>`<tr data-user-id="${user.id}"><td>${user.id}</td><td><b>${user.name}</b></td><td>${user.phone}</td><td>${user.email}</td><td><select class="role-select" aria-label="${user.name}的角色">${roles.map(role=>`<option ${role===user.role?'selected':''}>${role}</option>`).join('')}</select></td><td><span class="account-status ${user.status==='启用'?'enabled':'disabled'}">${user.status}</span></td><td>${user.plan}</td><td><div class="credit-control"><input data-credit-input="${user.id}" inputmode="numeric" value="${Number(user.credits||0)}"/><button class="table-action" data-credit-save="${user.id}">保存</button></div></td><td>${user.projects}</td><td>${user.createdAt}</td><td>${user.lastActive}</td><td>${user.inviteCode||'未记录'}</td><td>${user.source}</td><td><button class="user-toggle ${user.status==='启用'?'disable':'enable'}" data-user-toggle="${user.id}">${user.status==='启用'?'禁用':'启用'}</button></td></tr>`).join('');
 }
 
 function xmlEscape(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -162,6 +170,17 @@ function loadMvp(){
   let invites=readInvites();
   renderInvites(invites);
   document.getElementById('user-rows').addEventListener('click',event=>{
+    const creditButton=event.target.closest('[data-credit-save]');
+    if(creditButton){
+      const user=users.find(item=>item.id===creditButton.dataset.creditSave);if(!user)return;
+      const input=document.querySelector(`[data-credit-input="${creditButton.dataset.creditSave}"]`);
+      const credits=Math.max(0,Math.floor(Number(input?.value||0)));
+      user.credits=Number.isFinite(credits)?credits:0;
+      saveUsers(users);
+      syncConnectedCredits(user);
+      renderUsers(users);
+      return;
+    }
     const button=event.target.closest('[data-user-toggle]');if(!button)return;
     const user=users.find(item=>item.id===button.dataset.userToggle);if(!user)return;
     user.status=user.status==='启用'?'禁用':'启用';saveUsers(users);renderUsers(users);
