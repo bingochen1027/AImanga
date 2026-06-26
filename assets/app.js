@@ -224,8 +224,8 @@
       const data=JSON.parse(localStorage.getItem('md-last-purchase')||'null');
       if(data){
         latest.classList.add('show');
-        latest.querySelector('h3').textContent=`最新购买：${data.name}`;
-        latest.querySelector('p').textContent=`${data.time} 已确认，金额 ${data.price}。权益已同步到当前个人中心示例状态。`;
+        latest.querySelector('h3').textContent=`最新权益记录：${data.name}`;
+        latest.querySelector('p').textContent=`${data.time} 已记录。当前阶段客户积分由后台分配管理。`;
       }
     }catch(e){}
   }

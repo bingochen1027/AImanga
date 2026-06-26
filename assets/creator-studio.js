@@ -50,8 +50,8 @@
       guideCopy:'点击下一步时会先校验剧本内容。没有内容时只提示“请输入内容”，不会进入视频设定。',
       action:'粘贴剧本或输入想法',
       status:()=>state.script.trim()?'剧本内容已填写':'待输入内容',
-      rules:['剧本内容不能为空','AI 创作需要先输入想法','未登录会弹出登录面板'],
-      preview:['剧本输入','AI 帮写','上传剧本'],
+      rules:['剧本内容不能为空','AI 创作需要先输入想法','AI 生成后可继续修改'],
+      preview:['剧本输入','AI 帮写','故事可视化'],
       image:'assets/images/story-cases/case-platform-nine.png'
     },
     {
@@ -60,11 +60,11 @@
       title:'视频设定',
       desc:'确认 60 秒短视频的画面比例、视觉风格、镜头密度和输出策略，后续阶段会沿用这些设定。',
       guideTitle:'先确定视频基础参数',
-      guideCopy:'第一阶段固定生成 60 秒竖屏短视频，先验证从剧本到首集预览的最小闭环。',
+      guideCopy:'第一阶段固定 60 秒时长，可选择竖屏 9:16 或横屏 16:9，并选择 2D、3D、仿真人等画面风格。',
       action:'确认视频参数',
-      status:()=>state.videoConfirmed?'60 秒短视频参数已确认':'使用默认 60 秒短视频参数',
-      rules:['时长固定 60 秒','分镜数量默认自动','下一步生成资产清单'],
-      preview:['60 秒时长','画面比例','视觉风格'],
+      status:()=>state.videoConfirmed?`60 秒 · ${state.videoRatio} · ${state.videoStyle}`:'待确认视频参数',
+      rules:['时长固定 60 秒','支持 9:16 / 16:9','支持多种视频风格'],
+      preview:['60 秒时长','画面比例','视频风格'],
       image:'assets/images/story-cases/case-xingchao-archive.png'
     },
     {
@@ -75,8 +75,8 @@
       guideTitle:'确认资产清单',
       guideCopy:'这一阶段要保证主角、关键场景和核心道具都已列入，否则后续分镜会缺资产。',
       action:'确认角色、场景和道具',
-      status:()=>state.assetsConfirmed?'资产已确认':'待确认资产',
-      rules:['角色不少于 1 个','场景不少于 1 个','核心道具可选'],
+      status:()=>state.assetsConfirmed?'资产提示词已确认':(state.assetRegenerated?'资产已重新生成':'待确认资产提示词'),
+      rules:['可修改提示词','可重新生成资产','人物资产提供四视图'],
       preview:['角色','场景','道具'],
       image:'assets/images/story-cases/case-fog-harbor-letter.png'
     },
@@ -97,12 +97,12 @@
       name:'分镜视频',
       next:'视频预览',
       title:'分镜视频',
-      desc:'生成 60 秒短视频任务，并检查片段状态、失败重试和待处理状态。',
+      desc:'生成 60 秒短视频任务，并检查片段状态、失败重试和单条分镜重生成。',
       guideTitle:'生成分镜视频',
-      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建 60 秒短视频演示任务，并同步到后台记录。',
+      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建 60 秒短视频演示任务，并支持单条分镜视频重生成。',
       action:'生成 60 秒短视频',
       status:()=>state.videoGenerated?'60 秒短视频已生成':'待生成 60 秒短视频',
-      rules:['必须邀请码登录','固定生成 60 秒','完成后进入预览'],
+      rules:['必须邀请码登录','固定生成 60 秒','单条分镜可重生成'],
       preview:['60 秒任务','生成状态','片段预览'],
       image:'assets/images/story-cases/case-redline-chase.png'
     },
@@ -110,13 +110,13 @@
       name:'视频预览',
       next:'',
       title:'视频预览',
-      desc:'检查 60 秒短视频节奏、字幕、音效和发布信息。这里是第一阶段产线的最后一步。',
+      desc:'检查 60 秒短视频节奏、字幕、音效和自动拼接状态。这里是第一阶段产线的最后一步。',
       guideTitle:'完成视频预览',
-      guideCopy:'最后阶段提供导出、发布和返回修改入口。未登录时导出和发布会显示登录面板。',
+      guideCopy:'最后阶段展示单条片段裁剪、字幕、音效和 AI 自动拼接状态，确认后保存当前版本。',
       action:'预览并确认 60 秒短视频',
       status:()=>state.previewChecked?'60 秒预览已确认':'待确认 60 秒预览',
-      rules:['可返回任意已完成阶段修改','导出发布需要邀请码登录','完成后保存项目版本'],
-      preview:['60 秒成片预览','导出发布','版本保存'],
+      rules:['可返回任意已完成阶段修改','可标记裁剪/字幕/音效','AI 自动拼接为成片'],
+      preview:['60 秒成片预览','自动拼接','版本保存'],
       image:'assets/images/story-cases/case-icefield-echo.png'
     }
   ];
@@ -125,23 +125,16 @@
   const assetFolderInfo={
     root:{name:'资产管理',parent:null},
     material:{name:'素材库',parent:'root'},
-    scene:{name:'场景库',parent:'material',upload:'上传场景图',category:'场景库'},
-    role:{name:'角色库',parent:'material',upload:'上传角色图',category:'角色库'},
-    prop:{name:'道具库',parent:'material',upload:'上传道具图',category:'道具库'},
-    file:{name:'文件库',parent:'material',upload:'上传本地文件',category:'文件库'},
-    pose:{name:'姿势库',parent:'material',upload:'上传姿势图',category:'姿势库'},
-    effect:{name:'特效库',parent:'material',upload:'上传特效图',category:'特效库'},
-    expression:{name:'表情库',parent:'material',upload:'上传表情图',category:'表情库'},
-    style:{name:'风格库',parent:'material',upload:'上传风格图',category:'风格库'},
-    voice:{name:'音色库',parent:'material',category:'音色库'},
-    sound:{name:'音效库',parent:'material',category:'音效库'},
-    styleFeatured:{name:'风格库',parent:'style',category:'风格库'},
-    styleMine:{name:'我的风格库',parent:'style',category:'风格库'},
-    voiceYouth:{name:'青年',parent:'voice',category:'音色库'},
-    voiceMiddle:{name:'中年',parent:'voice',category:'音色库'},
-    voiceTeen:{name:'少年',parent:'voice',category:'音色库'},
-    voiceSenior:{name:'老年',parent:'voice',category:'音色库'},
-    voiceChild:{name:'儿童',parent:'voice',category:'音色库'},
+    scene:{name:'场景资产',parent:'material',upload:'上传场景图',category:'场景资产'},
+    role:{name:'人物资产',parent:'material',upload:'上传人物图',category:'人物资产'},
+    prop:{name:'道具资产',parent:'material',upload:'上传道具图',category:'道具资产'},
+    voice:{name:'配音资产',parent:'material',category:'配音资产'},
+    sound:{name:'音效资产',parent:'material',category:'音效资产'},
+    voiceYouth:{name:'青年',parent:'voice',category:'配音资产'},
+    voiceMiddle:{name:'中年',parent:'voice',category:'配音资产'},
+    voiceTeen:{name:'少年',parent:'voice',category:'配音资产'},
+    voiceSenior:{name:'老年',parent:'voice',category:'配音资产'},
+    voiceChild:{name:'儿童',parent:'voice',category:'配音资产'},
     sfxEvent:{name:'事件音效',parent:'sound',category:'音效库'},
     sfxPerson:{name:'人物音效',parent:'sound',category:'音效库'},
     sfxAnimal:{name:'动物音效',parent:'sound',category:'音效库'},
@@ -159,16 +152,11 @@
     workStartup:{name:'刚毕业创业的最大优势：一无所有所以敢全力投入',parent:'myWorks'}
   };
   const assetMaterialFolders=[
-    ['scene','场景库','2026/06/19 01:47','19项'],
-    ['role','角色库','2026/06/19 01:47','17项'],
-    ['prop','道具库','2026/06/19 01:47','17项'],
-    ['file','文件库','2026/06/19 01:47','0项'],
-    ['pose','姿势库','2026/06/19 01:47','11项'],
-    ['effect','特效库','2026/06/19 01:47','11项'],
-    ['expression','表情库','2026/06/19 01:47','14项'],
-    ['style','风格库','2026/06/19 01:47','2项'],
-    ['voice','音色库','2026/06/19 01:47','0项'],
-    ['sound','音效库','2026/06/19 01:47','0项']
+    ['scene','场景资产','2026/06/19 01:47','19项'],
+    ['role','人物资产','2026/06/19 01:47','17项'],
+    ['prop','道具资产','2026/06/19 01:47','17项'],
+    ['voice','配音资产','2026/06/19 01:47','0项'],
+    ['sound','音效资产','2026/06/19 01:47','0项']
   ];
   const assetWorkFolders=[
     ['workLinyue','林玥用倒计时告别三年感情，以“123”密码开启新生活','2026/06/24 00:06','13项'],
@@ -308,15 +296,30 @@
       stage:0,
       idea:'',
       script:'',
+      videoRatio:'9:16',
+      videoStyle:'2D 国漫',
       videoConfirmed:false,
       assetsConfirmed:false,
+      assetPrompts:{
+        role:'主角：年轻创作者，外冷内热，服装以蓝白为主，需要正面、侧面、背面和表情四视图。',
+        scene:'核心场景：雨夜街道、旧照相馆、天桥。保持同一城市、同一光线和同一镜头质感。',
+        prop:'核心道具：旧照片、录音笔、门禁卡。需要清晰轮廓、材质细节和可复用视角。'
+      },
+      assetRegenerated:false,
       storyboards:[],
+      clipRegenerated:{},
       videoGenerated:false,
+      postEdit:{crop:false,subtitle:true,sound:false,stitch:true},
       previewChecked:false,
       lastSaved:'自动保存于刚刚'
     };
     try{
-      return Object.assign(fallback,JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'));
+      const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{};
+      return Object.assign(fallback,saved,{
+        assetPrompts:Object.assign({},fallback.assetPrompts,saved.assetPrompts||{}),
+        clipRegenerated:Object.assign({},fallback.clipRegenerated,saved.clipRegenerated||{}),
+        postEdit:Object.assign({},fallback.postEdit,saved.postEdit||{})
+      });
     }catch(_){
       return fallback;
     }
@@ -427,7 +430,7 @@
       title:'第一集 60 秒短视频',
       stage:'视频预览',
       progress:100,
-      platform:'抖音 9:16',
+      platform:state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16',
       createdAt:new Date().toISOString()
     };
     if(!connected.projects||!connected.projects.length) connected.projects=[project];
@@ -436,7 +439,7 @@
       connected.credits=Math.max(0,Number(connected.credits||0)-VIDEO_CREDIT_COST);
       connected.events=[...(connected.events||[]),{
         name:'short_video_generated',
-        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:'9:16'},
+        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:state.videoRatio,style:state.videoStyle},
         path:'creator-studio.html',
         at:new Date().toISOString()
       }].slice(-80);
@@ -612,10 +615,6 @@
     if(folderId==='material') return assetMaterialFolders.map(row=>makeFolderItem(row,'material'));
     if(folderId==='myWorks') return assetWorkFolders.map(row=>makeFolderItem(row,'myWorks'));
     if(assetMediaRows[folderId]) return assetMediaRows[folderId].map((row,index)=>makeImageItem(folderId,row,index));
-    if(folderId==='style') return [
-      {id:'folder-style-featured',type:'folder',kind:'folder',target:'styleFeatured',name:'风格库',date:'2026/06/19 01:48',count:'48项',folderId:'style',featured:true},
-      {id:'folder-style-mine',type:'folder',kind:'folder',target:'styleMine',name:'我的风格库',date:'2026/06/19 01:48',count:'0项',folderId:'style'}
-    ];
     if(folderId==='voice') return [
       ['voiceYouth','青年','2026/06/24 01:17','214项'],
       ['voiceMiddle','中年','2026/06/24 01:17','103项'],
@@ -889,28 +888,45 @@
           <textarea id="script-editor" maxlength="${MAX_SCRIPT_LENGTH}" placeholder="粘贴或上传剧本内容。当前版本建议上传单集，生成效果更佳。">${escapeHtml(state.script)}</textarea>
           <input id="script-file" type="file" accept=".txt,.md,.doc,.docx" hidden/>
         </div>
+        ${state.script.trim()?renderScriptVisualization():''}
       </div>
     `;
   }
   function renderVideoPanel(){
     return `
-      <div class="nami-settings-grid">
-        ${settingCard('成片时长','60 秒','第一阶段固定短视频时长')}
-        ${settingCard('画面比例','竖屏 9:16','适合短视频平台')}
-        ${settingCard('视频风格','电影感国漫','保持人物和场景统一')}
-        ${settingCard('预计消耗',VIDEO_CREDIT_COST+' 积分','登录后创建生成任务')}
+      <div class="nami-option-section">
+        <div class="nami-option-heading"><span>成片时长</span><b>60 秒</b><small>第一阶段固定生成 60 秒短视频。</small></div>
+        <div class="nami-option-heading"><span>预计消耗</span><b>${VIDEO_CREDIT_COST} 积分</b><small>登录后创建生成任务，失败会保留重试入口。</small></div>
+      </div>
+      <div class="nami-option-section">
+        <h3>画面比例</h3>
+        <div class="nami-settings-grid">
+          ${settingOption('ratio','9:16','竖屏 9:16','适合抖音、视频号、小红书等竖屏消费场景。')}
+          ${settingOption('ratio','16:9','横屏 16:9','适合横屏播放、官网展示和大屏预览。')}
+        </div>
+      </div>
+      <div class="nami-option-section">
+        <h3>视频风格</h3>
+        <div class="nami-settings-grid style-grid">
+          ${settingOption('style','2D 国漫','2D 国漫','线条清晰，适合连载漫剧与爽文题材。')}
+          ${settingOption('style','3D 卡通','3D 卡通','角色体积感更强，适合轻喜剧和儿童向内容。')}
+          ${settingOption('style','仿真人','仿真人','接近真人短剧质感，适合都市、情感与职场题材。')}
+          ${settingOption('style','写实电影','写实电影','光影和镜头更偏电影感，适合悬疑、科幻与剧情向。')}
+          ${settingOption('style','水墨国风','水墨国风','留白、宣纸质感，适合古风、仙侠和文化题材。')}
+          ${settingOption('style','Q版治愈','Q版治愈','人物比例可爱，适合轻松、治愈和社交传播。')}
+        </div>
       </div>
       <div class="nami-action-row"><button class="nami-green-btn" id="confirm-video" type="button">确认视频设定</button><button type="button" data-stage-reset="video">恢复默认</button></div>
     `;
   }
   function renderAssetPanel(){
     return `
-      <div class="nami-card-grid">
-        ${assetCard('角色','主角、关键对手、线索人物','已从剧本识别 3 个角色')}
-        ${assetCard('场景','街道、旧照相馆、雨夜天桥','已从剧本识别 3 个场景')}
-        ${assetCard('道具','旧照片、录音笔、门禁卡','已从剧本识别 3 个道具')}
+      <div class="nami-asset-prompt-grid">
+        ${assetPromptCard('role','人物资产','主角、对手、关键线索人物','人物四视图：正面 / 侧面 / 背面 / 表情')}
+        ${assetPromptCard('scene','场景资产','街道、旧照相馆、雨夜天桥','多视图：全景 / 近景 / 夜景 / 细节')}
+        ${assetPromptCard('prop','道具资产','旧照片、录音笔、门禁卡','多视图：正面 / 侧面 / 细节 / 使用状态')}
       </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="confirm-assets" type="button">确认资产清单</button><button type="button" data-login-action>添加角色/场景/道具</button></div>
+      <div class="nami-action-row"><button class="nami-green-btn" id="regen-assets" type="button">按提示词重新生成资产</button><button type="button" id="confirm-assets">确认资产清单</button></div>
     `;
   }
   function renderStoryboardPanel(){
@@ -931,37 +947,74 @@
     return `
       <div class="nami-video-limit">
         <div><span>第一阶段输出</span><b>60 秒短视频</b></div>
-        <p>固定竖屏 9:16，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
+        <p>${state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16'} · ${escapeHtml(state.videoStyle)}，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
       </div>
       <div class="nami-table-list">
         ${state.storyboards.map((item,index)=>`
           <div class="nami-shot-card">
             <b>${escapeHtml(item.shot)}</b>
-            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'60 秒短视频片段已生成，可进入预览。':'等待生成 60 秒短视频片段。'}</p><small>${state.videoGenerated?'Succeeded':'Waiting'}</small></div>
-            <i>${state.videoGenerated?'✓':'待生成'}</i>
+            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'60 秒短视频片段已生成，可进入预览。':'等待生成 60 秒短视频片段。'}</p><small>${state.videoGenerated?(state.clipRegenerated[item.shot]?'Regenerated':'Succeeded'):'Waiting'}</small></div>
+            <div class="nami-shot-actions"><i>${state.videoGenerated?'✓':'待生成'}</i><button type="button" data-regenerate-shot="${escapeHtml(item.shot)}">重新生成</button></div>
           </div>
         `).join('')}
       </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成 60 秒短视频</button><button type="button" data-login-action>失败重试</button></div>
+      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成 60 秒短视频</button><button type="button" id="retry-videos">失败重试</button></div>
     `;
   }
   function renderPreviewPanel(){
     return `
       <div class="nami-preview-final">
-        <div class="nami-video-frame"><span>▶</span><b>第一集 60 秒预览</b><small>9:16 · ${VIDEO_DURATION_SECONDS}s</small></div>
+        <div class="nami-video-frame"><span>▶</span><b>第一集 60 秒预览</b><small>${escapeHtml(state.videoRatio)} · ${VIDEO_DURATION_SECONDS}s</small></div>
         <div>
           <h3>60 秒短视频预览</h3>
-          <p>检查成片节奏、字幕、音效和导出信息。确认后会保存为当前项目版本，并在后台生成记录中显示。</p>
-          <div class="nami-action-row"><button class="nami-green-btn" id="confirm-preview" type="button">确认 60 秒预览</button><button type="button" data-login-action>导出视频</button><button type="button" data-login-action>发布投放</button></div>
+          <p>检查成片节奏、字幕、音效和自动拼接状态。确认后会保存为当前项目版本，并在后台生成记录中显示。</p>
+          <div class="nami-post-tools">
+            ${postTool('crop','单条分镜裁剪','可进入当前片段做开始/结束点调整')}
+            ${postTool('subtitle','字幕','可手动修改字幕文本，也可保持 AI 自动字幕')}
+            ${postTool('sound','音效','可手动添加提示音、氛围声和转场声')}
+            ${postTool('stitch','AI 自动拼接','系统将分镜片段自动拼接为 60 秒成片')}
+          </div>
+          <div class="nami-stitch-steps">
+            ${stitchStep('1','片段检查',state.videoGenerated)}
+            ${stitchStep('2','字幕对齐',state.postEdit.subtitle)}
+            ${stitchStep('3','音效混合',state.postEdit.sound)}
+            ${stitchStep('4','自动拼接',state.postEdit.stitch)}
+          </div>
+          <div class="nami-action-row compact"><button class="nami-green-btn" id="confirm-preview" type="button">确认 60 秒预览</button><button type="button" data-post-action="crop">裁剪当前分镜</button><button type="button" data-post-action="subtitle">编辑字幕</button><button type="button" data-post-action="sound">添加音效</button><button type="button" data-post-action="stitch">重新自动拼接</button></div>
         </div>
       </div>
     `;
   }
-  function settingCard(label,value,copy){
-    return `<button class="nami-setting-card selected" type="button"><span>${label}</span><b>${value}</b><small>${copy}</small></button>`;
+  function renderScriptVisualization(){
+    const brief=state.script.trim().split(/\n+/).filter(Boolean).slice(0,4);
+    const cards=[
+      ['开场钩子',brief[0]||'用异常事件在前 3 秒抓住用户。'],
+      ['核心冲突',brief[1]||'主角发现线索并被迫做出选择。'],
+      ['情绪反转',brief[2]||'关键人物出现，改变观众判断。'],
+      ['结尾悬念',brief[3]||'留出下一集必须继续观看的问题。']
+    ];
+    return `<div class="nami-script-visual"><h3>AI 剧本故事可视化</h3><div>${cards.map(card=>`<article><span>${escapeHtml(card[0])}</span><p>${escapeHtml(card[1])}</p></article>`).join('')}</div></div>`;
   }
-  function assetCard(title,items,copy){
-    return `<div class="nami-asset-card"><span>${title}</span><b>${items}</b><small>${copy}</small></div>`;
+  function settingOption(group,value,label,copy){
+    const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
+    return `<button class="nami-setting-card ${selected?'selected':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}"><span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
+  }
+  function assetPromptCard(key,title,items,viewText){
+    const prompt=state.assetPrompts[key]||'';
+    return `
+      <article class="nami-asset-prompt-card">
+        <header><span>${escapeHtml(title)}</span><b>${escapeHtml(items)}</b><small>${escapeHtml(viewText)}</small></header>
+        <textarea data-asset-prompt="${escapeHtml(key)}">${escapeHtml(prompt)}</textarea>
+        <div class="nami-view-tags">${viewText.split('：').pop().split('/').map(item=>`<em>${escapeHtml(item.trim())}</em>`).join('')}</div>
+      </article>
+    `;
+  }
+  function postTool(key,title,copy){
+    const active=Boolean(state.postEdit[key]);
+    return `<article class="${active?'active':''}"><span>${active?'已开启':'待处理'}</span><b>${escapeHtml(title)}</b><small>${escapeHtml(copy)}</small></article>`;
+  }
+  function stitchStep(index,title,done){
+    return `<div class="${done?'done':''}"><b>${escapeHtml(index)}</b><span>${escapeHtml(title)}</span></div>`;
   }
   function bindPanelEvents(){
     const idea=document.getElementById('idea-input');
@@ -983,11 +1036,12 @@
       });
     }
     document.getElementById('ai-create')?.addEventListener('click',()=>{
-      if(!hasInviteSession()) return openLogin('请先使用邀请码登录');
-      state.script='根据你的想法生成的 60 秒短视频剧本：\n\n1. 开场 3 秒抛出反转钩子。\n2. 主角发现关键线索并进入冲突。\n3. 结尾留下悬念，引导继续观看下一集。';
+      const ideaText=state.idea.trim()||'主角发现异常线索，进入一场必须在 60 秒内讲清楚的悬疑故事。';
+      state.script=`第一集 60 秒短视频剧本：${ideaText}\n\n开场 0-3 秒：主角在熟悉的地点发现一个不合常理的细节，镜头快速推近，抛出“为什么只有我看见？”的钩子。\n\n发展 4-25 秒：主角顺着线索找到关键人物或关键道具，对方只说半句话就消失，冲突从日常转为危险。\n\n反转 26-45 秒：主角以为自己在追查别人，实际证据指向自己。画面切换到旧照片、录音或门禁记录，强化悬疑感。\n\n结尾 46-60 秒：主角打开最后一道门，看见和自己有关的真相，画面停在震惊表情并留下下一集问题。`;
+      state.generatedFromIdea=ideaText;
       save();
       render();
-      toast('已生成 60 秒短视频剧本草稿');
+      toast('AI 剧本已生成，可继续编辑');
     });
     document.querySelectorAll('[data-editor-action]').forEach(button=>button.addEventListener('click',()=>{
       const action=button.dataset.editorAction;
@@ -1013,11 +1067,50 @@
       render();
       toast('上传剧本成功');
     });
+    document.querySelectorAll('[data-setting-group]').forEach(button=>button.addEventListener('click',()=>{
+      if(button.dataset.settingGroup==='ratio') state.videoRatio=button.dataset.settingValue;
+      if(button.dataset.settingGroup==='style') state.videoStyle=button.dataset.settingValue;
+      state.videoConfirmed=false;
+      save();
+      render();
+    }));
+    document.querySelector('[data-stage-reset="video"]')?.addEventListener('click',()=>{
+      state.videoRatio='9:16';
+      state.videoStyle='2D 国漫';
+      state.videoConfirmed=false;
+      save();
+      render();
+      toast('已恢复默认视频设定');
+    });
+    document.querySelectorAll('[data-asset-prompt]').forEach(input=>input.addEventListener('input',()=>{
+      state.assetPrompts[input.dataset.assetPrompt]=input.value;
+      state.assetsConfirmed=false;
+      save();
+      renderStatusOnly();
+    }));
     document.getElementById('confirm-video')?.addEventListener('click',()=>{state.videoConfirmed=true;save();render();toast('已确认视频设定');});
+    document.getElementById('regen-assets')?.addEventListener('click',()=>{state.assetRegenerated=true;state.assetsConfirmed=false;save();render();toast('已按提示词重新生成资产');});
     document.getElementById('confirm-assets')?.addEventListener('click',()=>{state.assetsConfirmed=true;save();render();toast('已确认资产清单');});
     document.getElementById('regen-storyboard')?.addEventListener('click',()=>{state.storyboards=[];ensureStoryboards();save();render();toast('已重新生成分镜');});
     document.getElementById('generate-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
+    document.getElementById('retry-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
+    document.querySelectorAll('[data-regenerate-shot]').forEach(button=>button.addEventListener('click',()=>{
+      if(!state.videoGenerated) return toast('请先生成 60 秒短视频');
+      state.clipRegenerated[button.dataset.regenerateShot]=new Date().toISOString();
+      save();
+      render();
+      toast('已重新生成本条分镜视频');
+    }));
     document.getElementById('confirm-preview')?.addEventListener('click',()=>{state.previewChecked=true;save();render();toast('预览已确认');});
+    document.querySelectorAll('[data-post-action]').forEach(button=>button.addEventListener('click',()=>{
+      const action=button.dataset.postAction;
+      if(action&&state.postEdit){
+        state.postEdit[action]=true;
+        save();
+        render();
+        toast(action==='stitch'?'已重新自动拼接':'已更新后期设置');
+      }
+    }));
     document.querySelectorAll('[data-login-action]').forEach(button=>button.addEventListener('click',()=>openLogin('请先使用邀请码登录')));
   }
   function renderStatusOnly(){
