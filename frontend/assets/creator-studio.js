@@ -7,15 +7,15 @@
   const VIDEO_CREDIT_COST=15;
   const DEFAULT_PROJECT_ID='1729382256911763547';
   const styleVisuals={
-    '都市写实':{slug:'urban-realistic',tag:'城市夜景',target:'assets/images/video-styles/style-urban-realistic.jpg'},
-    '古风写实':{slug:'ancient-realistic',tag:'古风庭院',target:'assets/images/video-styles/style-ancient-realistic.jpg'},
-    '暗黑悬疑':{slug:'dark-suspense',tag:'雨夜线索',target:'assets/images/video-styles/style-dark-suspense.jpg'},
-    '国漫现代（2d）':{slug:'modern-guoman-2d',tag:'现代国漫',target:'assets/images/video-styles/style-modern-guoman-2d.jpg'},
-    '国漫古风（2d）':{slug:'ancient-guoman-2d',tag:'东方国漫',target:'assets/images/video-styles/style-ancient-guoman-2d.jpg'},
-    '赛博朋克':{slug:'cyberpunk',tag:'霓虹未来',target:'assets/images/video-styles/style-cyberpunk.jpg'},
-    '3D动漫':{slug:'3d-animation',tag:'3D 动画',target:'assets/images/video-styles/style-3d-animation.jpg'},
-    '90年代写实':{slug:'nineties-realistic',tag:'胶片年代',target:'assets/images/video-styles/style-nineties-realistic.jpg'},
-    '90年代漫画风':{slug:'nineties-comic',tag:'复古漫画',target:'assets/images/video-styles/style-nineties-comic.jpg'}
+    '都市写实':{slug:'urban-realistic',tag:'城市夜景',target:'assets/images/video-styles/style-urban-realistic.jpg',hasImage:true},
+    '古风写实':{slug:'ancient-realistic',tag:'古风庭院',target:'assets/images/video-styles/style-ancient-realistic.jpg',hasImage:true},
+    '暗黑悬疑':{slug:'dark-suspense',tag:'雨夜线索',target:'assets/images/video-styles/style-dark-suspense.jpg',hasImage:true},
+    '国漫现代（2d）':{slug:'modern-guoman-2d',tag:'现代国漫',target:'assets/images/video-styles/style-modern-guoman-2d.jpg',hasImage:true},
+    '国漫古风（2d）':{slug:'ancient-guoman-2d',tag:'东方国漫',target:'assets/images/video-styles/style-ancient-guoman-2d.jpg',hasImage:true},
+    '赛博朋克':{slug:'cyberpunk',tag:'霓虹未来',target:'assets/images/video-styles/style-cyberpunk.jpg',hasImage:true},
+    '3D动漫':{slug:'3d-animation',tag:'3D 动画',target:'assets/images/video-styles/style-3d-animation.jpg',hasImage:true},
+    '90年代写实':{slug:'nineties-realistic',tag:'胶片年代',target:'assets/images/video-styles/style-nineties-realistic.jpg',hasImage:true},
+    '90年代漫画风':{slug:'nineties-comic',tag:'复古漫画',target:'assets/images/video-styles/style-nineties-comic.jpg',hasImage:true}
   };
   const presetStyleOptions=[
     {value:'都市写实',label:'都市写实',copy:'现代城市、情感、职场和悬疑题材的写实质感。'},
@@ -1064,7 +1064,7 @@
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
     const isStyle=group==='style';
     const visual=isStyle?styleVisuals[value]:null;
-    const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}"><em>图片占位</em><i>${escapeHtml(visual.tag)}</i></div>`:'';
+    const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}"><em>${visual.hasImage?'风格图':'图片占位'}</em><i>${escapeHtml(visual.tag)}</i></div>`:'';
     return `<button class="nami-setting-card ${selected?'selected':''} ${isStyle?'nami-style-card':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}">${styleVisual}<span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
   }
   function assetPromptCard(config){
