@@ -1064,7 +1064,7 @@
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
     const isStyle=group==='style';
     const visual=isStyle?styleVisuals[value]:null;
-    const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}"><em>${visual.hasImage?'风格图':'图片占位'}</em><i>${escapeHtml(visual.tag)}</i></div>`:'';
+    const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}" aria-hidden="true"></div>`:'';
     return `<button class="nami-setting-card ${selected?'selected':''} ${isStyle?'nami-style-card':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}">${styleVisual}<span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
   }
   function assetPromptCard(config){
