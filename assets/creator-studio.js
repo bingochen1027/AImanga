@@ -133,6 +133,13 @@
       output:'道具多视图'
     }
   ];
+  const scriptModelOptions=[
+    {value:'Deepseek',label:'Deepseek',copy:'默认模型，适合中文短剧和分镜剧本'},
+    {value:'通义千问',label:'通义千问',copy:'适合中文叙事和稳定改写'},
+    {value:'Kimi',label:'Kimi',copy:'适合长文本理解和剧本整理'},
+    {value:'豆包',label:'豆包',copy:'适合轻量创意和口语化表达'},
+    {value:'GPT-4o',label:'GPT-4o',copy:'适合复杂结构和多风格改写'}
+  ];
   const assetViewState={folderId:'root',previewId:null,dialog:null};
   const assetSessionMedia={};
   const assetFolderInfo={
@@ -309,6 +316,7 @@
       stage:0,
       idea:'',
       script:'',
+      scriptModel:'Deepseek',
       videoRatio:'9:16',
       videoStyle:'都市写实',
       videoConfirmed:false,
@@ -340,6 +348,7 @@
       merged.stage=Math.min(Math.max(Number(merged.stage)||0,0),4);
       const allowedStyles=['都市写实','古风写实','暗黑悬疑','国漫现代（2d）','国漫古风（2d）','赛博朋克','3D动漫','90年代写实','90年代漫画风'];
       if(!allowedStyles.includes(merged.videoStyle)) merged.videoStyle='都市写实';
+      if(!scriptModelOptions.some(item=>item.value===merged.scriptModel)) merged.scriptModel='Deepseek';
       return merged;
     }catch(_){
       return fallback;
@@ -899,7 +908,11 @@
         <div class="nami-char-count" id="script-count">${state.script.length}/${MAX_SCRIPT_LENGTH}</div>
         <div class="nami-ai-row">
           <div>
-            <span>没有剧本？AI帮你写：</span>
+            <div class="nami-ai-toolbar">
+              <span>没有剧本？AI帮你写：</span>
+              <label class="nami-model-select"><small>大模型</small><select id="script-model">${scriptModelOptions.map(item=>`<option value="${escapeHtml(item.value)}" ${state.scriptModel===item.value?'selected':''}>${escapeHtml(item.label)}</option>`).join('')}</select></label>
+            </div>
+            <p class="nami-model-copy">${escapeHtml((scriptModelOptions.find(item=>item.value===state.scriptModel)||scriptModelOptions[0]).copy)}</p>
             <textarea id="idea-input" maxlength="10000" placeholder="输入你的想法">${escapeHtml(state.idea)}</textarea>
           </div>
           <button class="nami-green-btn" id="ai-create" type="button" ${state.idea.trim()?'':'disabled'}>帮我创作</button>
@@ -911,13 +924,11 @@
               <button type="button" data-editor-action="copy">复制</button>
               <button type="button" data-editor-action="clear">清空</button>
               <button type="button" data-editor-action="upload">上传剧本</button>
-              <button type="button" data-editor-action="history">历史版本</button>
             </div>
           </div>
           <textarea id="script-editor" maxlength="${MAX_SCRIPT_LENGTH}" placeholder="粘贴或上传剧本内容。当前版本建议上传单集，生成效果更佳。">${escapeHtml(state.script)}</textarea>
           <input id="script-file" type="file" accept=".txt,.md,.doc,.docx" hidden/>
         </div>
-        ${state.script.trim()?renderScriptVisualization():''}
       </div>
     `;
   }
@@ -1000,16 +1011,6 @@
       <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成分镜视频</button><button type="button" id="retry-videos">失败重试</button></div>
     `;
   }
-  function renderScriptVisualization(){
-    const brief=state.script.trim().split(/\n+/).filter(Boolean).slice(0,4);
-    const cards=[
-      ['开场钩子',brief[0]||'用异常事件在前 3 秒抓住用户。'],
-      ['核心冲突',brief[1]||'主角发现线索并被迫做出选择。'],
-      ['情绪反转',brief[2]||'关键人物出现，改变观众判断。'],
-      ['结尾悬念',brief[3]||'留出下一集必须继续观看的问题。']
-    ];
-    return `<div class="nami-script-visual"><h3>AI 剧本故事可视化</h3><div>${cards.map(card=>`<article><span>${escapeHtml(card[0])}</span><p>${escapeHtml(card[1])}</p></article>`).join('')}</div></div>`;
-  }
   function settingOption(group,value,label,copy){
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
     return `<button class="nami-setting-card ${selected?'selected':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}"><span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
@@ -1074,6 +1075,14 @@
     const idea=document.getElementById('idea-input');
     const script=document.getElementById('script-editor');
     const scriptFile=document.getElementById('script-file');
+    const scriptModel=document.getElementById('script-model');
+    if(scriptModel){
+      scriptModel.addEventListener('change',()=>{
+        state.scriptModel=scriptModel.value;
+        save();
+        render();
+      });
+    }
     if(idea){
       idea.addEventListener('input',()=>{
         state.idea=idea.value;
@@ -1095,7 +1104,7 @@
       state.generatedFromIdea=ideaText;
       save();
       render();
-      toast('AI 剧本已生成，可继续编辑');
+      toast(state.scriptModel+' 已生成剧本，可继续编辑');
     });
     document.querySelectorAll('[data-editor-action]').forEach(button=>button.addEventListener('click',()=>{
       const action=button.dataset.editorAction;
@@ -1111,7 +1120,6 @@
         return toast('已清空');
       }
       if(action==='upload') return scriptFile?.click();
-      if(action==='history') return openLogin('请先使用邀请码登录');
     }));
     scriptFile?.addEventListener('change',()=>{
       const file=scriptFile.files?.[0];
