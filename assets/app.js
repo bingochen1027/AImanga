@@ -1,7 +1,8 @@
 (function(){
   const root=document.documentElement;
-  const saved=localStorage.getItem('md-theme'); if(saved) root.setAttribute('data-theme',saved);
-  document.querySelectorAll('[data-theme-toggle]').forEach(btn=>btn.addEventListener('click',()=>{const next=root.getAttribute('data-theme')==='dark'?'light':'dark';root.setAttribute('data-theme',next);localStorage.setItem('md-theme',next);btn.textContent=next==='dark'?'☀️':'🌙';}));
+  root.setAttribute('data-theme','light');
+  localStorage.removeItem('md-theme');
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn=>btn.remove());
   document.querySelectorAll('[data-tabs]').forEach(group=>{group.querySelectorAll('[data-target]').forEach(btn=>btn.addEventListener('click',()=>{group.querySelectorAll('[data-target]').forEach(b=>b.classList.remove('active'));group.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');const panel=group.querySelector(btn.dataset.target);if(panel)panel.classList.add('active');}));});
   document.querySelectorAll('[data-filter-group]').forEach(group=>{const target=group.dataset.target;group.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{group.querySelectorAll('[data-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;document.querySelectorAll(target).forEach(card=>{const cat=card.dataset.category||'';card.style.display=(f==='all'||cat.includes(f))?'':'none';});}));});
   document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent='已复制';setTimeout(()=>btn.textContent='复制',1300)}catch(e){btn.textContent='复制失败'}}));
@@ -25,10 +26,9 @@
 
 })();
 
-// Keep the theme icon in sync with the saved page theme on first paint.
+// Theme switching has been removed from the customer-facing MVP.
 (function(){
-  const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.querySelectorAll('[data-theme-toggle]').forEach(button=>button.textContent=dark?'☀️':'🌙');
+  document.documentElement.setAttribute('data-theme','light');
 })();
 
 // Connected demo: persist a lightweight customer journey across all pages.
@@ -37,9 +37,9 @@
   const INVITE_KEY='md-invite-codes';
   const initial={user:null,credits:0,projects:[],events:[]};
   const defaultInvites=[
-    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
-    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
-    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
+    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于首批内测用户注册',usageLog:[]},
+    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于体验第一阶段分镜视频生成',usageLog:[]},
+    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于内部团队验证',usageLog:[]}
   ];
   const read=()=>{try{return {...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...initial}}};
   const write=(state)=>localStorage.setItem(KEY,JSON.stringify(state));
@@ -55,11 +55,17 @@
     }
     let updated=false;
     invites.forEach(invite=>{
+      invite.maxUses=1;
+      invite.used=Number(invite.used||0);
+      invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
+      invite.users=Array.isArray(invite.users)?invite.users:[];
+      if(invite.used>=1) invite.status='已使用';
       if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
         invite.label='15秒分镜视频体验码';
-        invite.note='用于体验第一阶段分镜视频生成';
+        invite.note='一次性邀请码，用于体验第一阶段分镜视频生成';
         updated=true;
       }
+      updated=true;
     });
     if(updated) saveInvites(invites);
     return invites;
@@ -69,7 +75,7 @@
   const validateInvite=code=>{
     const invite=findInvite(code);
     if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
-    if(invite.status!=='启用') return {ok:false,message:'该邀请码已停用，请联系运营重新开通。'};
+    if(invite.status!=='启用') return {ok:false,message:'该邀请码已使用或已停用，请联系运营重新开通。'};
     if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
     return {ok:true,invite};
   };
@@ -79,12 +85,15 @@
     const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
     if(!invite) return null;
     invite.users=Array.isArray(invite.users)?invite.users:[];
+    invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
     if(!invite.users.includes(phone)){
       invite.used=Number(invite.used||0)+1;
       invite.users.push(phone);
+      invite.usageLog.push({phone,usedAt:new Date().toLocaleString('zh-CN',{hour12:false}),page:location.pathname.split('/').pop()||'index.html'});
     }
     invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
     invite.lastUser=phone;
+    if(Number(invite.used||0)>=1) invite.status='已使用';
     saveInvites(invites);
     return invite;
   };
@@ -102,10 +111,16 @@
     const phone=document.getElementById('login-phone').value.trim();
     const code=document.getElementById('login-code').value.trim();
     const inviteCode=document.getElementById('login-invite').value.trim();
+    const agreement=document.getElementById('login-agreement');
     const inviteResult=validateInvite(inviteCode);
     if(!/^1\d{10}$/.test(phone)||!/^\d{6}$/.test(code)){
       event.preventDefault();
       document.getElementById('login-message').textContent='请输入有效手机号和 6 位验证码。';
+      return;
+    }
+    if(agreement&&!agreement.checked){
+      event.preventDefault();
+      document.getElementById('login-message').textContent='请先阅读并同意用户协议和隐私政策。';
       return;
     }
     if(!inviteResult.ok){
@@ -121,6 +136,97 @@
     state.events.push({name:'trial_credits_granted',meta:{credits:500,inviteCode:normalizeInvite(invite.code)},path:'login.html',at:new Date().toISOString()});
     write(state);
   });
+
+  document.querySelectorAll('[data-policy-open]').forEach(link=>link.addEventListener('click',event=>{
+    event.preventDefault();
+    document.querySelector('.policy-modal')?.remove();
+    const title=link.dataset.policyOpen==='privacy'?'隐私政策':'用户协议';
+    const modal=document.createElement('div');
+    modal.className='policy-modal';
+    modal.innerHTML=`<div class="policy-card" role="dialog" aria-modal="true" aria-label="${title}">
+      <button class="modal-close" type="button" data-policy-close aria-label="关闭">×</button>
+      <span class="page-kicker">${title}</span>
+      <h2>${title}</h2>
+      <p>协议内容由系统自动生成，后续将根据正式业务规则更新文档细节。当前版本仅用于邀请码内测注册、账号登录、项目创建和必要服务通知。</p>
+      <button class="btn primary block" type="button" data-policy-close>我已了解</button>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.querySelectorAll('[data-policy-close]').forEach(btn=>btn.addEventListener('click',()=>modal.remove()));
+    modal.addEventListener('click',e=>{if(e.target===modal) modal.remove()});
+  }));
+
+  function renderInvitePortal(){
+    const host=document.getElementById('invite-portal-root');
+    if(!host) return;
+    const invites=readInvites();
+    const total=invites.length;
+    const active=invites.filter(item=>item.status==='启用').length;
+    const used=invites.filter(item=>item.status==='已使用'||Number(item.used||0)>=1).length;
+    host.innerHTML=`<section class="portal-hero">
+      <div><span class="page-kicker">后台 Portal</span><h1>邀请码管理</h1><p>生成一次性邀请码，查看每个邀请码的启用、已使用、停用状态，并追踪使用人和使用时间。</p></div>
+      <div class="portal-stats"><div><span>全部邀请码</span><b>${total}</b></div><div><span>可使用</span><b>${active}</b></div><div><span>已使用</span><b>${used}</b></div></div>
+    </section>
+    <section class="portal-grid">
+      <form class="portal-card" id="invite-create-form">
+        <h2>生成邀请码</h2>
+        <label><span>用途备注</span><input id="invite-label" maxlength="30" placeholder="例如：渠道内测 / 客户试用"/></label>
+        <label><span>说明</span><textarea id="invite-note" maxlength="120" placeholder="选填，便于后续追踪来源"></textarea></label>
+        <button class="btn primary block" type="submit">生成一次性邀请码</button>
+        <p>每个邀请码只能登录 / 注册一次，使用后自动变为“已使用”。</p>
+      </form>
+      <div class="portal-card wide">
+        <div class="portal-card-head"><h2>邀请码状态</h2><button class="btn secondary small" type="button" data-invite-reset>重置演示数据</button></div>
+        <div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>邀请码</th><th>用途</th><th>状态</th><th>使用人</th><th>使用时间</th><th>操作</th></tr></thead><tbody>
+          ${invites.map(item=>`<tr>
+            <td><button type="button" data-copy="${escapePortal(item.code)}">${escapePortal(item.code)}</button></td>
+            <td><b>${escapePortal(item.label||'未命名')}</b><small>${escapePortal(item.note||'一次性邀请码')}</small></td>
+            <td><span class="invite-status ${item.status==='启用'?'active':item.status==='已使用'?'used':'off'}">${escapePortal(item.status||'启用')}</span></td>
+            <td>${escapePortal(item.lastUser||'-')}</td>
+            <td>${escapePortal(item.lastUsedAt||'-')}</td>
+            <td><button class="btn secondary small" type="button" data-invite-toggle="${escapePortal(item.code)}">${item.status==='启用'?'停用':'启用'}</button></td>
+          </tr>`).join('')}
+        </tbody></table></div>
+      </div>
+    </section>`;
+  }
+  function escapePortal(value){
+    return String(value||'').replace(/[&<>"']/g,match=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
+  }
+  function generateInviteCode(){
+    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code='ES';
+    for(let i=0;i<8;i+=1) code+=alphabet[Math.floor(Math.random()*alphabet.length)];
+    return code;
+  }
+  if(document.getElementById('invite-portal-root')){
+    renderInvitePortal();
+    document.addEventListener('submit',event=>{
+      if(event.target.id!=='invite-create-form') return;
+      event.preventDefault();
+      const invites=readInvites();
+      let code=generateInviteCode();
+      while(invites.some(item=>normalizeInvite(item.code)===code)) code=generateInviteCode();
+      invites.unshift({code,label:document.getElementById('invite-label').value.trim()||'运营邀请码',status:'启用',maxUses:1,used:0,createdAt:new Date().toLocaleString('zh-CN',{hour12:false}),note:document.getElementById('invite-note').value.trim()||'后台生成的一次性邀请码',users:[],usageLog:[]});
+      saveInvites(invites);
+      toast('邀请码已生成',code);
+      renderInvitePortal();
+    });
+    document.addEventListener('click',event=>{
+      const toggle=event.target.closest('[data-invite-toggle]');
+      if(toggle){
+        const code=normalizeInvite(toggle.dataset.inviteToggle);
+        const invites=readInvites();
+        const invite=invites.find(item=>normalizeInvite(item.code)===code);
+        if(invite&&Number(invite.used||0)<1) invite.status=invite.status==='启用'?'停用':'启用';
+        saveInvites(invites);
+        renderInvitePortal();
+      }
+      if(event.target.closest('[data-invite-reset]')){
+        localStorage.removeItem(INVITE_KEY);
+        renderInvitePortal();
+      }
+    });
+  }
 
   const checkCards=[...document.querySelectorAll('.check-card')];
   checkCards.forEach((card,index)=>{
@@ -151,7 +257,7 @@
     if(project){
       const displayProjectId=String(project.id||'').replace(/^PRJ-/,'项目-');
       projectHost.innerHTML=`<div class="journey-notice"><div><span class="mini-tag">刚刚创建 · ${displayProjectId}</span><h3>${project.title}</h3><p>项目已准备好。下一步进入引导式创作台，完成剧本方向、大纲审稿和项目档案。</p></div><a class="btn primary" href="creator-studio.html">继续制作</a></div>`;
-      if(!state.events.some(e=>e.name==='job_queued'&&e.meta&&e.meta.projectId===project.id)){state.events.push({name:'job_queued',meta:{projectId:project.id,skill:'script_framework'},path:'studio.html',at:new Date().toISOString()});write(state)}
+      if(!state.events.some(e=>e.name==='job_queued'&&e.meta&&e.meta.projectId===project.id)){state.events.push({name:'job_queued',meta:{projectId:project.id,skill:'script_framework'},path:'creator-studio.html',at:new Date().toISOString()});write(state)}
     }
   }
 
@@ -176,7 +282,7 @@
 // Step 6: pricing and payment business-flow prototype logic
 (function(){
   const plans={
-    creator:{name:'创作者会员',category:'订阅会员',price:'¥29',cycle:'1 个月',discount:'首月低门槛体验',desc:'适合个人创作者和副业用户，低成本持续试片、做模板和生成正片草稿。',benefits:[['会员权益','高清导出、去水印、基础商用授权'],['月度积分','每月赠送 500 积分'],['创作能力','剧本框架 技能、角色资产库、标准分镜、基础商用授权'],['到账位置','个人中心 / 当前套餐、钱包、订单、商用授权同步更新']]},
+    creator:{name:'创作者会员',category:'订阅会员',price:'¥29',cycle:'1 个月',discount:'首月体验',desc:'适合个人创作者和副业用户，持续试片、做模板和生成正片草稿。',benefits:[['会员权益','高清导出、去水印、基础商用授权'],['体验权益','每月基础创作额度'],['创作能力','剧本框架 技能、角色资产库、标准分镜、基础商用授权'],['到账位置','个人中心 / 当前套餐、钱包、订单、商用授权同步更新']]},
     pro:{name:'专业会员',category:'订阅会员',price:'¥99',cycle:'1 个月',discount:'含 2,000 积分',desc:'适合日更、系列化、批量生成和内容团队冷启动，包含高级技能和项目复盘。',benefits:[['会员权益','高清导出、去水印、基础商用授权'],['月度积分','每月赠送 2,000 积分'],['创作能力','剧本扩写、细拆分镜、批量生成、多版本草稿'],['到账位置','个人中心 / 当前套餐、钱包、订单、商用授权同步更新']]},
     team:{name:'团队会员',category:'团队会员',price:'¥299 起',cycle:'1 个月',discount:'团队活动价最高 6.72 折',desc:'适合工作室、内容机构、版权方小团队，多席位协作、共享积分和项目权限管理。',benefits:[['团队权益','5 个团队席位，支持成员权限'],['共享积分','共享 8,000 积分'],['项目能力','项目阶段、审核流、成本测算、订单发票'],['到账位置','个人中心 / 团队空间、订单发票和商用授权同步更新']]},
     credits:{name:'标准积分充值包',category:'积分充值包',price:'¥49',cycle:'长期有效',discount:'600 积分',desc:'适合在会员额度之外按需扩展生成，用于标准视频、批量重试和局部重绘。',benefits:[['积分到账','购买 600 积分，立即到账'],['使用范围','视频镜头、角色场景、批量生成和局部重绘'],['补偿规则','生成失败自动补偿或退回积分'],['到账位置','个人中心 / 我的钱包、消耗记录和订单发票同步更新']]},
