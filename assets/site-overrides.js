@@ -1,5 +1,5 @@
 // Edit this file for persistent text, image, and link overrides.
-// Open frontend/edit.html for a clickable editing entry page.
+// Keep persistent text, image, and link overrides here.
 window.MD_SITE_OVERRIDES = {
   /*
   "home.hero.title": "从一个故事，<br><span>到一部完整漫剧。</span>",
