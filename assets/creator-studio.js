@@ -3,7 +3,6 @@
   const CONNECTED_KEY='md-connected-state';
   const INVITE_KEY='md-invite-codes';
   const MAX_SCRIPT_LENGTH=10000;
-  const VIDEO_DURATION_SECONDS=15;
   const VIDEO_CREDIT_COST=15;
   const DEFAULT_PROJECT_ID='1729382256911763547';
   const styleVisuals={
@@ -28,11 +27,93 @@
     {value:'90年代写实',label:'90年代写实',copy:'胶片色彩和年代环境，适合怀旧剧情。'},
     {value:'90年代漫画风',label:'90年代漫画风',copy:'复古漫画质感，适合强情绪和风格化叙事。'}
   ];
-  const CUSTOM_STYLE_VALUE='自定义风格';
+  const videoModelOptions=[
+    {provider:'DOUBAO',name:'Seedance 2.0',value:'neo-video-2-0',supportAudio:1,durationRange:{min:4,max:15,step:1},resolutions:['480p|480p','720p|720p (标清)','1080p|1080p (高清)','4k|4k'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','21:9|21:9','3:4|3:4','4:3|4:3']},
+    {provider:'DOUBAO',name:'Seedance 2.0 fast',value:'neo-video-2-0-fast',supportAudio:1,durationRange:{min:4,max:15,step:1},resolutions:['480p|480p','720p|720p (标清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','3:4|3:4','4:3|4:3','21:9|21:9']},
+    {provider:'DOUBAO',name:'Seedance 2.0 Mini',value:'doubao-seedance-2-0-mini-260615',supportAudio:1,durationRange:{min:4,max:15,step:1},resolutions:['480p|480p','720p|720p (标清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','21:9|21:9','3:4|3:4','4:3|4:3']},
+    {provider:'DOUBAO',name:'Seedance 1.0 Fast',value:'doubao-seedance-1-0-pro-fast-251015',supportAudio:0,durationRange:{min:3,max:10,step:1},resolutions:['720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','4:3|4:3','3:4|3:4','21:9|21:9','9:21|9:21','auto|按参考图尺寸']},
+    {provider:'DOUBAO',name:'Seedance 1.5 Pro',value:'doubao-seedance-1-5-pro-251215',supportAudio:1,durationRange:{min:4,max:12,step:1},resolutions:['480p|480p','720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','3:4|3:4','4:3|4:3','21:9|21:9','9:21|9:21','auto|按参考图尺寸']},
+    {provider:'DOUBAO',name:'Seedance 1.0 Pro',value:'doubao-seedance-1-0-pro-250528',supportAudio:0,durationRange:{min:2,max:10,step:1},resolutions:['720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','4:3|4:3','3:4|3:4','21:9|21:9','9:21|9:21','auto|按参考图尺寸']},
+    {provider:'KLING',name:'Kling v3',value:'kling-v3',supportAudio:1,durationRange:{min:3,max:15,step:1},resolutions:['720p|720p (标清)','1080p|1080p (高清)','4K|4K (超高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','auto|按参考图尺寸']},
+    {provider:'KLING',name:'Kling v2.6',value:'kling-v2-6',supportAudio:1,durationRange:{min:5,max:10,step:5},resolutions:['1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','auto|按参考图尺寸']},
+    {provider:'KLING',name:'Kling v2.5',value:'kling-v2-5',supportAudio:0,durationRange:{min:5,max:10,step:5},resolutions:['720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','auto|按参考图尺寸']},
+    {provider:'KLING',name:'Kling v2.1',value:'kling-v2-1',supportAudio:0,durationRange:{min:5,max:10,step:5},resolutions:['720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['auto|按参考图尺寸']},
+    {provider:'VIDU',name:'Vidu Q3 pro',value:'vidu-q3-pro',supportAudio:1,durationRange:{min:5,max:16,step:1},resolutions:['720p|720p (标清)','1080p|1080p (高清)','2k|2k'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','3:4|3:4','4:3|4:3','1:1|方形 (1:1)','auto|按参考图尺寸']},
+    {provider:'VIDU',name:'Vidu Q2 Pro',value:'vidu-q2-pro',supportAudio:0,durationRange:{min:5,max:8,step:3},resolutions:['720p|720p (标清)','1080p|1080p (高清)'],aspectRatios:['auto|按参考图尺寸']},
+    {provider:'WAN',name:'Wan 2.7',value:'wan2.7',supportAudio:1,durationRange:{min:2,max:15,step:1},resolutions:['720P|720P','1080P|1080P'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','4:3|4:3','3:4|3:4','auto|按参考图尺寸']},
+    {provider:'MINIMAX',name:'Hailuo 2.3',value:'MiniMax-Hailuo-2.3',supportAudio:0,durationRange:{min:6,max:10,step:4},resolutions:['768p|768p (标清+)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','auto|按参考图尺寸']},
+    {provider:'HAPPY HORSE',name:'HappyHorse 1.0',value:'happyhorse-1.0',supportAudio:0,durationRange:{min:3,max:15,step:1},resolutions:['720P|720P','1080P|1080P'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','1:1|方形 (1:1)','4:3|4:3','3:4|3:4','auto|按参考图尺寸']},
+    {provider:'MINIMAX',name:'Hailuo 2.3 Fast',value:'MiniMax-Hailuo-2.3-Fast',supportAudio:0,durationRange:{min:6,max:10,step:4},resolutions:['768p|768p (标清+)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','auto|按参考图尺寸']},
+    {provider:'MINIMAX',name:'Hailuo 02',value:'MiniMax-Hailuo-02',supportAudio:0,durationRange:{min:6,max:10,step:4},resolutions:['768p|768p (标清+)','1080p|1080p (高清)'],aspectRatios:['16:9|横屏 (16:9)','auto|按参考图尺寸']},
+    {provider:'VEO',name:'Veo 3.1',value:'veo-3.1-generate-001',supportAudio:1,durationRange:{min:4,max:8,step:2},resolutions:['720p|720p (标清)','1080p|1080p (高清)','4K|4K (超高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)']},
+    {provider:'VEO',name:'Veo 3.1 Fast',value:'veo-3.1-fast-generate-001',supportAudio:1,durationRange:{min:4,max:8,step:2},resolutions:['720p|720p (标清)','1080p|1080p (高清)','4K|4K (超高清)'],aspectRatios:['16:9|横屏 (16:9)','9:16|竖屏 (9:16)','auto|按参考图尺寸']}
+  ].map(item=>({
+    ...item,
+    resolutions:item.resolutions.map(optionString=>videoParseOption(optionString)),
+    aspectRatios:item.aspectRatios.map(optionString=>videoParseOption(optionString))
+  }));
+  const videoModelProviders=['DOUBAO','KLING','VIDU','WAN','MINIMAX','HAPPY HORSE','VEO'];
+  const assetStudioIcons={
+    user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+    scene:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 14l5-4 4 3 3-2 6 5"/><circle cx="8" cy="9" r="1.4"/></svg>',
+    prop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>',
+    spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L21 9l-5 4.4L17.5 21 12 17l-5.5 4L8 13.4 3 9l6.4-.4z"/></svg>',
+    mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-11"/></svg>',
+    refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>',
+    add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  };
+  const assetStudioData={
+    role:{label:'角色',icon:assetStudioIcons.user,views:['正面','侧面','背面','表情'],viewLabel:'人物四视图',
+      items:[
+        {id:'r1',name:'李明',kind:'主角',main:true,defaultState:'done',voice:'男性-青年-真诚青年',desc:'28 岁程序员，长期加班导致疲惫不堪，面临工作与家庭的抉择，最终选择回家。',attrs:['身份关系','年龄气质','发型服装','表情动作']},
+        {id:'r2',name:'王总',kind:'反派 / 上司',main:true,defaultState:'empty',voice:'',desc:'40 岁公司高层，精明强干，对下属严格，追求项目成功，不惜让员工年关加班。',attrs:['身份关系','年龄气质','发型服装','表情动作']},
+        {id:'r3',name:'加班同事',kind:'配角',main:false,defaultState:'empty',voice:'',desc:'几位同样深夜加班的同事，长期高压工作导致精神麻木，对现状习以为常。',attrs:['身份关系','发型服装']}
+      ]},
+    scene:{label:'场景',icon:assetStudioIcons.scene,views:['全景','近景','夜景','细节'],viewLabel:'场景多视图',
+      items:[
+        {id:'s1',name:'高铁站台',kind:'外景 · 夜',main:true,defaultState:'empty',desc:'核心场景：雨夜的高铁站台，冷色灯光，人流稀疏。倒计时危机的起点。',attrs:['空间结构','时代地点','光线天气','镜头质感']},
+        {id:'s2',name:'公司机房',kind:'内景 · 冷光',main:true,defaultState:'empty',desc:'核心场景：深夜机房，蓝白冷光，成排服务器。李明远程修复漏洞的战场。',attrs:['空间结构','光线天气','镜头质感']},
+        {id:'s3',name:'出租屋',kind:'内景 · 暖',main:false,defaultState:'empty',desc:'回忆 / 旁白场景：温暖的出租屋，与冷峻的机房形成情绪对照。',attrs:['空间结构','光线天气']}
+      ]},
+    prop:{label:'道具',icon:assetStudioIcons.prop,views:['正面','侧面','细节','使用状态'],viewLabel:'道具多视图',
+      items:[
+        {id:'p1',name:'笔记本电脑',kind:'关键道具',main:true,defaultState:'empty',desc:'核心道具：李明远程修复漏洞的工具，需要清晰轮廓与屏幕反光质感。',attrs:['外形材质','尺寸比例','关键纹理','剧情用途']},
+        {id:'p2',name:'旧照片',kind:'情感道具',main:false,defaultState:'empty',desc:'承载家庭记忆的旧照片，特写时需材质细节与岁月痕迹。',attrs:['外形材质','关键纹理','剧情用途']}
+      ]}
+  };
+  const assetVoiceOptions={
+    Recent:[['男性-青年-真诚青年','Male','中文(普通话)'],['男性-中年-魅力老成','Male','中文'],['女性-少年-温暖少女','Female','中文(普通话)'],['女性-成年-阅历姐姐','Female','中文(普通话)']],
+    Male:[['男性-青年-真诚青年','Male','中文(普通话)'],['男性-中年-沉稳上司','Male','中文'],['男性-中年-值得信赖的人','Male','中文'],['男性-青年-热血少年','Male','中文(普通话)']],
+    Female:[['女性-少年-温暖少女','Female','中文(普通话)'],['女性-成年-阅历姐姐','Female','中文(普通话)'],['女性-青年-清冷御姐','Female','中文']],
+    'My Custom':[['我的音色 · 旁白','Custom','中文(普通话)']]
+  };
+  const defaultAssetItemStates={r1:'done',r2:'empty',r3:'empty',s1:'empty',s2:'empty',s3:'empty',p1:'empty',p2:'empty'};
+  const defaultAssetVoices={r1:'男性-青年-真诚青年'};
+  const storyboardIcons={
+    film:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 4v5M17 4v5"/></svg>',
+    img:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
+    spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L21 9l-5 4.4L17.5 21 12 17l-5.5 4L8 13.4 3 9l6.4-.4z"/></svg>',
+    mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+    refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>',
+    expand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+    add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-11"/></svg>',
+    scene:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 14l5-4 4 3 3-2 6 5"/></svg>',
+    arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>'
+  };
   const defaultInvites=[
-    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:60,used:0,createdAt:'2026-06-25 10:00',note:'用于首批内测用户注册'},
-    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:30,used:0,createdAt:'2026-06-25 10:00',note:'用于体验第一阶段分镜视频生成'},
-    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:10,used:0,createdAt:'2026-06-25 10:00',note:'内部团队验证'}
+    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于首批内测用户注册',usageLog:[]},
+    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于体验第一阶段分镜视频生成',usageLog:[]},
+    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于内部团队验证',usageLog:[]}
   ];
   const body=document.body;
   const state=loadState();
@@ -98,20 +179,27 @@
       guideTitle:'确认资产清单',
       guideCopy:'这一阶段要保证主角、关键场景和核心道具都已列入，否则后续分镜会缺资产。',
       action:'确认角色、场景和道具',
-      status:()=>state.assetsConfirmed?'资产提示词已确认':(state.assetRegenerated?'资产已重新生成':'待确认资产提示词'),
+      status:()=>{
+        const counts=assetOverallCounts();
+        return counts.remaining===0?'全部资产已确认':`待确认资产 ${counts.remaining} 项`;
+      },
       rules:['可修改提示词','可重新生成资产','人物资产提供四视图'],
       preview:['角色','场景','道具'],
       image:'assets/images/story-cases/case-fog-harbor-letter.png'
     },
     {
       name:'分镜脚本',
-      next:'分镜视频',
+      next:'生成成片',
       title:'分镜脚本',
       desc:'把剧本拆成可生成视频的镜头卡片，确认镜头顺序、画面描述和台词。',
       guideTitle:'检查分镜是否可生成',
       guideCopy:'进入分镜视频之前，需要至少有 3 条分镜。系统会根据剧本自动生成一版示例分镜。',
       action:'确认分镜脚本',
-      status:()=>state.storyboards.length?'已生成 '+state.storyboards.length+' 条分镜':'待生成分镜',
+      status:()=>{
+        ensureStoryboards();
+        const counts=storyboardCounts();
+        return counts.confirmed===counts.total?'全部分镜已确认':`已生成 ${counts.generated}/${counts.total} · 已确认 ${counts.confirmed}`;
+      },
       rules:['至少 3 条分镜','每条包含画面描述','可返回前一步调整资产'],
       preview:['镜头序号','画面描述','台词旁白'],
       image:'assets/images/story-cases/case-shanhai-oath.png'
@@ -120,40 +208,14 @@
       name:'分镜视频',
       next:'',
       title:'分镜视频',
-      desc:'生成单条分镜视频任务，并检查片段状态、失败重试、单条分镜重生成和单条导出。',
-      guideTitle:'生成分镜视频',
-      guideCopy:'第一阶段生成动作需要先用邀请码登录；登录后会创建分镜视频演示任务，单个分镜视频上限 15 秒，并支持单条重生成和导出。',
-      action:'生成分镜视频',
-      status:()=>state.videoGenerated?'分镜视频已生成':'待生成分镜视频',
-      rules:['必须邀请码登录','单个分镜上限 15 秒','支持单条分镜重生成和导出'],
-      preview:['15 秒分镜','生成状态','单条导出'],
+      desc:'逐镜预览画面，调整时长、配音与字幕，确认后生成第一集样片。',
+      guideTitle:'视频生成与预览',
+      guideCopy:'这一阶段只保留必要控制：预览当前镜头、检查配音字幕、确认视频模型和视频设置，然后生成整片样片。',
+      action:'确认生成整片',
+      status:()=>state.videoGenerated?'第一集样片已生成':'待生成第一集样片',
+      rules:['预览当前镜头','检查配音和字幕','确认后生成整片'],
+      preview:['镜头预览','生成设置','导出成片'],
       image:'assets/images/story-cases/case-redline-chase.png'
-    }
-  ];
-  const assetBlueprints=[
-    {
-      key:'role',
-      title:'人物资产',
-      examples:'主角、对手、关键线索人物',
-      views:['正面','侧面','背面','表情'],
-      checklist:['身份关系','年龄气质','发型服装','表情动作'],
-      output:'人物四视图'
-    },
-    {
-      key:'scene',
-      title:'场景资产',
-      examples:'街道、旧照相馆、雨夜天桥',
-      views:['全景','近景','夜景','细节'],
-      checklist:['空间结构','时代地点','光线天气','镜头质感'],
-      output:'场景多视图'
-    },
-    {
-      key:'prop',
-      title:'道具资产',
-      examples:'旧照片、录音笔、门禁卡',
-      views:['正面','侧面','细节','使用状态'],
-      checklist:['外形材质','尺寸比例','关键纹理','剧情用途'],
-      output:'道具多视图'
     }
   ];
   const scriptModelOptions=[
@@ -165,6 +227,11 @@
   ];
   const assetViewState={folderId:'root',previewId:null,dialog:null};
   const assetSessionMedia={};
+  let assetVoiceTarget=null;
+  let assetVoiceTab='Recent';
+  let pendingAssetVoice=null;
+  let storyboardModal=null;
+  let storyboardDurationDraft='';
   const assetFolderInfo={
     root:{name:'资产管理',parent:null},
     material:{name:'素材库',parent:'root'},
@@ -341,9 +408,12 @@
       script:'',
       scriptModel:'Deepseek',
       videoRatio:'9:16',
+      videoModel:'neo-video-2-0',
+      videoModelProvider:'DOUBAO',
+      videoResolution:'480p',
+      videoSettingDuration:'4',
+      videoSettingRatio:'16:9',
       videoStyle:'都市写实',
-      videoCustomStyleName:'',
-      videoCustomStylePrompt:'',
       videoConfirmed:false,
       assetsConfirmed:false,
       assetPrompts:{
@@ -352,11 +422,21 @@
         prop:'核心道具：旧照片、录音笔、门禁卡。需要清晰轮廓、材质细节和可复用视角。'
       },
       assetRegenerated:false,
+      assetGenerating:'',
+      assetTab:'role',
+      assetItemStates:defaultAssetItemStates,
+      assetVoices:defaultAssetVoices,
       assetGenerated:{},
       assetUploads:{},
       storyboards:[],
+      storyboardFilter:'all',
       clipRegenerated:{},
       videoGenerated:false,
+      videoSelectedShotId:'D012',
+      videoVoiceEnabled:true,
+      videoSubtitleEnabled:true,
+      videoVoiceCompleted:false,
+      videoModal:null,
       postEdit:{crop:false,subtitle:true,sound:false,stitch:true},
       previewChecked:false,
       lastSaved:'自动保存于刚刚'
@@ -365,17 +445,26 @@
       const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{};
       const merged=Object.assign(fallback,saved,{
         assetPrompts:Object.assign({},fallback.assetPrompts,saved.assetPrompts||{}),
+        assetItemStates:Object.assign({},fallback.assetItemStates,saved.assetItemStates||{}),
+        assetVoices:Object.assign({},fallback.assetVoices,saved.assetVoices||{}),
         assetGenerated:Object.assign({},fallback.assetGenerated,saved.assetGenerated||{}),
         assetUploads:Object.assign({},fallback.assetUploads,saved.assetUploads||{}),
         clipRegenerated:Object.assign({},fallback.clipRegenerated,saved.clipRegenerated||{}),
         postEdit:Object.assign({},fallback.postEdit,saved.postEdit||{})
       });
       merged.stage=Math.min(Math.max(Number(merged.stage)||0,0),4);
-      const allowedStyles=presetStyleOptions.map(item=>item.value).concat(CUSTOM_STYLE_VALUE);
+      const allowedStyles=presetStyleOptions.map(item=>item.value);
       if(!allowedStyles.includes(merged.videoStyle)) merged.videoStyle='都市写实';
-      merged.videoCustomStyleName=String(merged.videoCustomStyleName||'').slice(0,40);
-      merged.videoCustomStylePrompt=String(merged.videoCustomStylePrompt||'').slice(0,500);
-      if(!scriptModelOptions.some(item=>item.value===merged.scriptModel)) merged.scriptModel='Deepseek';
+      if(!['Deepseek','通义千问','Kimi','豆包','GPT-4o'].includes(merged.scriptModel)) merged.scriptModel='Deepseek';
+      if(!assetStudioData[merged.assetTab]) merged.assetTab='role';
+      Object.keys(defaultAssetItemStates).forEach(id=>{
+        if(!['empty','gen','done','confirmed'].includes(merged.assetItemStates[id])) merged.assetItemStates[id]=defaultAssetItemStates[id];
+      });
+      if(!['all','dialog','pending'].includes(merged.storyboardFilter)) merged.storyboardFilter='all';
+      if(typeof merged.videoVoiceEnabled!=='boolean') merged.videoVoiceEnabled=true;
+      if(typeof merged.videoSubtitleEnabled!=='boolean') merged.videoSubtitleEnabled=true;
+      if(typeof merged.videoVoiceCompleted!=='boolean') merged.videoVoiceCompleted=false;
+      ensureVideoModelState(merged);
       return merged;
     }catch(_){
       return fallback;
@@ -387,11 +476,10 @@
     if(els.saveState) els.saveState.textContent=state.lastSaved;
   }
   function currentVideoStyleLabel(){
-    if(state.videoStyle!==CUSTOM_STYLE_VALUE) return state.videoStyle;
-    return state.videoCustomStyleName.trim()||CUSTOM_STYLE_VALUE;
+    return state.videoStyle;
   }
   function currentVideoStylePrompt(){
-    return state.videoStyle===CUSTOM_STYLE_VALUE?(state.videoCustomStylePrompt.trim()||'按自定义风格描述生成画面。'):'';
+    return '';
   }
   function escapeHtml(value){
     return String(value).replace(/[&<>"']/g,match=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -429,11 +517,17 @@
     }
     let updated=false;
     invites.forEach(invite=>{
+      invite.maxUses=1;
+      invite.used=Number(invite.used||0);
+      invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
+      invite.users=Array.isArray(invite.users)?invite.users:[];
+      if(invite.used>=1) invite.status='已使用';
       if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
         invite.label='15秒分镜视频体验码';
-        invite.note='用于体验第一阶段分镜视频生成';
+        invite.note='一次性邀请码，用于体验第一阶段分镜视频生成';
         updated=true;
       }
+      updated=true;
     });
     if(updated) saveInvites(invites);
     return invites;
@@ -445,7 +539,7 @@
     const normalized=normalizeInvite(code);
     const invite=readInvites().find(item=>normalizeInvite(item.code)===normalized);
     if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
-    if(invite.status!=='启用') return {ok:false,message:'该邀请码已停用，请联系运营重新开通。'};
+    if(invite.status!=='启用') return {ok:false,message:'该邀请码已使用或已停用，请联系运营重新开通。'};
     if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
     return {ok:true,invite};
   }
@@ -455,12 +549,15 @@
     const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
     if(!invite) return null;
     invite.users=Array.isArray(invite.users)?invite.users:[];
+    invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
     if(!invite.users.includes(phone)){
       invite.used=Number(invite.used||0)+1;
       invite.users.push(phone);
+      invite.usageLog.push({phone,usedAt:new Date().toLocaleString('zh-CN',{hour12:false}),page:'creator-studio.html'});
     }
     invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
     invite.lastUser=phone;
+    if(Number(invite.used||0)>=1) invite.status='已使用';
     saveInvites(invites);
     return invite;
   }
@@ -496,43 +593,32 @@
     closeLogin();
     toast('邀请码登录成功');
   }
-  function syncShortVideoGeneration(){
+  function completeFullVideoGeneration(){
+    state.videoGenerated=true;
+    state.videoDuration=Math.round(videoTotalDuration());
+    state.videoCost=0;
+    state.videoGeneratedAt=new Date().toISOString();
     const connected=readConnected();
     const project=(connected.projects&&connected.projects[0])||{
       id:'项目-'+currentProjectId.slice(-6),
-      title:'第一条 15 秒分镜视频',
+      title:'第一集样片',
       stage:'分镜视频',
       progress:100,
-      platform:state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16',
+      platform:videoDisplayRatio(),
       createdAt:new Date().toISOString()
     };
     if(!connected.projects||!connected.projects.length) connected.projects=[project];
-    const already=(connected.events||[]).some(event=>event.name==='short_video_generated'&&event.meta&&event.meta.projectId===project.id);
+    const already=(connected.events||[]).some(event=>event.name==='full_video_generated'&&event.meta&&event.meta.projectId===project.id);
     if(!already){
-      connected.credits=Math.max(0,Number(connected.credits||0)-VIDEO_CREDIT_COST);
       connected.events=[...(connected.events||[]),{
-        name:'short_video_generated',
-        meta:{projectId:project.id,title:project.title,durationSeconds:VIDEO_DURATION_SECONDS,cost:VIDEO_CREDIT_COST,format:state.videoRatio,style:currentVideoStyleLabel(),stylePrompt:currentVideoStylePrompt()},
+        name:'full_video_generated',
+        meta:{projectId:project.id,title:project.title,durationSeconds:state.videoDuration,format:videoDisplayRatio(),model:videoCurrentModel().name,videoSettings:videoSettingSummary(),style:currentVideoStyleLabel(),shots:state.storyboards.length},
         path:'creator-studio.html',
         at:new Date().toISOString()
       }].slice(-80);
       writeConnected(connected);
     }
-  }
-  function completeShortVideoGeneration(){
-    if(!hasInviteSession()){
-      openLogin('请先使用邀请码登录');
-      return false;
-    }
-    state.videoGenerated=true;
-    state.videoDuration=VIDEO_DURATION_SECONDS;
-    state.videoCost=VIDEO_CREDIT_COST;
-    state.videoGeneratedAt=new Date().toISOString();
-    syncShortVideoGeneration();
     save();
-    render();
-    toast('15 秒分镜视频已生成');
-    return true;
   }
   function openLogin(extraMessage){
     if(extraMessage) toast(extraMessage);
@@ -547,14 +633,25 @@
     return state.script.trim().length>0;
   }
   function ensureStoryboards(){
-    if(state.storyboards.length) return;
-    const base=state.script.trim()||'主角发现异常线索，开始进入故事核心冲突。';
+    const hasFullBoard=state.storyboards.length>=14&&state.storyboards.every(item=>item.id&&item.state&&Array.isArray(item.roles));
+    if(hasFullBoard) return;
+    const office='科技公司办公区(深夜)';
     state.storyboards=[
-      {shot:'01',scene:'开场异常',image:'主角在熟悉的街道上发现时间停顿，镜头从远景推进到面部特写。',line:'这里怎么只剩我一个人？'},
-      {shot:'02',scene:'线索出现',image:'旧照片在手中发光，画面切到照片里的陌生房间。',line:'照片背后写着同一天的日期。'},
-      {shot:'03',scene:'决定追查',image:'主角冲进雨夜，霓虹倒映在地面，远处出现关键人物剪影。',line:'我要找到这张照片的主人。'}
+      {id:'D001',shot:'D001',roles:['李明'],scene:office,who:'',line:'镜头从办公区缓慢推进，李明独自伏案，神情凝重。',image:'镜头从办公区缓慢推进，李明独自伏案，神情凝重。',dur:'3.0s',state:'done'},
+      {id:'D002',shot:'D002',roles:['李明'],scene:office,who:'',line:'特写李明的手指在键盘上飞快敲击，屏幕蓝光映在脸上。',image:'特写李明的手指在键盘上飞快敲击，屏幕蓝光映在脸上。',dur:'2.6s',state:'done'},
+      {id:'D003',shot:'D003',roles:['李明'],scene:office,who:'',line:'李明抬头看向墙上的时钟，时间所剩无几。',image:'李明抬头看向墙上的时钟，时间所剩无几。',dur:'2.2s',state:'empty'},
+      {id:'D004',shot:'D004',roles:['李明','王总'],scene:office,who:'王总',line:'小李啊！这个支付漏洞必须在天亮前修复！你看看，几百万的交易数据都卡着呢！',image:'王总逼近李明，办公区屏幕和服务器告警光交错。',dur:'5.4s',state:'empty'},
+      {id:'D005',shot:'D005',roles:['李明','王总'],scene:office,who:'',line:'李明被上司逼近，下意识后退一步，神情为难。',image:'李明被上司逼近，下意识后退一步，神情为难。',dur:'2.8s',state:'empty'},
+      {id:'D006',shot:'D006',roles:['王总','李明'],scene:office,who:'王总',line:'怎么？家里有事？年都快过了，不就差这临门一脚吗？',image:'王总站在冷色灯光下质问，李明攥紧手机。',dur:'4.2s',state:'empty'},
+      {id:'D007',shot:'D007',roles:['李明'],scene:office,who:'李明',line:'妈……',image:'李明看着来电显示，欲言又止，背景办公室一片冷清。',dur:'2.0s',state:'empty'},
+      {id:'D008',shot:'D008',roles:['李明'],scene:office,who:'画外音',line:'明儿啊！你什么时候回来？你爸包的饺子都凉了，非要等你回来一起吃！',image:'李明低头听电话，手机听筒里传来母亲声音，屏幕蓝光映出犹豫。',dur:'5.2s',state:'empty'},
+      {id:'D009',shot:'D009',roles:['李明','王总'],scene:office,who:'李明',line:'王总！这个漏洞，小张也能解决！我今天，必须回家！',image:'李明终于抬头反抗，王总愣住，办公区气氛凝固。',dur:'4.6s',state:'empty'},
+      {id:'D010',shot:'D010',roles:['李明'],scene:'高速列车车厢(夜景)',who:'',line:'李明冲出办公楼，奔向最后一班回家的高铁。',image:'李明拖着背包冲向高铁站，城市夜色和车灯拉成光线。',dur:'3.4s',state:'empty'},
+      {id:'D011',shot:'D011',roles:['李明'],scene:'高速列车车厢(夜景)',who:'李明',line:'喂？',image:'列车车厢夜景，李明接起陌生号码，表情紧张。',dur:'1.6s',state:'empty'},
+      {id:'D012',shot:'D012',roles:[],scene:'高速列车车厢(夜景)',who:'未知号码',line:'李明吗？你家……你家出事了！你快回来！',image:'手机特写显示未知号码，车窗外黑暗高速掠过。',dur:'4.0s',state:'empty'},
+      {id:'D013',shot:'D013',roles:['李明'],scene:'高速列车车厢(夜景)',who:'',line:'李明脸色骤变，手机几乎滑落。车窗外灯火飞驰。',image:'李明脸色骤变，手机几乎滑落。车窗外灯火飞驰。',dur:'3.2s',state:'empty'},
+      {id:'D014',shot:'D014',roles:['李明'],scene:'高速列车车厢(夜景)',who:'',line:'列车驶入隧道，画面陷入黑暗——第一集钩子收尾。',image:'列车驶入隧道，车厢灯光闪烁后画面陷入黑暗。',dur:'2.4s',state:'empty'}
     ];
-    if(base.length>80) state.storyboards.push({shot:'04',scene:'情绪钩子',image:'主角看见照片中的自己，画面停在震惊表情。',line:'为什么我也在里面？'});
   }
   function render(){
     body.dataset.view=currentView;
@@ -566,11 +663,10 @@
     const stage=stages[state.stage];
     if(state.stage>=3) ensureStoryboards();
     body.dataset.stage=String(state.stage);
-    setDockActive('creator');
     els.micro.textContent=(state.stage+1)+' / '+stages.length+' · '+stage.name;
     els.title.textContent=stage.title;
     els.desc.textContent=stage.desc;
-    els.next.textContent=stage.next?'下一步：'+stage.next:'完成制作';
+    els.next.textContent=state.stage===4?(state.videoGenerated?'导出成片':'生成整片'):(stage.next?'下一步：'+stage.next:'完成制作');
     els.back.disabled=state.stage===0;
     els.stageProgress.textContent=(state.stage+1)+' / '+stages.length;
     const percent=Math.round((state.stage+1)/stages.length*100);
@@ -591,17 +687,11 @@
     renderPanel();
     bindPanelEvents();
   }
-  function setDockActive(view){
-    document.querySelectorAll('.studio-dock a').forEach(link=>link.classList.remove('active'));
-    const selector=view==='assets'?'[data-view-link="assets"]':'a[href="creator-studio.html"]';
-    document.querySelector('.studio-dock '+selector)?.classList.add('active');
-  }
   function assetUrl(){
     return 'creator-studio.html?menuKey=assets&id='+encodeURIComponent(currentProjectId);
   }
   function renderAssetsView(){
     body.dataset.stage='assets';
-    setDockActive('assets');
     const folder=assetFolderMeta(assetViewState.folderId);
     const items=getAssetFolderItems(assetViewState.folderId);
     els.micro.textContent='';
@@ -983,82 +1073,521 @@
         <div class="nami-settings-grid style-grid">
           ${presetStyleOptions.map(item=>settingOption('style',item.value,item.label,item.copy)).join('')}
         </div>
-        ${customStylePanel()}
       </div>
       <div class="nami-action-row"><button class="nami-green-btn" id="confirm-video" type="button">确认视频设定</button><button type="button" data-stage-reset="video">恢复默认</button></div>
     `;
   }
   function renderAssetPanel(){
     return `
-      <div class="nami-asset-flow">
-        <div><span>剧本资产拆分</span><b>人物</b><small>确认角色一致性</small></div>
-        <div><span>空间资产拆分</span><b>场景</b><small>统一画面环境</small></div>
-        <div><span>线索资产拆分</span><b>道具</b><small>保证剧情物件可复用</small></div>
-      </div>
-      <div class="nami-asset-prompt-grid">
-        ${assetBlueprints.map(assetPromptCard).join('')}
-      </div>
-      <div class="nami-asset-confirm-strip">
-        <div><b>${assetReadyCount()} / ${assetBlueprints.length}</b><span>类资产已生成或上传参考</span></div>
-        <button class="nami-green-btn" id="regen-assets" type="button">按提示词重新生成全部资产</button>
-        <button type="button" id="confirm-assets">确认资产清单</button>
-      </div>
+      <section class="nami-rs-stage">
+        <div class="nami-rs-head">
+          <div>
+            <span>第 3 步 / 共 5 步</span>
+            <h2>角色 · 场景 · 道具</h2>
+            <p>平台已从剧本里识别出需要的素材。逐个生成并确认每个角色、场景和道具，全部确认后才进入分镜脚本，确保后续镜头不换脸、不穿帮。</p>
+          </div>
+          <em><i></i>自动保存于刚刚</em>
+        </div>
+        <div class="nami-rs-toolbar">
+          <div class="nami-rs-tabs" role="tablist">
+            ${renderAssetStudioTabs()}
+          </div>
+          <button class="nami-rs-batch" type="button" data-asset-generate-current>${assetStudioIcons.spark}一键生成本类未生成项</button>
+          <div class="nami-rs-tracker">${renderAssetCurrentTracker()}</div>
+        </div>
+        <div class="nami-rs-grid">
+          ${renderAssetStudioCards()}
+        </div>
+        ${renderAssetStudioActionBar()}
+        ${renderAssetVoiceModal()}
+      </section>
     `;
   }
   function renderStoryboardPanel(){
     ensureStoryboards();
     return `
-      <div class="nami-table-list">
-        ${state.storyboards.map(item=>`
-          <div class="nami-shot-card">
-            <b>${escapeHtml(item.shot)}</b>
-            <div><span>${escapeHtml(item.scene)}</span><p>${escapeHtml(item.image)}</p><small>${escapeHtml(item.line)}</small></div>
+      <section class="nami-board-stage">
+        <div class="nami-board-head">
+          <div>
+            <span>第 4 步 / 共 5 步</span>
+            <h2>分镜脚本</h2>
+            <p>平台已把剧本自动拆成镜头。逐个生成画面、配上台词配音，确认整套分镜后即可进入成片。每个镜头都会沿用前面确认的角色与场景。</p>
           </div>
-        `).join('')}
-      </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="regen-storyboard" type="button">重新生成分镜</button><button type="button" data-login-action>编辑分镜</button></div>
+          <em><i></i>自动保存于刚刚</em>
+        </div>
+        <div class="nami-board-toolbar">
+          <span class="nami-board-count">${storyboardIcons.film}<b>${state.storyboards.length}</b> 镜头</span>
+          <div class="nami-board-filters">
+            ${storyboardFilterButton('all','全部')}
+            ${storyboardFilterButton('dialog','有台词')}
+            ${storyboardFilterButton('pending','未生成')}
+          </div>
+          <button class="nami-board-batch" type="button" data-board-generate-all>${storyboardIcons.spark}一键生成全部画面</button>
+          <div class="nami-board-tracker">${renderStoryboardTracker()}</div>
+        </div>
+        <div class="nami-board-grid">
+          ${renderStoryboardCards()}
+        </div>
+        ${renderStoryboardActionBar()}
+        ${renderStoryboardModal()}
+      </section>
     `;
+  }
+  function storyboardFilterButton(key,label){
+    return `<button class="${state.storyboardFilter===key?'on':''}" type="button" data-board-filter="${escapeHtml(key)}">${escapeHtml(label)}</button>`;
+  }
+  function storyboardVisibleShots(){
+    if(state.storyboardFilter==='dialog') return state.storyboards.filter(item=>item.who);
+    if(state.storyboardFilter==='pending') return state.storyboards.filter(item=>item.state==='empty'||item.state==='gen');
+    return state.storyboards;
+  }
+  function storyboardCounts(){
+    const total=state.storyboards.length;
+    const generated=state.storyboards.filter(item=>item.state==='done'||item.state==='confirmed').length;
+    const confirmed=state.storyboards.filter(item=>item.state==='confirmed').length;
+    const pending=state.storyboards.filter(item=>item.state==='empty').length;
+    return {total,generated,confirmed,pending};
+  }
+  function renderStoryboardTracker(){
+    const counts=storyboardCounts();
+    return `<span>已生成 <b>${counts.generated}</b> / ${counts.total}</span>`;
+  }
+  function renderStoryboardCards(){
+    const cards=storyboardVisibleShots().map(renderStoryboardCard).join('');
+    if(state.storyboardFilter!=='all') return cards;
+    return cards+`<button class="nami-board-add" type="button" data-board-add>${storyboardIcons.add}<span>加镜头</span></button>`;
+  }
+  function renderStoryboardCard(item){
+    const status=item.state||'empty';
+    const confirmed=status==='confirmed';
+    const action=status==='empty'
+      ? `<button class="nami-board-go gen" type="button" data-board-generate-one="${escapeHtml(item.id)}">${storyboardIcons.spark}生成画面</button>`
+      : status==='gen'
+        ? '<button class="nami-board-go busy" type="button">生成中...</button>'
+        : status==='done'
+          ? `<button class="nami-board-go confirm" type="button" data-board-confirm-one="${escapeHtml(item.id)}">${storyboardIcons.check}确认</button>`
+          : `<span class="nami-board-go confirmed-state">${storyboardIcons.check} 已确认</span>`;
+    const regen=status==='done'||status==='confirmed'?`<button class="nami-board-vbadge" type="button" data-board-regenerate-one="${escapeHtml(item.id)}" title="重新生成">${storyboardIcons.refresh}</button>`:'';
+    const roles=(item.roles||[]).map(role=>`<span class="nami-board-chip role">${escapeHtml(role)}</span>`).join('');
+    const dialogue=item.who?`
+      <div class="nami-board-dialog">
+        <span class="who">${escapeHtml(item.who)}</span>
+        <span class="line">${escapeHtml(item.line)}</span>
+        <button class="mic ${confirmed?'':'muted'}" type="button" data-board-voice="${escapeHtml(item.id)}">${storyboardIcons.mic}${confirmed?'已配音':'生成配音'}</button>
+      </div>`:`<div class="nami-board-dialog"><span class="line">${escapeHtml(item.line||item.image)}</span></div>`;
+    return `<article class="nami-board-shot ${status} ${confirmed?'confirmed':''}" id="board-shot-${escapeHtml(item.id)}">
+      <div class="nami-board-frame">
+        ${regen}
+        <span class="nami-board-confirm-tag">${storyboardIcons.check} 已确认</span>
+        <div class="empty">${storyboardIcons.img}<span>未生成 · 点击生成画面</span></div>
+        <div class="generating"><i></i><span>正在生成画面...</span></div>
+        <div class="pic">
+          <div class="ph">${storyboardIcons.film}</div>
+          <span class="dur">${escapeHtml(item.dur||'3.0s')}</span>
+          <div class="tools">
+            <button type="button" data-board-regenerate-one="${escapeHtml(item.id)}" title="重新生成">${storyboardIcons.refresh}</button>
+            <button type="button" data-board-preview="${escapeHtml(item.id)}" title="预览">${storyboardIcons.expand}</button>
+          </div>
+        </div>
+      </div>
+      <div class="nami-board-body">
+        <div class="nami-board-chips">${roles}<span class="nami-board-chip scene">${storyboardIcons.scene}${escapeHtml(item.scene)}</span></div>
+        ${dialogue}
+      </div>
+      <div class="nami-board-foot">
+        <span class="sid">${escapeHtml(item.id)}</span>
+        <button class="mini" type="button" data-board-edit="${escapeHtml(item.id)}" title="编辑镜头">${storyboardIcons.edit}</button>
+        <button class="mini del" type="button" data-board-delete="${escapeHtml(item.id)}" title="删除">${storyboardIcons.del}</button>
+        <span></span>
+        ${action}
+      </div>
+    </article>`;
+  }
+  function renderStoryboardActionBar(){
+    const counts=storyboardCounts();
+    let status='';
+    if(counts.confirmed===counts.total) status=`<b>全部 ${counts.total} 个镜头已确认</b>，可以进入成片生成。`;
+    else if(counts.generated===counts.total) status=`画面已全部生成，还有 <strong>${counts.total-counts.confirmed} 个镜头</strong> 待确认。`;
+    else status=`还有 <strong>${counts.pending} 个镜头</strong> 未生成画面，生成并确认后进入成片。`;
+    return `<div class="nami-board-actionbar">
+      <p>${status}</p>
+      <span class="cost">${storyboardIcons.spark}${counts.pending?counts.pending+' 镜待生成':'已完成'}</span>
+      <button class="nami-board-btn ghost" type="button" data-board-prev>上一步</button>
+      <button class="nami-board-btn primary" type="button" data-board-next ${counts.confirmed===counts.total?'':'disabled'}>下一步：生成成片${storyboardIcons.arrow}</button>
+    </div>`;
+  }
+  function renderStoryboardModal(){
+    if(!storyboardModal) return '';
+    if(storyboardModal.type==='cost') return renderStoryboardCostModal();
+    if(storyboardModal.type==='edit') return renderStoryboardEditModal(storyboardModal.id);
+    return '';
+  }
+  function renderStoryboardCostModal(){
+    const counts=storyboardCounts();
+    const n=counts.pending;
+    return `<div class="nami-board-scrim" id="board-modal-scrim" role="dialog" aria-modal="true">
+      <div class="nami-board-modal cost-modal">
+        <div class="cost-icon">${storyboardIcons.spark}</div>
+        <h3>批量生成画面</h3>
+        <p>将为 ${n} 个未生成的镜头生成画面，已生成的会跳过。完成后逐个确认即可。</p>
+        <div class="cost-row"><span>生成镜头</span><b>${n} 个</b></div>
+        <div class="cost-row"><span>完成方式</span><b>逐镜确认</b></div>
+        <footer><button class="nami-board-btn ghost" type="button" data-board-modal-close>再想想</button><button class="nami-board-btn primary" type="button" data-board-confirm-cost>确认生成 (${n})</button></footer>
+      </div>
+    </div>`;
+  }
+  function renderStoryboardEditModal(id){
+    const shot=state.storyboards.find(item=>item.id===id);
+    if(!shot) return '';
+    const active=storyboardDurationDraft||shot.dur||'3.0s';
+    return `<div class="nami-board-scrim" id="board-modal-scrim" role="dialog" aria-modal="true">
+      <div class="nami-board-modal edit-modal">
+        <header><span>${storyboardIcons.edit}</span><div><h3>编辑镜头</h3><small>${escapeHtml(shot.id)} · ${escapeHtml(shot.scene)}</small></div><button type="button" data-board-modal-close>${storyboardIcons.x}</button></header>
+        <div class="modal-body">
+          <label><span>画面描述</span><textarea id="board-edit-line">${escapeHtml(shot.image||shot.line)}</textarea></label>
+          <label><span>台词 / 旁白${shot.who?'（'+escapeHtml(shot.who)+'）':'（无）'}</span><input id="board-edit-dialog" value="${escapeHtml(shot.who?shot.line:'')}" placeholder="该镜头无台词"/></label>
+          <label><span>镜头时长</span><div class="duration-seg">
+            ${['2.0s','3.0s','5.0s'].map(value=>`<button class="${active===value?'on':''}" type="button" data-board-duration="${escapeHtml(value)}">${value.replace('.0s',' 秒')}</button>`).join('')}
+          </div></label>
+        </div>
+        <footer><button class="nami-board-btn ghost" type="button" data-board-modal-close>取消</button><button class="nami-board-btn primary" type="button" data-board-save-edit="${escapeHtml(shot.id)}">保存修改</button></footer>
+      </div>
+    </div>`;
+  }
+  function videoParseOption(optionString){
+    const parts=String(optionString).split('|');
+    return {value:parts[0],name:parts[1]||parts[0]};
+  }
+  function videoFindModel(value){
+    return videoModelOptions.find(model=>model.value===value)||null;
+  }
+  function videoModelsByProvider(provider){
+    return videoModelOptions.filter(model=>model.provider===provider);
+  }
+  function videoDurationOptions(model){
+    const range=model.durationRange||{min:4,max:15,step:1};
+    const min=Number(range.min)||4;
+    const max=Number(range.max)||min;
+    const step=Number(range.step)||1;
+    const options=[];
+    for(let value=min;value<=max;value+=step){
+      options.push({value:String(value),name:value+'s'});
+    }
+    return options;
+  }
+  function ensureVideoModelState(target){
+    let model=videoFindModel(target.videoModel);
+    if(!model){
+      model=videoModelOptions[0];
+      target.videoModel=model.value;
+    }
+    if(!videoModelProviders.includes(target.videoModelProvider)||target.videoModelProvider!==model.provider) target.videoModelProvider=model.provider;
+    if(!model.resolutions.some(item=>item.value===target.videoResolution)) target.videoResolution=model.resolutions[0]?.value||'480p';
+    const durations=videoDurationOptions(model);
+    if(!durations.some(item=>item.value===String(target.videoSettingDuration))) target.videoSettingDuration=durations[0]?.value||'4';
+    if(!model.aspectRatios.some(item=>item.value===target.videoSettingRatio)) target.videoSettingRatio=model.aspectRatios[0]?.value||'16:9';
+    if(target.videoSettingRatio&&target.videoSettingRatio!=='auto') target.videoRatio=target.videoSettingRatio;
+  }
+  function videoCurrentModel(){
+    ensureVideoModelState(state);
+    return videoFindModel(state.videoModel)||videoModelOptions[0];
+  }
+  function videoCurrentResolution(model=videoCurrentModel()){
+    return model.resolutions.find(item=>item.value===state.videoResolution)||model.resolutions[0]||{value:'480p',name:'480p'};
+  }
+  function videoCurrentDuration(model=videoCurrentModel()){
+    const options=videoDurationOptions(model);
+    return options.find(item=>item.value===String(state.videoSettingDuration))||options[0]||{value:'4',name:'4s'};
+  }
+  function videoCurrentAspect(model=videoCurrentModel()){
+    return model.aspectRatios.find(item=>item.value===state.videoSettingRatio)||model.aspectRatios[0]||{value:'16:9',name:'横屏 (16:9)'};
+  }
+  function videoSettingSummary(model=videoCurrentModel()){
+    const resolution=videoCurrentResolution(model);
+    const duration=videoCurrentDuration(model);
+    const aspect=videoCurrentAspect(model);
+    return `${resolution.name} · ${duration.name} · ${aspect.name}`;
+  }
+  function videoDisplayRatio(){
+    const aspect=videoCurrentAspect();
+    return aspect.value==='auto'?'自动':aspect.value;
+  }
+  function renderVideoProviderTabs(model){
+    const activeProvider=state.videoModelProvider||model.provider;
+    return videoModelProviders.map(provider=>{
+      const selected=provider===activeProvider;
+      const count=videoModelsByProvider(provider).length;
+      return `<button class="${selected?'on':''}" type="button" data-video-provider="${escapeHtml(provider)}"><b>${escapeHtml(provider)}</b><small>${count}</small></button>`;
+    }).join('');
+  }
+  function renderVideoModelChoices(model){
+    const provider=state.videoModelProvider||model.provider;
+    return videoModelsByProvider(provider).map(item=>{
+      const selected=item.value===model.value;
+      return `<button class="${selected?'on':''}" type="button" data-video-model="${escapeHtml(item.value)}">
+        <span>${escapeHtml(item.provider)}</span>
+        <b>${escapeHtml(item.name)}</b>
+        <small>${item.supportAudio===1?'支持生成音频':'无内置音频'}</small>
+      </button>`;
+    }).join('');
+  }
+  function renderVideoSettingChips(label,type,options,selected){
+    return `<div class="nami-video-setting-group">
+      <span>${escapeHtml(label)}</span>
+      <div>${options.map(option=>`<button class="${option.value===selected?'on':''}" type="button" data-video-${escapeHtml(type)}="${escapeHtml(option.value)}">${escapeHtml(option.name)}</button>`).join('')}</div>
+    </div>`;
+  }
+  function renderVideoShotListItem(item,index){
+    const active=item.id===state.videoSelectedShotId;
+    const label=String(index+1).padStart(2,'0');
+    const status=item.state==='confirmed'||item.state==='done'?'已生成':'待生成';
+    return `<button class="nami-video-shot-card ${active?'active':''}" type="button" data-video-select-shot="${escapeHtml(item.id)}">
+      <span class="nami-video-shot-thumb"><img src="${escapeHtml(videoFrameImage(index))}" alt="分镜 ${escapeHtml(label)} 缩略图"/></span>
+      <span class="nami-video-shot-copy">
+        <b>分镜 ${escapeHtml(label)}</b>
+        <small>${escapeHtml(item.dur||'3.0s')} · ${escapeHtml(status)}</small>
+        <em>${item.who?videoSubtitleLine(item):escapeHtml(item.image||item.line||'暂无画面描述')}</em>
+      </span>
+    </button>`;
   }
   function renderVideoGeneratePanel(){
+    ensureStoryboards();
+    ensureVideoModelState(state);
+    const selected=videoSelectedShot();
+    const counts=storyboardCounts();
+    const dialogueCount=videoDialogueCount();
+    const cost=videoGenerationCost();
+    const connected=readConnected();
+    const credits=Number(connected.credits||3709);
+    const generated=Boolean(state.videoGenerated);
+    const shotNumber=selected.id.replace(/^D0*/,'')||selected.id;
+    const model=videoCurrentModel();
+    const voiceAvailable=model.supportAudio===1;
+    const selectedIndex=Math.max(0,state.storyboards.findIndex(item=>item.id===selected.id));
+    const promptText=selected.image||selected.line||'暂无镜头描述';
+    const promptLength=promptText.length;
+    const previewImage=videoFrameImage(selectedIndex);
+    const voiceStatus=state.videoVoiceEnabled?(state.videoVoiceCompleted?'配音已完成':'待设置声音'):'配音关闭';
     return `
-      <div class="nami-video-limit">
-        <div><span>第一阶段输出</span><b>15 秒分镜视频</b></div>
-        <p>${state.videoRatio==='16:9'?'横屏 16:9':'竖屏 9:16'} · ${escapeHtml(currentVideoStyleLabel())}，预计消耗 ${VIDEO_CREDIT_COST} 积分；必须先使用邀请码登录/注册。</p>
-      </div>
-      <div class="nami-table-list">
-        ${state.storyboards.map((item,index)=>`
-          <div class="nami-shot-card">
-            <b>${escapeHtml(item.shot)}</b>
-            <div><span>${escapeHtml(item.scene)}</span><p>${state.videoGenerated?'本条 15 秒分镜视频已生成，可单独导出。':'等待生成本条 15 秒分镜视频。'}</p><small>${state.videoGenerated?(state.clipRegenerated[item.shot]?'Regenerated':'Succeeded'):'Waiting'}</small></div>
-            <div class="nami-shot-actions"><i>${state.videoGenerated?'✓':'待生成'}</i><button type="button" data-regenerate-shot="${escapeHtml(item.shot)}">重新生成</button><button type="button" data-export-shot="${escapeHtml(item.shot)}">导出</button></div>
+      <section class="nami-video-stage nami-video-editor-stage">
+        <div class="nami-video-head">
+          <div>
+            <span><b>5</b> 视频生成与预览</span>
+            <h2>分镜视频编辑器</h2>
+            <p>按分镜逐条检查镜头描述、视频模型、清晰度、配音和字幕，再在底部分镜条预览整片效果。</p>
           </div>
-        `).join('')}
-      </div>
-      <div class="nami-action-row"><button class="nami-green-btn" id="generate-videos" type="button">生成分镜视频</button><button type="button" id="retry-videos">失败重试</button></div>
+          <em>已自动保存</em>
+        </div>
+
+        <div class="nami-video-workspace" aria-label="分镜视频编辑器">
+          <aside class="nami-video-shot-panel" aria-label="左侧分镜列表">
+            <header class="nami-video-panel-head">
+              <div>
+                <h3>分镜列表</h3>
+                <p>${counts.total} 个镜头 · 当前分镜 ${escapeHtml(String(selectedIndex+1))}</p>
+              </div>
+              <span>${generated?'已生成':'待生成'}</span>
+            </header>
+            <div class="nami-video-shot-list">
+              ${state.storyboards.map((item,index)=>renderVideoShotListItem(item,index)).join('')}
+            </div>
+          </aside>
+
+          <main class="nami-video-stage-panel" aria-label="中央预览画布">
+            <header class="nami-video-stage-toolbar">
+              <div>
+                <h3>镜头 ${escapeHtml(shotNumber)} · 视频预览</h3>
+                <p>${escapeHtml(selected.dur||'3.0s')} · ${escapeHtml(videoDisplayRatio())} · ${escapeHtml(model.name)}</p>
+              </div>
+              <div>
+                <button class="nami-video-btn ghost" type="button" data-video-prev>上一步</button>
+                <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片'}</button>
+              </div>
+            </header>
+            <div class="nami-video-canvas-wrap">
+              <div class="nami-video-stage-canvas" style="background-image:linear-gradient(180deg,rgba(7,12,28,.08),rgba(7,12,28,.72)),url('${escapeHtml(previewImage)}')">
+                <span>当前镜头 · ${generated?'已生成':'待生成'}</span>
+                <button type="button" data-video-play aria-label="预览当前镜头">${assetStudioIcons.play}</button>
+                <p>${videoSubtitleLine(selected)}</p>
+              </div>
+              <div class="nami-video-playbar">
+                <button type="button" data-video-play aria-label="播放或暂停">▶</button>
+                <div><span style="width:${generated?'100':'42'}%"></span></div>
+                <b>${videoTotalDurationLabel()}</b>
+              </div>
+            </div>
+            <footer class="nami-video-stage-footer">
+              <div>
+                <b>本地功能已保留</b>
+                <span>分镜切换、视频模型、清晰度、时长、比例、配音、字幕、预览、生成和导出。</span>
+              </div>
+            </footer>
+          </main>
+
+          <aside class="nami-video-inspector-panel" aria-label="右侧属性面板">
+            <header class="nami-video-panel-head">
+              <div>
+                <h3>属性面板</h3>
+                <p>基础、生成、输出</p>
+              </div>
+              <span>可编辑</span>
+            </header>
+            <div class="nami-video-inspector-body">
+              <details class="nami-video-section" open>
+                <summary>镜头基础信息 <span>⌄</span></summary>
+                <div>
+                  <label class="nami-editor-prompt">
+                    <span>镜头描述</span>
+                    <textarea readonly aria-label="当前镜头描述">${escapeHtml(promptText)}</textarea>
+                    <em>${promptLength}/800</em>
+                    <button type="button" data-video-optimize>优化</button>
+                  </label>
+                  <div class="nami-video-shot-summary">
+                    <div><span>片段时长</span><b>${escapeHtml(selected.dur||'3.0s')}</b></div>
+                    <div><span>字幕状态</span><b>${state.videoSubtitleEnabled?'开启':'关闭'}</b></div>
+                    <div><span>配音状态</span><b>${escapeHtml(voiceStatus)}</b></div>
+                  </div>
+                </div>
+              </details>
+              <details class="nami-video-section" open>
+                <summary>视频模型 <span>⌄</span></summary>
+                <div>
+                  <div class="nami-video-block-head"><span>当前模型</span><b>${escapeHtml(model.name)}</b></div>
+                  <div class="nami-video-provider-tabs">${renderVideoProviderTabs(model)}</div>
+                  <div class="nami-video-model-list">${renderVideoModelChoices(model)}</div>
+                </div>
+              </details>
+              <details class="nami-video-section" open>
+                <summary>视频设置 <span>⌄</span></summary>
+                <div>
+                  ${renderVideoSettingChips('时长','duration',videoDurationOptions(model),String(state.videoSettingDuration))}
+                  ${renderVideoSettingChips('清晰度','resolution',model.resolutions,state.videoResolution)}
+                  ${renderVideoSettingChips('宽高比','aspect',model.aspectRatios,state.videoSettingRatio)}
+                </div>
+              </details>
+              <details class="nami-video-section" open>
+                <summary>配音与字幕 <span>⌄</span></summary>
+                <div class="nami-video-audio-grid">
+                  <div class="row"><span>生成配音</span><button class="nami-video-switch ${state.videoVoiceEnabled&&voiceAvailable?'':'off'}" type="button" data-video-toggle="voice" aria-label="生成配音开关" ${voiceAvailable?'':'disabled'}></button></div>
+                  <div class="row"><span>字幕</span><button class="nami-video-switch ${state.videoSubtitleEnabled?'':'off'}" type="button" data-video-toggle="subtitle" aria-label="字幕开关"></button></div>
+                  <small>${voiceAvailable?'当前模型支持生成音频':'当前模型无内置音频，字幕和后期配音仍可保留'}</small>
+                </div>
+              </details>
+              <details class="nami-video-section" open>
+                <summary>生成状态 <span>⌄</span></summary>
+                <div>
+                  <p class="nami-video-status-note">${generated?'第一集样片已就绪，可继续导出成片。':'当前还未生成整片，确认设置后可生成第一集样片。'}</p>
+                </div>
+              </details>
+            </div>
+          </aside>
+
+          <section class="nami-video-story-strip" aria-label="底部分镜缩略时间线">
+            <div class="nami-video-strip-meta">
+              <b>底部分镜条</b>
+              <span>点击分镜同步中央预览与右侧参数。</span>
+            </div>
+            <div class="nami-video-strip-list">
+              ${state.storyboards.map((item,index)=>renderVideoFrame(item,index)).join('')}
+            </div>
+            <div class="nami-video-strip-actions">
+              <button class="nami-video-btn ghost" type="button" data-video-play>整片预览</button>
+              <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片'}</button>
+              <span>${generated?'已生成':'待生成'} · ${videoTotalDurationLabel()}</span>
+            </div>
+          </section>
+        </div>
+
+        <div class="nami-video-mobile-actions">
+          <button class="nami-video-btn ghost" type="button" data-video-prev>上一步</button>
+          <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片（'+counts.total+' 镜）'} <i>›</i></button>
+        </div>
+
+        ${renderVideoGenerationModal(credits,cost)}
+      </section>
     `;
   }
-  function customStylePanel(){
-    const active=state.videoStyle===CUSTOM_STYLE_VALUE;
-    const customName=state.videoCustomStyleName.trim();
-    const customPrompt=state.videoCustomStylePrompt.trim();
-    return `
-      <div class="nami-custom-style-panel ${active?'active':''}">
-        <div class="nami-custom-style-head">
-          <div><span>自定义视频风格</span><b>创建专属画面风格</b><small>适合品牌定制、特殊题材和参考图风格迁移。</small></div>
-          <button type="button" data-use-custom-style>${active?'已使用':'使用自定义'}</button>
+  function videoGenerationCost(){
+    return Math.max(VIDEO_CREDIT_COST,state.storyboards.length*6);
+  }
+  function videoDialogueCount(){
+    return state.storyboards.filter(item=>item.who).length;
+  }
+  function videoPendingVoiceCount(){
+    if(!state.videoVoiceEnabled||state.videoVoiceCompleted) return 0;
+    return Math.min(2,videoDialogueCount());
+  }
+  function videoSelectedShot(){
+    ensureStoryboards();
+    let selected=state.storyboards.find(item=>item.id===state.videoSelectedShotId);
+    if(!selected){
+      selected=state.storyboards.find(item=>item.id==='D012')||state.storyboards[0];
+      state.videoSelectedShotId=selected?.id||'';
+    }
+    return selected||{id:'D001',dur:'3.0s',line:'暂无镜头',who:'',image:'暂无镜头'};
+  }
+  function videoSubtitleLine(item){
+    if(!state.videoSubtitleEnabled) return '字幕已关闭';
+    if(item.who) return `${escapeHtml(item.who)}：${escapeHtml(item.line)}`;
+    return escapeHtml(item.line||item.image||'');
+  }
+  function videoTotalDuration(){
+    return state.storyboards.reduce((sum,item)=>sum+(parseFloat(item.dur)||3),0);
+  }
+  function videoTotalDurationLabel(){
+    const total=Math.round(videoTotalDuration());
+    const minutes=String(Math.floor(total/60)).padStart(2,'0');
+    const seconds=String(total%60).padStart(2,'0');
+    return `00:00 / ${minutes}:${seconds}`;
+  }
+  function videoFrameImage(index){
+    const images=[
+      'assets/images/story-cases/case-platform-nine.png',
+      'assets/images/story-cases/case-xingchao-archive.png',
+      'assets/images/story-cases/case-fog-harbor-letter.png',
+      'assets/images/story-cases/case-redline-chase.png',
+      'assets/images/story-cases/case-empty-city-light.png',
+      'assets/images/story-cases/case-icefield-echo.png',
+      'assets/images/story-cases/case-guixu-radio.png',
+      'assets/images/story-cases/case-shanhai-oath.png'
+    ];
+    return images[index%images.length];
+  }
+  function renderVideoFrame(item,index){
+    const active=item.id===state.videoSelectedShotId;
+    return `<button class="nami-video-frame ${active?'on':''}" type="button" data-video-select-shot="${escapeHtml(item.id)}">
+      <i>动态</i>
+      <img src="${escapeHtml(videoFrameImage(index))}" alt="镜头 ${escapeHtml(item.id)} 画面"/>
+      <span><b>分镜${escapeHtml(String(index+1))}</b><small>${escapeHtml(item.dur||'3.0s')}</small></span>
+      <em>${item.who?videoSubtitleLine(item):'设置声音'}</em>
+    </button>`;
+  }
+  function renderVideoGenerationModal(credits,cost){
+    if(state.videoModal==='export') return `<div class="nami-video-scrim" id="video-modal-scrim" role="dialog" aria-modal="true">
+      <div class="nami-video-modal">
+        <header><h3>第一集样片已就绪</h3><p>整片 ${videoTotalDurationLabel().split('/ ')[1]}，${state.storyboards.length} 个镜头全部完成，可保存到项目库或导出离线文件。</p></header>
+        <div class="body">
+          <div><span>片长 / 镜头</span><b>${videoTotalDurationLabel().split('/ ')[1]} · ${state.storyboards.length} 镜</b></div>
+          <div><span>视频设置</span><b>${escapeHtml(videoSettingSummary())}</b></div>
+          <p>已包含字幕与配音。导出后也可以回到项目库继续调整。</p>
         </div>
-        <div class="nami-custom-style-body">
-          <div class="nami-custom-style-fields">
-            <label><span>风格名称</span><input data-custom-style-field="name" maxlength="40" value="${escapeHtml(state.videoCustomStyleName)}" placeholder="例如：蓝调港风悬疑"/></label>
-            <label><span>画面描述</span><textarea data-custom-style-field="prompt" maxlength="500" placeholder="描述色彩、光影、镜头、人物质感、年代感或参考方向。">${escapeHtml(state.videoCustomStylePrompt)}</textarea></label>
-          </div>
-          <div class="nami-custom-style-preview">
-            <div class="nami-custom-style-thumb"><em>图片占位</em><i>${escapeHtml(customName||'专属风格')}</i></div>
-            <p><b>${escapeHtml(active?currentVideoStyleLabel():'未启用自定义')}</b><small>${escapeHtml(customPrompt||'填写描述后点击使用自定义风格，后续资产和分镜视频会沿用该方向。')}</small></p>
-          </div>
-        </div>
+        <footer><button class="nami-video-btn ghost" type="button" data-video-modal-close>保存到项目库</button><button class="nami-video-btn primary" type="button" data-video-export>导出成片</button></footer>
       </div>
-    `;
+    </div>`;
+    if(state.videoModal!=='cost') return '';
+    return `<div class="nami-video-scrim" id="video-modal-scrim" role="dialog" aria-modal="true">
+      <div class="nami-video-modal">
+        <header><h3>确认生成第一集样片</h3><p>生成开始前再确认一次镜头数量、预计耗时和字幕配音设置。结果仍可继续修改。</p></header>
+        <div class="body">
+          <div><span>生成内容</span><b>${state.storyboards.length} 镜整片</b></div>
+          <div><span>预计耗时</span><b>约 4 分钟</b></div>
+          <div><span>视频设置</span><b>${escapeHtml(videoSettingSummary())}</b></div>
+          <div><span>字幕配音</span><b>${state.videoVoiceEnabled?'配音开启':'配音关闭'} · ${state.videoSubtitleEnabled?'字幕开启':'字幕关闭'}</b></div>
+          <p>生成失败的镜头会保留重试入口。建议先生成低清样片，满意后再高清渲染。</p>
+        </div>
+        <footer><button class="nami-video-btn ghost" type="button" data-video-modal-close>再检查一下</button><button class="nami-video-btn primary" type="button" data-video-confirm-generate>确认生成</button></footer>
+      </div>
+    </div>`;
   }
   function settingOption(group,value,label,copy){
     const selected=(group==='ratio'?state.videoRatio:state.videoStyle)===value;
@@ -1067,61 +1596,136 @@
     const styleVisual=isStyle&&visual?`<div class="nami-style-thumb" data-style="${escapeHtml(visual.slug)}" data-image-target="${escapeHtml(visual.target)}" aria-hidden="true"></div>`:'';
     return `<button class="nami-setting-card ${selected?'selected':''} ${isStyle?'nami-style-card':''}" type="button" data-setting-group="${escapeHtml(group)}" data-setting-value="${escapeHtml(value)}">${styleVisual}<span>${escapeHtml(group==='ratio'?'画面比例':'视频风格')}</span><b>${escapeHtml(label)}</b><small>${escapeHtml(copy)}</small></button>`;
   }
-  function assetPromptCard(config){
-    const key=config.key;
-    const prompt=state.assetPrompts[key]||'';
-    const generated=Boolean(state.assetGenerated[key]);
-    const upload=state.assetUploads[key]||'';
-    return `
-      <article class="nami-asset-prompt-card ${generated||upload?'ready':''}">
+  function assetStudioKeys(){
+    return ['role','scene','prop'];
+  }
+  function assetSectionCounts(key){
+    const items=assetStudioData[key].items;
+    const confirmed=items.filter(item=>assetItemState(item.id)==='confirmed').length;
+    return {confirmed,total:items.length,remaining:items.length-confirmed};
+  }
+  function assetOverallCounts(){
+    return assetStudioKeys().reduce((acc,key)=>{
+      const counts=assetSectionCounts(key);
+      acc.confirmed+=counts.confirmed;
+      acc.total+=counts.total;
+      acc.remaining+=counts.remaining;
+      return acc;
+    },{confirmed:0,total:0,remaining:0});
+  }
+  function assetItemState(id){
+    return state.assetItemStates[id]||defaultAssetItemStates[id]||'empty';
+  }
+  function setAssetItemState(id,value){
+    state.assetItemStates[id]=value;
+    state.assetsConfirmed=assetOverallCounts().remaining===0;
+  }
+  function assetFindItem(id){
+    for(const key of assetStudioKeys()){
+      const item=assetStudioData[key].items.find(entry=>entry.id===id);
+      if(item) return {key,section:assetStudioData[key],item};
+    }
+    return null;
+  }
+  function renderAssetStudioTabs(){
+    return assetStudioKeys().map(key=>{
+      const section=assetStudioData[key];
+      const counts=assetSectionCounts(key);
+      const allDone=counts.remaining===0;
+      return `<button class="nami-rs-tab ${state.assetTab===key?'on':''} ${allDone?'alldone':''}" type="button" data-asset-switch="${escapeHtml(key)}">
+        <span>${section.icon}</span>${escapeHtml(section.label)}
+        <i>${counts.confirmed}/${counts.total}</i>
+        <em>${assetStudioIcons.check}</em>
+      </button>`;
+    }).join('');
+  }
+  function renderAssetCurrentTracker(){
+    const counts=assetSectionCounts(state.assetTab);
+    return `<span>本类 <b>${counts.confirmed}</b> / ${counts.total} 已确认</span>`;
+  }
+  function renderAssetStudioCards(){
+    const section=assetStudioData[state.assetTab];
+    return section.items.map(item=>renderAssetStudioCard(section,item)).join('')+
+      `<button class="nami-rs-add-card" type="button" data-asset-add>${assetStudioIcons.add}<span>新增${escapeHtml(section.label)}</span></button>`;
+  }
+  function renderAssetStudioCard(section,item){
+    const itemState=assetItemState(item.id);
+    const isConfirmed=itemState==='confirmed';
+    const voice=state.assetVoices[item.id]||item.voice||'';
+    const voiceButton=state.assetTab==='role'?`<button class="nami-rs-voice ${voice?'set':''}" type="button" data-asset-voice="${escapeHtml(item.id)}">${assetStudioIcons.mic}${escapeHtml(voice?voice.split('-').slice(-1)[0]:'设置音色')}</button>`:'';
+    const regen=(itemState==='done'||itemState==='confirmed')?`<button class="nami-rs-cardgo regen" type="button" data-asset-regenerate-one="${escapeHtml(item.id)}" title="重新生成">${assetStudioIcons.refresh}</button>`:'';
+    let action='';
+    if(itemState==='empty') action=`<button class="nami-rs-cardgo gen" type="button" data-asset-generate-one="${escapeHtml(item.id)}">${assetStudioIcons.spark}生成</button>`;
+    if(itemState==='gen') action='<button class="nami-rs-cardgo busy" type="button">生成中...</button>';
+    if(itemState==='done') action=`<button class="nami-rs-cardgo confirm" type="button" data-asset-confirm-one="${escapeHtml(item.id)}">${assetStudioIcons.check}确认</button>`;
+    if(itemState==='confirmed') action=`<span class="nami-rs-cardgo confirmed-state">${assetStudioIcons.check} 已确认</span>`;
+    return `<article class="nami-rs-card ${itemState} ${isConfirmed?'confirmed':''}" id="asset-card-${escapeHtml(item.id)}">
+      <div class="nami-rs-preview">
+        ${item.main?'<span class="nami-rs-main-badge">主</span>':''}
+        <span class="nami-rs-confirm-tag">${assetStudioIcons.check} 已确认</span>
+        <div class="nami-rs-empty">${section.icon}<span>未生成 · 点击下方生成</span></div>
+        <div class="nami-rs-generating"><i></i><span>正在生成${escapeHtml(section.viewLabel)}...</span></div>
+        <div class="nami-rs-views">${section.views.map(view=>`<div>${section.icon}<span>${escapeHtml(view)}</span></div>`).join('')}</div>
+      </div>
+      <div class="nami-rs-card-body">
+        <div class="nami-rs-name-row"><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.kind)}</small></div>
+        <p class="nami-rs-view-label">${escapeHtml(section.viewLabel)}：<strong>${section.views.map(escapeHtml).join(' / ')}</strong></p>
+        <div class="nami-rs-attrs">${item.attrs.map(attr=>`<span>${escapeHtml(attr)}</span>`).join('')}</div>
+        <p class="nami-rs-desc">${escapeHtml(item.desc)}</p>
+      </div>
+      <div class="nami-rs-card-foot">
+        ${voiceButton}
+        <button class="nami-rs-mini" type="button" data-asset-edit="${escapeHtml(item.id)}" title="编辑">${assetStudioIcons.edit}</button>
+        <button class="nami-rs-mini del" type="button" data-asset-delete="${escapeHtml(item.id)}" title="删除">${assetStudioIcons.del}</button>
+        <span></span>
+        ${regen}${action}
+      </div>
+    </article>`;
+  }
+  function renderAssetStudioActionBar(){
+    const counts=assetOverallCounts();
+    const missing=assetStudioKeys().map(key=>{
+      const sectionCounts=assetSectionCounts(key);
+      return sectionCounts.remaining?`${assetStudioData[key].label} ${sectionCounts.remaining} 项`:'';
+    }).filter(Boolean);
+    const ready=counts.remaining===0;
+    return `<div class="nami-rs-actionbar">
+      <p>${ready?`<b>全部 ${counts.total} 项已确认</b>，可以进入分镜脚本了。`:`还有 <strong>${escapeHtml(missing.join('、'))}</strong> 待确认，全部确认后才能进入分镜。`}</p>
+      <button class="nami-rs-btn ghost" type="button" data-asset-prev>上一步</button>
+      <button class="nami-rs-btn primary" type="button" data-asset-next ${ready?'':'disabled'}>下一步：分镜脚本<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>`;
+  }
+  function renderAssetVoiceModal(){
+    if(!assetVoiceTarget) return '';
+    const found=assetFindItem(assetVoiceTarget);
+    if(!found) return '';
+    const current=pendingAssetVoice||state.assetVoices[assetVoiceTarget]||found.item.voice||'';
+    const tabs=Object.keys(assetVoiceOptions);
+    return `<div class="nami-rs-scrim" id="asset-voice-scrim" role="dialog" aria-modal="true">
+      <div class="nami-rs-modal">
         <header>
-          <span>${escapeHtml(config.title)}</span>
-          <b>${escapeHtml(config.examples)}</b>
-          <small>${escapeHtml(config.output)}：${config.views.map(escapeHtml).join(' / ')}</small>
+          <span>${assetStudioIcons.mic}</span>
+          <h3>设置音色 · ${escapeHtml(found.item.name)}</h3>
+          <button type="button" data-asset-voice-close aria-label="关闭">${assetStudioIcons.x}</button>
         </header>
-        <div class="nami-asset-checklist">${config.checklist.map(item=>`<em>${escapeHtml(item)}</em>`).join('')}</div>
-        <textarea data-asset-prompt="${escapeHtml(key)}">${escapeHtml(prompt)}</textarea>
-        <div class="nami-asset-preview-slots">
-          ${config.views.map((view,index)=>`<div class="${generated||upload?'filled':''}"><b>${escapeHtml(view)}</b><small>${generated?'已生成':(upload?'参考已上传':'待生成')}</small><i>${index+1}</i></div>`).join('')}
+        <div class="nami-rs-voice-tabs">${tabs.map(tab=>`<button class="${tab===assetVoiceTab?'on':''}" type="button" data-asset-voice-tab="${escapeHtml(tab)}">${escapeHtml(tab)}</button>`).join('')}</div>
+        <div class="nami-rs-voice-list">
+          ${assetVoiceOptions[assetVoiceTab].map(voice=>{
+            const selected=voice[0]===current;
+            return `<button class="nami-rs-voice-card ${selected?'on':''}" type="button" data-asset-pick-voice="${escapeHtml(voice[0])}">
+              <span class="nami-rs-play" data-asset-voice-preview="${escapeHtml(voice[0])}">${assetStudioIcons.play}</span>
+              <span><b>${escapeHtml(voice[0])}</b><small><i>${escapeHtml(voice[1])}</i>${escapeHtml(voice[2])}</small></span>
+              <em>${assetStudioIcons.check}</em>
+            </button>`;
+          }).join('')}
         </div>
-        <div class="nami-view-tags">${config.views.map(item=>`<em>${escapeHtml(item)}</em>`).join('')}</div>
-        <div class="nami-asset-card-actions">
-          <button type="button" data-generate-asset="${escapeHtml(key)}">${generated?'重新生成':'生成资产'}</button>
-          <button type="button" data-upload-asset="${escapeHtml(key)}">${upload?'更换参考':'上传参考'}</button>
-          <input type="file" accept="image/*" hidden data-asset-file="${escapeHtml(key)}"/>
-        </div>
-        <p class="nami-asset-status">${upload?`参考图：${escapeHtml(upload)}`:(generated?'已按当前提示词生成，可继续确认':'建议先检查提示词，再生成或上传参考图。')}</p>
-      </article>
-    `;
+        <footer><button class="nami-rs-btn ghost" type="button" data-asset-voice-close>取消</button><button class="nami-rs-btn primary" type="button" data-asset-save-voice>使用该音色</button></footer>
+      </div>
+    </div>`;
   }
-  function assetReadyCount(){
-    return assetBlueprints.filter(item=>state.assetGenerated[item.key]||state.assetUploads[item.key]).length;
-  }
-  function assetTitle(key){
-    return assetBlueprints.find(item=>item.key===key)?.title||'资产';
-  }
-  function exportShotVideo(shotId){
-    if(!state.videoGenerated) return toast('请先生成分镜视频');
-    const shot=state.storyboards.find(item=>item.shot===shotId);
-    const content=[
-      `分镜 ${shotId||''} 15 秒视频导出记录`,
-      `画面比例：${state.videoRatio}`,
-      `视频风格：${currentVideoStyleLabel()}`,
-      `镜头：${shot?.scene||'未命名分镜'}`,
-      `画面：${shot?.image||'暂无画面描述'}`,
-      `台词：${shot?.line||'暂无台词'}`,
-      `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`
-    ].join('\n');
-    const blob=new Blob(['\ufeff',content],{type:'text/plain;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement('a');
-    link.href=url;
-    link.download=`分镜${shotId||'视频'}_15秒导出记录.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast('已导出本条 15 秒分镜视频');
+  function assetTitle(id){
+    const found=assetFindItem(id);
+    return found?found.item.name:'资产';
   }
   function bindPanelEvents(){
     const idea=document.getElementById('idea-input');
@@ -1188,87 +1792,321 @@
       save();
       render();
     }));
-    document.querySelectorAll('[data-custom-style-field]').forEach(input=>input.addEventListener('input',()=>{
-      if(input.dataset.customStyleField==='name') state.videoCustomStyleName=input.value.slice(0,40);
-      if(input.dataset.customStyleField==='prompt') state.videoCustomStylePrompt=input.value.slice(0,500);
-      state.videoConfirmed=false;
-      save();
-      renderStatusOnly();
-    }));
-    document.querySelector('[data-use-custom-style]')?.addEventListener('click',()=>{
-      const nameInput=document.querySelector('[data-custom-style-field="name"]');
-      const promptInput=document.querySelector('[data-custom-style-field="prompt"]');
-      state.videoCustomStyleName=(nameInput?.value||state.videoCustomStyleName||'').trim().slice(0,40);
-      state.videoCustomStylePrompt=(promptInput?.value||state.videoCustomStylePrompt||'').trim().slice(0,500);
-      if(!state.videoCustomStyleName&&!state.videoCustomStylePrompt) return toast('请先填写自定义视频风格');
-      state.videoStyle=CUSTOM_STYLE_VALUE;
-      state.videoConfirmed=false;
-      save();
-      render();
-      toast('已使用自定义视频风格');
-    });
     document.querySelector('[data-stage-reset="video"]')?.addEventListener('click',()=>{
       state.videoRatio='9:16';
+      state.videoModel='neo-video-2-0';
+      state.videoModelProvider='DOUBAO';
+      state.videoResolution='480p';
+      state.videoSettingDuration='4';
+      state.videoSettingRatio='16:9';
       state.videoStyle='都市写实';
-      state.videoCustomStyleName='';
-      state.videoCustomStylePrompt='';
       state.videoConfirmed=false;
       save();
       render();
       toast('已恢复默认视频设定');
     });
-    document.querySelectorAll('[data-asset-prompt]').forEach(input=>input.addEventListener('input',()=>{
-      state.assetPrompts[input.dataset.assetPrompt]=input.value;
-      state.assetsConfirmed=false;
+    document.querySelectorAll('[data-asset-switch]').forEach(button=>button.addEventListener('click',()=>{
+      state.assetTab=button.dataset.assetSwitch;
       save();
-      renderStatusOnly();
+      render();
     }));
     document.getElementById('confirm-video')?.addEventListener('click',()=>{
-      if(state.videoStyle===CUSTOM_STYLE_VALUE&&!state.videoCustomStyleName.trim()&&!state.videoCustomStylePrompt.trim()) return toast('请先填写自定义视频风格');
       state.videoConfirmed=true;
       save();
       render();
       toast('已确认视频设定');
     });
-    document.querySelectorAll('[data-generate-asset]').forEach(button=>button.addEventListener('click',()=>{
-      state.assetGenerated[button.dataset.generateAsset]=new Date().toISOString();
-      state.assetsConfirmed=false;
+    document.querySelectorAll('[data-asset-generate-one],[data-asset-regenerate-one]').forEach(button=>button.addEventListener('click',()=>{
+      const id=button.dataset.assetGenerateOne||button.dataset.assetRegenerateOne;
+      const name=assetTitle(id);
+      setAssetItemState(id,'gen');
       save();
       render();
-      toast('已生成'+assetTitle(button.dataset.generateAsset));
+      toast((button.dataset.assetRegenerateOne?'重新生成 ':'正在生成 ')+name+'...');
+      setTimeout(()=>{
+        setAssetItemState(id,'done');
+        save();
+        render();
+      },1500);
     }));
-    document.querySelectorAll('[data-upload-asset]').forEach(button=>button.addEventListener('click',()=>{
-      document.querySelector(`[data-asset-file="${button.dataset.uploadAsset}"]`)?.click();
-    }));
-    document.querySelectorAll('[data-asset-file]').forEach(input=>input.addEventListener('change',()=>{
-      const file=input.files?.[0];
-      if(!file) return;
-      state.assetUploads[input.dataset.assetFile]=file.name;
-      state.assetsConfirmed=false;
+    document.querySelectorAll('[data-asset-confirm-one]').forEach(button=>button.addEventListener('click',()=>{
+      const id=button.dataset.assetConfirmOne;
+      if(assetItemState(id)!=='done') return;
+      setAssetItemState(id,'confirmed');
       save();
       render();
-      toast('已上传'+assetTitle(input.dataset.assetFile)+'参考图');
+      toast(assetTitle(id)+' 已确认');
     }));
-    document.getElementById('regen-assets')?.addEventListener('click',()=>{
-      assetBlueprints.forEach(item=>{state.assetGenerated[item.key]=new Date().toISOString();});
-      state.assetRegenerated=true;
-      state.assetsConfirmed=false;
+    document.querySelector('[data-asset-generate-current]')?.addEventListener('click',()=>{
+      const items=assetStudioData[state.assetTab].items.filter(item=>assetItemState(item.id)==='empty');
+      if(!items.length) return toast('本类没有未生成项');
+      items.forEach(item=>setAssetItemState(item.id,'gen'));
       save();
       render();
-      toast('已按提示词重新生成全部资产');
+      toast('正在批量生成 '+items.length+' 项...');
+      items.forEach((item,index)=>{
+        setTimeout(()=>{
+          setAssetItemState(item.id,'done');
+          save();
+          render();
+        },1400+index*500);
+      });
     });
-    document.getElementById('confirm-assets')?.addEventListener('click',()=>{state.assetsConfirmed=true;save();render();toast('已确认资产清单');});
-    document.getElementById('regen-storyboard')?.addEventListener('click',()=>{state.storyboards=[];ensureStoryboards();save();render();toast('已重新生成分镜');});
-    document.getElementById('generate-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
-    document.getElementById('retry-videos')?.addEventListener('click',()=>completeShortVideoGeneration());
-    document.querySelectorAll('[data-regenerate-shot]').forEach(button=>button.addEventListener('click',()=>{
-      if(!state.videoGenerated) return toast('请先生成分镜视频');
-      state.clipRegenerated[button.dataset.regenerateShot]=new Date().toISOString();
+    document.querySelectorAll('[data-asset-voice]').forEach(button=>button.addEventListener('click',()=>{
+      assetVoiceTarget=button.dataset.assetVoice;
+      assetVoiceTab='Recent';
+      pendingAssetVoice=state.assetVoices[assetVoiceTarget]||assetFindItem(assetVoiceTarget)?.item.voice||'';
+      render();
+    }));
+    document.querySelectorAll('[data-asset-voice-tab]').forEach(button=>button.addEventListener('click',()=>{
+      assetVoiceTab=button.dataset.assetVoiceTab;
+      render();
+    }));
+    document.querySelectorAll('[data-asset-pick-voice]').forEach(button=>button.addEventListener('click',()=>{
+      pendingAssetVoice=button.dataset.assetPickVoice;
+      render();
+    }));
+    document.querySelectorAll('[data-asset-voice-preview]').forEach(button=>button.addEventListener('click',event=>{
+      event.stopPropagation();
+      toast('试听：'+button.dataset.assetVoicePreview);
+    }));
+    document.querySelector('[data-asset-save-voice]')?.addEventListener('click',()=>{
+      if(assetVoiceTarget&&pendingAssetVoice){
+        state.assetVoices[assetVoiceTarget]=pendingAssetVoice;
+        save();
+        toast(assetTitle(assetVoiceTarget)+' 的音色已设置');
+      }
+      assetVoiceTarget=null;
+      pendingAssetVoice=null;
+      render();
+    });
+    document.querySelectorAll('[data-asset-voice-close]').forEach(button=>button.addEventListener('click',()=>{
+      assetVoiceTarget=null;
+      pendingAssetVoice=null;
+      render();
+    }));
+    document.getElementById('asset-voice-scrim')?.addEventListener('click',event=>{
+      if(event.target.id==='asset-voice-scrim'){
+        assetVoiceTarget=null;
+        pendingAssetVoice=null;
+        render();
+      }
+    });
+    document.querySelector('[data-asset-add]')?.addEventListener('click',()=>toast('新增'+assetStudioData[state.assetTab].label+'（演示）'));
+    document.querySelectorAll('[data-asset-edit]').forEach(button=>button.addEventListener('click',()=>toast('编辑设定')));
+    document.querySelectorAll('[data-asset-delete]').forEach(button=>button.addEventListener('click',()=>toast('已移除（演示）')));
+    document.querySelector('[data-asset-prev]')?.addEventListener('click',()=>{
+      state.stage=1;
       save();
       render();
-      toast('已重新生成本条分镜视频');
+    });
+    document.querySelector('[data-asset-next]')?.addEventListener('click',()=>{
+      const counts=assetOverallCounts();
+      if(counts.remaining>0) return toast('请先确认全部角色、场景和道具');
+      state.assetsConfirmed=true;
+      state.stage=3;
+      ensureStoryboards();
+      save();
+      render();
+    });
+    document.querySelectorAll('[data-board-filter]').forEach(button=>button.addEventListener('click',()=>{
+      state.storyboardFilter=button.dataset.boardFilter;
+      save();
+      render();
     }));
-    document.querySelectorAll('[data-export-shot]').forEach(button=>button.addEventListener('click',()=>exportShotVideo(button.dataset.exportShot)));
+    document.querySelectorAll('[data-board-generate-one],[data-board-regenerate-one]').forEach(button=>button.addEventListener('click',()=>{
+      const id=button.dataset.boardGenerateOne||button.dataset.boardRegenerateOne;
+      const shot=state.storyboards.find(item=>item.id===id);
+      if(!shot) return;
+      shot.state='gen';
+      save();
+      render();
+      toast((button.dataset.boardRegenerateOne?'重新生成 ':'正在生成 ')+id+' 画面...');
+      setTimeout(()=>{
+        const current=state.storyboards.find(item=>item.id===id);
+        if(current) current.state='done';
+        save();
+        render();
+      },1400);
+    }));
+    document.querySelectorAll('[data-board-confirm-one]').forEach(button=>button.addEventListener('click',()=>{
+      const shot=state.storyboards.find(item=>item.id===button.dataset.boardConfirmOne);
+      if(!shot||shot.state!=='done') return;
+      shot.state='confirmed';
+      save();
+      render();
+      toast(shot.id+' 已确认');
+    }));
+    document.querySelector('[data-board-generate-all]')?.addEventListener('click',()=>{
+      const counts=storyboardCounts();
+      if(!counts.pending) return toast('没有未生成的镜头');
+      storyboardModal={type:'cost'};
+      render();
+    });
+    document.querySelector('[data-board-confirm-cost]')?.addEventListener('click',()=>{
+      const pending=state.storyboards.filter(item=>item.state==='empty');
+      storyboardModal=null;
+      pending.forEach(item=>{item.state='gen';});
+      save();
+      render();
+      toast('正在批量生成 '+pending.length+' 个镜头...');
+      pending.forEach((item,index)=>{
+        setTimeout(()=>{
+          const shot=state.storyboards.find(entry=>entry.id===item.id);
+          if(shot) shot.state='done';
+          save();
+          render();
+        },1200+index*450);
+      });
+    });
+    document.querySelectorAll('[data-board-edit]').forEach(button=>button.addEventListener('click',()=>{
+      storyboardModal={type:'edit',id:button.dataset.boardEdit};
+      storyboardDurationDraft='';
+      render();
+    }));
+    document.querySelectorAll('[data-board-duration]').forEach(button=>button.addEventListener('click',()=>{
+      storyboardDurationDraft=button.dataset.boardDuration;
+      render();
+    }));
+    document.querySelectorAll('[data-board-save-edit]').forEach(button=>button.addEventListener('click',()=>{
+      const shot=state.storyboards.find(item=>item.id===button.dataset.boardSaveEdit);
+      if(!shot) return;
+      const image=document.getElementById('board-edit-line')?.value.trim();
+      const line=document.getElementById('board-edit-dialog')?.value.trim();
+      if(image){
+        shot.image=image;
+        if(!shot.who) shot.line=image;
+      }
+      if(shot.who&&line) shot.line=line;
+      if(storyboardDurationDraft) shot.dur=storyboardDurationDraft;
+      storyboardModal=null;
+      storyboardDurationDraft='';
+      save();
+      render();
+      toast(shot.id+' 已更新');
+    }));
+    document.querySelectorAll('[data-board-modal-close]').forEach(button=>button.addEventListener('click',()=>{
+      storyboardModal=null;
+      storyboardDurationDraft='';
+      render();
+    }));
+    document.getElementById('board-modal-scrim')?.addEventListener('click',event=>{
+      if(event.target.id==='board-modal-scrim'){
+        storyboardModal=null;
+        storyboardDurationDraft='';
+        render();
+      }
+    });
+    document.querySelectorAll('[data-board-preview]').forEach(button=>button.addEventListener('click',()=>toast('放大预览 '+button.dataset.boardPreview)));
+    document.querySelectorAll('[data-board-voice]').forEach(button=>button.addEventListener('click',()=>toast('试听配音 · '+button.dataset.boardVoice)));
+    document.querySelector('[data-board-add]')?.addEventListener('click',()=>toast('新增镜头（演示）'));
+    document.querySelectorAll('[data-board-delete]').forEach(button=>button.addEventListener('click',()=>toast('已移除（演示）')));
+    document.querySelector('[data-board-prev]')?.addEventListener('click',()=>{
+      state.stage=2;
+      save();
+      render();
+    });
+    document.querySelector('[data-board-next]')?.addEventListener('click',()=>{
+      const counts=storyboardCounts();
+      if(counts.confirmed<counts.total) return toast('请先确认全部分镜镜头');
+      state.stage=4;
+      save();
+      render();
+    });
+    document.querySelectorAll('[data-video-select-shot]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoSelectedShotId=button.dataset.videoSelectShot;
+      save();
+      render();
+      toast('正在预览镜头 '+state.videoSelectedShotId);
+    }));
+    document.querySelectorAll('[data-video-provider]').forEach(button=>button.addEventListener('click',()=>{
+      const provider=button.dataset.videoProvider;
+      const firstModel=videoModelsByProvider(provider)[0];
+      if(firstModel){
+        state.videoModelProvider=provider;
+        state.videoModel=firstModel.value;
+        ensureVideoModelState(state);
+      }
+      save();
+      render();
+    }));
+    document.querySelectorAll('[data-video-model]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoModel=button.dataset.videoModel;
+      const model=videoFindModel(state.videoModel);
+      if(model) state.videoModelProvider=model.provider;
+      ensureVideoModelState(state);
+      save();
+      render();
+    }));
+    document.querySelectorAll('[data-video-resolution]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoResolution=button.dataset.videoResolution;
+      ensureVideoModelState(state);
+      save();
+      render();
+    }));
+    document.querySelectorAll('[data-video-duration]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoSettingDuration=button.dataset.videoDuration;
+      ensureVideoModelState(state);
+      save();
+      render();
+    }));
+    document.querySelectorAll('[data-video-aspect]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoSettingRatio=button.dataset.videoAspect;
+      ensureVideoModelState(state);
+      save();
+      render();
+    }));
+    document.querySelectorAll('[data-video-toggle]').forEach(button=>button.addEventListener('click',()=>{
+      if(button.disabled) return;
+      if(button.dataset.videoToggle==='voice') state.videoVoiceEnabled=!state.videoVoiceEnabled;
+      if(button.dataset.videoToggle==='subtitle') state.videoSubtitleEnabled=!state.videoSubtitleEnabled;
+      save();
+      render();
+    }));
+    document.querySelector('[data-video-fill-voice]')?.addEventListener('click',()=>{
+      state.videoVoiceCompleted=true;
+      save();
+      render();
+      toast('配音已补齐');
+    });
+    document.querySelector('[data-video-optimize]')?.addEventListener('click',()=>toast('已优化当前镜头设置'));
+    document.querySelectorAll('[data-video-open-cost]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoModal=state.videoGenerated?'export':'cost';
+      save();
+      render();
+    }));
+    document.querySelector('[data-video-confirm-generate]')?.addEventListener('click',()=>{
+      state.videoModal=null;
+      completeFullVideoGeneration();
+      render();
+      toast('已开始生成，可在任务队列查看进度');
+    });
+    document.querySelector('[data-video-export]')?.addEventListener('click',()=>{
+      state.videoModal=null;
+      save();
+      render();
+      toast('正在导出成片...');
+    });
+    document.querySelectorAll('[data-video-modal-close]').forEach(button=>button.addEventListener('click',()=>{
+      state.videoModal=null;
+      save();
+      render();
+      if(button.closest('.nami-video-modal')?.querySelector('h3')?.textContent.includes('已就绪')) toast('已保存到项目库');
+    }));
+    document.getElementById('video-modal-scrim')?.addEventListener('click',event=>{
+      if(event.target.id==='video-modal-scrim'){
+        state.videoModal=null;
+        save();
+        render();
+      }
+    });
+    document.querySelector('[data-video-prev]')?.addEventListener('click',()=>{
+      state.stage=3;
+      save();
+      render();
+    });
+    document.querySelector('[data-video-play]')?.addEventListener('click',()=>toast('正在预览当前镜头'));
+    document.getElementById('regen-storyboard')?.addEventListener('click',()=>{state.storyboards=[];ensureStoryboards();save();render();toast('已重新生成分镜');});
     document.querySelectorAll('[data-login-action]').forEach(button=>button.addEventListener('click',()=>openLogin('请先使用邀请码登录')));
   }
   function renderStatusOnly(){
@@ -1281,9 +2119,28 @@
       return false;
     }
     if(state.stage===1) state.videoConfirmed=true;
-    if(state.stage===2) state.assetsConfirmed=true;
-    if(state.stage===3) ensureStoryboards();
-    if(state.stage===4&&!completeShortVideoGeneration()) return false;
+    if(state.stage===2){
+      const counts=assetOverallCounts();
+      if(counts.remaining>0){
+        toast('请先确认全部角色、场景和道具');
+        return false;
+      }
+      state.assetsConfirmed=true;
+    }
+    if(state.stage===3){
+      ensureStoryboards();
+      const counts=storyboardCounts();
+      if(counts.confirmed<counts.total){
+        toast('请先确认全部分镜镜头');
+        return false;
+      }
+    }
+    if(state.stage===4){
+      state.videoModal=state.videoGenerated?'export':'cost';
+      save();
+      render();
+      return false;
+    }
     save();
     return true;
   }
@@ -1324,14 +2181,6 @@
   });
   document.getElementById('save-exit')?.addEventListener('click',()=>toast('已保存项目'));
   document.getElementById('guide-question')?.addEventListener('click',()=>openLogin('请先使用邀请码登录'));
-  const assetLink=document.querySelector('[data-view-link="assets"]');
-  if(assetLink) assetLink.setAttribute('href',assetUrl());
-  assetLink?.addEventListener('click',event=>{
-    event.preventDefault();
-    currentView='assets';
-    history.pushState(null,'',assetUrl());
-    render();
-  });
   window.addEventListener('popstate',()=>{
     currentView=new URLSearchParams(location.search).get('menuKey')==='assets'?'assets':'creator';
     render();
