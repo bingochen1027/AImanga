@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>登录注册 | 漫剧工场｜智能漫剧增长工作台</title>
-<link href="assets/styles.css?v=20260622-3" rel="stylesheet"/>
+<link href="assets/styles.css?v=20260627-doc123" rel="stylesheet"/>
 <meta content="漫剧工场｜智能漫剧增长工作台：面向中国创作者、内容机构与版权方的智能漫剧生产、抖音视频素材和个人中心付费闭环原型。" name="description"/></head>
 <body data-page="login">
 <header class="site-header">
@@ -13,7 +13,6 @@
 <a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
 <nav class="nav-links"><a href="index.html">首页</a><a href="features.html">产品功能</a><a href="account.html">个人中心</a><a href="creator-studio.html">工作台</a></nav>
 <div class="nav-actions">
-<button aria-label="切换主题" class="icon-btn" data-theme-toggle="">🌙</button>
 <a class="btn secondary" href="login.html">登录</a>
 <a class="btn primary" href="creator-studio.html">免费生成第一集</a>
 <button class="icon-btn mobile-toggle" data-mobile-toggle="">☰</button>
@@ -28,17 +27,15 @@
 <div class="grid-3"><div class="card"><h3>1</h3><p>选择身份：个人、团队、内容机构、版权方或品牌方。</p></div><div class="card"><h3>2</h3><p>选择目标：第一集、小说改编或品牌漫剧。</p></div><div class="card"><h3>3</h3><p>一句话生成或上传剧本。</p></div></div>
 </div>
 <div class="card login-card">
-<span class="page-kicker">邀请码登录 / 注册</span><h2 style="margin:14px 0 22px">使用邀请码领取试用权益</h2>
+<span class="page-kicker">邀请码登录 / 注册</span><h2 style="margin:14px 0 22px">使用邀请码登陆<br/>开启你的创作</h2>
 <div class="form-grid">
 <div class="field"><label for="login-phone">手机号</label><input id="login-phone" inputmode="tel" maxlength="11" placeholder="请输入手机号" value="13800138000"/></div>
 <div class="field"><label for="login-code">验证码</label><input id="login-code" inputmode="numeric" maxlength="6" placeholder="演示环境任意 6 位" value="888888"/></div>
 <div class="field"><label for="login-invite">邀请码</label><input id="login-invite" maxlength="24" autocomplete="one-time-code" placeholder="请输入运营分配的邀请码"/></div>
 <p class="form-message" id="login-message" role="status"></p>
-<a class="btn primary block" href="account.html" data-demo-login>使用邀请码登录并领取 500 试用积分</a>
-<div class="or-line">或</div>
-<button class="btn secondary block">微信快捷登录</button>
-<button class="btn secondary block">抖音授权登录（预留）</button>
-<p style="font-size:13px">第一阶段仅支持邀请码内测注册；没有邀请码请联系运营开通。生成前会展示 15 秒分镜视频任务和积分预估。</p>
+<label class="agreement login-agreement"><input id="login-agreement" type="checkbox"/> <span>我已阅读并同意 <a href="#" data-policy-open="terms">《用户协议》</a> 和 <a href="#" data-policy-open="privacy">《隐私政策》</a>，授权平台用于账号登录、项目创建和必要服务通知。</span></label>
+<a class="btn primary block" href="account.html" data-demo-login>登录</a>
+<p style="font-size:13px">第一阶段仅支持邀请码内测注册；没有邀请码请联系运营开通。</p>
 </div>
 </div>
 </div>
@@ -55,7 +52,7 @@
 </div>
 </footer>
 <script src="assets/site-overrides.js"></script>
-<script src="assets/app.js?v=20260626-1"></script>
+	<script src="assets/app.js?v=20260627-doc123"></script>
 <script src="assets/easy-edit.js"></script>
 </body>
 </html>
