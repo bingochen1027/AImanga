@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>引导式创作台｜漫剧工场</title>
   <meta content="轻松创作、进阶控制、专业编排三种控制深度共享同一条智能漫剧创作产线。" name="description"/>
-  <link href="assets/styles.css?v=20260626-9" rel="stylesheet"/>
+  <link href="assets/styles.css?v=20260628-reference-layout" rel="stylesheet"/>
 </head>
 <body class="creator-studio-page nami-workbench" data-page="creator-studio" data-stage="0">
   <header class="studio-globalbar studio-sitebar">
@@ -22,7 +22,6 @@
     <div class="studio-top-actions">
       <button class="asset-header-buy" id="asset-buy-top" type="button">立即抢购</button>
       <a class="studio-login-link" href="login.html">登录</a>
-      <button class="icon-btn" data-theme-toggle aria-label="切换主题">🌙</button>
       <div class="studio-flow-actions">
         <div class="storyboard-count"><span>分镜数量:</span><button id="shot-count-toggle" type="button">自动</button></div>
         <button class="btn secondary studio-back" id="studio-back" disabled>上一步</button>
@@ -33,14 +32,6 @@
   </header>
 
   <main class="creator-workbench">
-    <aside class="studio-dock" aria-label="全局工具">
-      <a href="index.html" title="首页">⌂<span>首页</span></a>
-      <a class="active" href="creator-studio.html" title="制作大片">◫<span>制作大片</span></a>
-      <a href="templates.html" title="工具箱">◇<span>工具箱</span></a>
-      <a href="account.html#projects" title="我的项目">▣<span>我的项目</span></a>
-      <a href="creator-studio.html?menuKey=assets&id=1729382256911763547" title="资产管理" data-view-link="assets">◉<span>资产管理</span></a>
-    </aside>
-
     <aside class="production-rail">
       <div class="rail-heading"><span>项目产线</span><b id="stage-progress">1 / 5</b></div>
       <nav class="production-stages">
@@ -78,16 +69,16 @@
           <label><span>+86</span><input id="studio-login-phone" inputmode="tel" maxlength="11" placeholder="手机号"/></label>
           <div class="login-code-row"><input id="studio-login-code" inputmode="numeric" maxlength="6" placeholder="验证码" value="888888"/><button type="button">获取验证码</button></div>
           <input id="studio-login-invite" type="text" maxlength="24" placeholder="邀请码"/>
-          <button class="nami-login-submit" type="button" id="studio-invite-login">登录 / 注册</button>
-          <p id="studio-login-message" role="status">第一阶段仅支持邀请码内测注册，登录后可生成 15 秒分镜视频。</p>
+          <button class="nami-login-submit" type="button" id="studio-invite-login">登录</button>
+          <p id="studio-login-message" role="status">第一阶段仅支持邀请码内测注册，每个邀请码只能使用一次。</p>
           <small><a href="login.html?next=studio">去登录页</a></small>
         </div>
       </div>
     </div>
   </div>
   <script src="assets/site-overrides.js"></script>
-  <script src="assets/app.js?v=20260626-1"></script>
-  <script src="assets/creator-studio.js?v=20260626-9"></script>
+  <script src="assets/app.js?v=20260627-doc123"></script>
+  <script src="assets/creator-studio.js?v=20260628-reference-layout"></script>
   <script src="assets/easy-edit.js"></script>
 </body>
 </html>
