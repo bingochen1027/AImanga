@@ -4,67 +4,132 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <title>个人中心｜漫剧工场</title>
-  <meta content="集中管理智能漫剧项目、资产、积分、订单、授权与团队协作。" name="description"/>
-  <link href="assets/styles.css?v=20260622-4" rel="stylesheet"/>
+  <meta content="集中管理你的漫剧项目与积分，从上次的下一步继续创作。" name="description"/>
+  <link href="assets/styles.css?v=20260627-doc123" rel="stylesheet"/>
 </head>
-<body data-page="account" class="account-refresh">
+<body data-page="account" class="account-simple-page">
 <header class="site-header">
   <div class="container nav">
     <a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
-    <nav class="nav-links"><a href="index.html">首页</a><a href="features.html">产品功能</a><a href="account.html">个人中心</a><a href="creator-studio.html">工作台</a></nav>
-    <div class="nav-actions"><button aria-label="切换日间和暗夜模式" class="icon-btn" data-theme-toggle>🌙</button><a class="btn secondary" href="login.html">登录</a><a class="btn primary" href="creator-studio.html">免费生成第一集</a><button aria-label="打开导航" class="icon-btn mobile-toggle" data-mobile-toggle>☰</button></div>
+    <nav class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="features.html">产品功能</a>
+      <a class="is-active" href="account.html">个人中心</a>
+      <a href="creator-studio.html">工作台</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="account-credit-chip" href="#wallet"><span></span><b>1,320</b><em>积分</em></a>
+      <a class="account-nav-avatar" href="account.html" aria-label="个人中心">创</a>
+      <button aria-label="打开导航" class="icon-btn mobile-toggle" data-mobile-toggle>☰</button>
+    </div>
   </div>
 </header>
 
-<main>
-  <section class="account-hero">
-    <div class="container account-hero-inner">
-      <div class="account-identity"><div class="account-avatar">创</div><div><span>欢迎回来</span><h1>漫剧创作者</h1><p>创作者会员 · 已连续创作 28 天</p></div></div>
-      <div class="account-hero-actions"><a class="btn primary" href="creator-studio.html">继续创作</a><a class="btn secondary" href="wizard.html">新建项目</a></div>
-      <div class="account-membership"><div><span>当前方案</span><b>创作者会员</b><small>2026-07-20 到期</small></div><div><span>可用积分</span><b>1,320</b><small>预计生成 4 集标准视频</small></div><div><span>本月创作</span><b>18 集</b><small>较上月增加 36%</small></div></div>
+<main class="account-simple-main">
+  <section class="container account-simple-bar">
+    <div class="account-simple-avatar">创</div>
+    <div>
+      <h1>漫剧创作者</h1>
+      <p>创作者会员 · <b>2026-07-20</b> 到期</p>
     </div>
   </section>
 
-  <nav class="container account-anchor-nav"><a href="#overview">总览</a><a href="#projects">我的项目</a><a href="#assets">资产库</a><a href="#wallet">积分钱包</a></nav>
-
-  <section class="container account-dashboard" id="overview">
-    <div class="account-continue-card">
-      <div class="continue-cover"><img src="assets/images/story-cases/case-platform-nine.png" alt="月台第九分钟当前项目"/><span>最近编辑</span></div>
-      <div class="continue-copy"><span class="page-kicker">继续上次创作</span><h2>月台第九分钟 · 第一单元</h2><p>当前任务：确认两版悬疑节奏差异，再进入角色与场景资产检查。</p><div class="continue-stage"><span class="done">剧本方向</span><i></i><span class="active">大纲确认</span><i></i><span>资产检查</span><i></i><span>分镜视频</span></div><div class="continue-meta"><div><small>项目进度</small><b>42%</b></div><div><small>预计剩余</small><b>约 18 分钟</b></div><div><small>预计消耗</small><b>280 积分</b></div></div><a class="btn primary" href="creator-studio.html">继续当前步骤</a></div>
+  <section class="container account-simple-section" id="projects">
+    <div class="account-simple-head">
+      <div>
+        <h2>我的项目</h2>
+        <p>从上次的下一步直接继续，不必重新找入口。</p>
+      </div>
+      <a class="btn primary" href="creator-studio.html">进入工作台</a>
     </div>
-    <div class="account-side-stack">
-      <div class="account-stat-card"><span>进行中项目</span><b>3</b><small>1 个等待确认</small></div><div class="account-stat-card"><span>可复用资产</span><b>46</b><small>角色、场景与道具</small></div><div class="account-stat-card warning"><span>待确认事项</span><b>2</b><small>大纲风险、授权文件</small></div>
+    <div class="account-simple-projects">
+      <a class="account-simple-project" href="creator-studio.html">
+        <div class="account-simple-cover">
+          <img src="assets/images/story-cases/case-platform-nine.png" alt="月台第九分钟封面"/>
+          <span>系列 · 第一单元</span>
+        </div>
+        <div class="account-simple-body">
+          <h3>月台第九分钟</h3>
+          <p>下一步：<b>确认大纲差异</b></p>
+          <footer><small>更新于 12 分钟前</small><strong>继续 ›</strong></footer>
+        </div>
+      </a>
+      <a class="account-simple-project" href="creator-studio.html">
+        <div class="account-simple-cover">
+          <img src="assets/images/story-cases/case-xingchao-archive.png" alt="星潮档案短片封面"/>
+          <span>科幻悬疑 · 试制</span>
+        </div>
+        <div class="account-simple-body">
+          <h3>星潮档案短片</h3>
+          <p>下一步：<b>补齐城市信号视图</b></p>
+          <footer><small>更新于昨天</small><strong>继续 ›</strong></footer>
+        </div>
+      </a>
+      <a class="account-simple-project" href="creator-studio.html">
+        <div class="account-simple-cover">
+          <img src="assets/images/story-cases/case-redline-chase.png" alt="赤线追踪试制封面"/>
+          <span>动作短片 · 首集</span>
+        </div>
+        <div class="account-simple-body">
+          <h3>赤线追踪试制</h3>
+          <p>下一步：<b>检查首集预览素材</b></p>
+          <footer><small>更新于 3 天前</small><strong>继续 ›</strong></footer>
+        </div>
+      </a>
     </div>
   </section>
 
-  <div class="container"><div id="latest-purchase-alert" class="account-alert refined-alert"><h3>最新积分记录</h3><p>积分由后台分配管理，最近一次积分变化会显示在这里。</p><div class="hero-actions"><a class="btn primary small" href="#wallet">查看积分</a><a class="btn secondary small" href="creator-studio.html">开始创作</a></div></div></div>
-
-  <section class="container account-section" id="projects">
-    <div class="section-head"><div class="copy"><span class="page-kicker">我的项目</span><h2>从当前任务继续，不必重新寻找入口</h2><p>项目卡直接显示下一步、版本、成本和最近更新时间。</p></div><a class="btn primary" href="wizard.html">新建项目</a></div>
-    <div class="account-project-grid">
-      <article class="account-project-card"><img src="assets/images/story-cases/case-platform-nine.png" alt="月台第九分钟项目封面"/><div><span>系列 · 第一单元</span><h3>月台第九分钟</h3><p>下一步：确认大纲差异</p><div class="progress"><span style="width:42%"></span></div><footer><small>更新于 12 分钟前</small><a href="creator-studio.html">继续 →</a></footer></div></article>
-      <article class="account-project-card"><img src="assets/images/story-cases/case-xingchao-archive.png" alt="星潮档案项目封面"/><div><span>科幻悬疑 · 试制</span><h3>星潮档案短片</h3><p>下一步：补齐城市信号视图</p><div class="progress"><span style="width:68%"></span></div><footer><small>更新于昨天</small><a href="creator-studio.html">继续 →</a></footer></div></article>
-      <article class="account-project-card"><img src="assets/images/story-cases/case-redline-chase.png" alt="赤线追踪项目封面"/><div><span>动作短片 · 首集</span><h3>赤线追踪试制</h3><p>下一步：检查首集预览素材</p><div class="progress"><span style="width:86%"></span></div><footer><small>更新于 3 天前</small><a href="creator-studio.html">继续 →</a></footer></div></article>
+  <section class="container account-simple-section" id="wallet">
+    <div class="account-simple-head">
+      <div>
+        <h2>积分</h2>
+        <p>积分由后台分配管理，用于生成剧本、资产与分镜视频。</p>
+      </div>
     </div>
-  </section>
-
-  <section class="account-assets-wrap" id="assets"><div class="container account-section">
-    <div class="section-head"><div class="copy"><span class="page-kicker">资产库</span><h2>项目结束，资产仍然可以继续使用</h2><p>所有资产记录来源项目、版本和最近使用位置。</p></div><a class="btn secondary" href="creator-studio.html">进入资产阶段</a></div>
-    <div class="account-asset-bento">
-      <div class="asset-feature-card"><div><span>最近使用</span><h3>人物：林澈</h3><p>四视图、基础表情和角色口吻已锁定。</p><small>来自《月台第九分钟》项目档案 1.4 版</small></div><img src="assets/images/story-cases/case-fog-harbor-letter.png" alt="人物资产视觉示例"/></div>
-      <div class="asset-count-card"><span>人物资产</span><b>18</b><small>4 个本月新增</small></div><div class="asset-count-card"><span>场景资产</span><b>12</b><small>8 个可跨项目复用</small></div><div class="asset-count-card"><span>道具资产</span><b>9</b><small>2 个待补齐视图</small></div><div class="asset-count-card"><span>配音资产</span><b>7</b><small>旁白与主要角色</small></div><div class="asset-count-card"><span>音效资产</span><b>12</b><small>氛围、转场与提示音</small></div>
+    <div class="account-simple-wallet">
+      <div class="account-simple-balance">
+        <span>可用积分</span>
+        <b>1,320</b>
+        <p>预计可生成约 4 集标准视频</p>
+      </div>
+      <div class="account-simple-records" id="account-records">
+        <div class="account-simple-record-title">最近记录</div>
+        <div class="account-simple-record"><div><b>视频生成</b><span>月台第九分钟 · 第一单元</span></div><strong class="neg">-280</strong></div>
+        <div class="account-simple-record"><div><b>失败返还</b><span>星潮档案短片</span></div><strong class="pos">+60</strong></div>
+        <div class="account-simple-record"><div><b>后台分配</b><span>内测体验积分</span></div><strong class="pos">+500</strong></div>
+        <div class="account-simple-record is-more"><div><b>人物与场景</b><span>林澈 · 角色档案 1.4</span></div><strong class="neg">-160</strong></div>
+        <div class="account-simple-record is-more"><div><b>分镜视频</b><span>赤线追踪试制 · 首集</span></div><strong class="neg">-100</strong></div>
+        <div class="account-simple-record is-more"><div><b>视频生成</b><span>月台第九分钟 · 序章</span></div><strong class="neg">-280</strong></div>
+        <div class="account-simple-record is-more"><div><b>后台分配</b><span>新手礼包</span></div><strong class="pos">+200</strong></div>
+        <button class="account-more-btn" id="account-more-btn" type="button" aria-expanded="false" aria-controls="account-records"><span>查看更多</span><i>⌄</i></button>
+      </div>
     </div>
-  </div></section>
-
-  <section class="container account-section account-finance-grid" id="wallet">
-    <div class="account-wallet-card"><div class="wallet-top"><div><span>积分钱包</span><h2>1,320</h2><p>客户积分由后台分配管理。</p></div><a class="btn primary" href="creator-studio.html">使用积分创作</a></div><div class="wallet-bars"><div><span>视频生成</span><b>420</b></div><div><span>人物与场景</span><b>160</b></div><div><span>分镜视频</span><b>100</b></div></div><table><tr><th>最近记录</th><th>项目</th><th>变化</th></tr><tr><td>视频生成</td><td>月台第九分钟 · 第一单元</td><td>-280</td></tr><tr><td>失败返还</td><td>星潮档案短片</td><td>+60</td></tr><tr><td>后台分配</td><td>内测体验积分</td><td>+500</td></tr></table></div>
-    <div class="account-right-column"><div class="account-small-panel"><span>当前权益</span><h3>内测创作权益</h3><p>可进入工作台完成剧本、资产、分镜和 15 秒分镜视频生成。</p><a href="creator-studio.html">继续创作 →</a></div><div class="account-small-panel"><span>团队空间</span><h3>1 个协作空间</h3><p>3 位成员，共享 8 个项目和 26 个资产。</p><a href="#">管理团队成员 →</a></div></div>
   </section>
 </main>
 
-<footer class="footer"><div class="container footer-grid"><div><a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a><p style="margin-top:14px;max-width:430px">从故事到剧本、资产、分镜、视频的一体化智能漫剧创作平台。</p></div><div><h4>产品</h4><a href="features.html">产品功能</a></div><div><h4>探索</h4><a href="account.html">个人中心</a></div><div><h4>开始</h4><a href="login.html">登录注册</a><a href="creator-studio.html">创作工作台</a></div></div></footer>
+<footer class="footer">
+  <div class="container footer-grid">
+    <div><a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a><p style="margin-top:14px;max-width:430px">从故事到剧本、资产、分镜、视频的一体化智能漫剧创作平台。</p></div>
+    <div><h4>产品</h4><a href="features.html">产品功能</a></div>
+    <div><h4>探索</h4><a href="account.html">个人中心</a></div>
+    <div><h4>开始</h4><a href="login.html">登录注册</a><a href="creator-studio.html">创作工作台</a></div>
+  </div>
+</footer>
 <script src="assets/site-overrides.js"></script>
-<script src="assets/app.js?v=20260626-1"></script>
+<script src="assets/app.js?v=20260627-doc123"></script>
 <script src="assets/easy-edit.js"></script>
+<script>
+(function(){
+  var records=document.getElementById('account-records');
+  var button=document.getElementById('account-more-btn');
+  if(!records||!button) return;
+  var label=button.querySelector('span');
+  button.addEventListener('click',function(){
+    var open=records.classList.toggle('expanded');
+    button.setAttribute('aria-expanded',open?'true':'false');
+    label.textContent=open?'收起':'查看更多';
+  });
+})();
+</script>
 </body>
 </html>
