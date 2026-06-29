@@ -66,11 +66,6 @@
     item('login.form.title','login.html','.login-card h2','text','登录页：表单标题'),
     item('login.form.primary','login.html','[data-demo-login]','text','登录页：主按钮'),
 
-    item('wizard.hero.title','wizard.html','.app-head h1','text','向导页：主标题'),
-    item('wizard.hero.subtitle','wizard.html','.app-head p','text','向导页：主说明'),
-    item('wizard.story.default','wizard.html','#story-input','value','向导页：默认故事'),
-    item('wizard.cta.primary','wizard.html','[data-create-project]','text','向导页：创建按钮'),
-
     item('account.hero.name','account.html','.account-identity h1','text','个人中心：用户名'),
     item('account.hero.plan','account.html','.account-identity p','text','个人中心：身份说明'),
     item('account.continue.title','account.html','.continue-copy h2','text','个人中心：继续项目标题'),

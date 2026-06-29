@@ -1,61 +1,27 @@
 <!DOCTYPE html>
-
-<html data-theme="light" lang="zh-CN">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>剧本生成向导 | 漫剧工场｜智能漫剧增长工作台</title>
-<link href="assets/styles.css?v=20260622-3" rel="stylesheet"/>
-<meta content="漫剧工场｜智能漫剧增长工作台：面向中国创作者、内容机构与版权方的智能漫剧生产、抖音视频素材和个人中心付费闭环原型。" name="description"/></head>
-<body data-page="wizard">
-<header class="site-header">
-<div class="container nav">
-<a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
-<nav class="nav-links"><a href="index.html">首页</a><a href="features.html">产品功能</a><a href="account.html">个人中心</a><a href="creator-studio.html">工作台</a></nav>
-<div class="nav-actions">
-<button aria-label="切换主题" class="icon-btn" data-theme-toggle="">🌙</button>
-<a class="btn secondary" href="login.html">登录</a>
-<a class="btn primary" href="creator-studio.html">免费生成第一集</a>
-<button class="icon-btn mobile-toggle" data-mobile-toggle="">☰</button>
-</div>
-</div>
-</header>
-<main class="app-shell">
-<aside class="sidebar">
-<div class="side-group"><div class="side-title">创作者中心</div><nav class="side-nav"><a href="account.html"><span>🏠</span>总览</a><a href="account.html#wallet"><span>💎</span>我的钱包 / 积分</a><a href="account.html#projects"><span>🎬</span>我的项目</a><a href="account.html#assets"><span>🧬</span>我的资产库</a><a href="creator-studio.html"><span>🚀</span>创作工作台</a><a href="wizard.html"><span>✍️</span>剧本向导</a></nav></div>
-<div class="card" style="padding:18px;border-radius:22px">
-<span class="mini-tag">创作者专业版</span>
-<h4 style="margin:12px 0 6px">3,820 积分</h4>
-<p style="font-size:13px">预计还能生成 4 集标准视频或 18 组视频素材。</p>
-<a class="btn primary small block" href="pricing.html" style="margin-top:14px">充值 / 升级</a>
-</div>
-</aside>
-<section class="main-app">
-<div class="app-head"><div><span class="page-kicker">新建项目</span><h1>选择你的创作起点</h1><p>可以从一句话、完整剧本或模板开始。创建项目后进入引导创作台，逐步完成方向、大纲和制作。</p></div><a class="btn primary" href="creator-studio.html" data-create-project>创建项目并开始创作</a></div><div class="cn-entry-options"><div class="active"><b>只有一个想法</b><p>用一句话开始，智能助手会逐题引导。</p><span>适合第一次创作</span></div><div><b>已有完整剧本</b><p>粘贴或上传剧本，自动提取关键信息。</p><span>适合进阶创作者</span></div><div><b>从模板开始</b><p>预填题材、平台和视觉方向，快速改编。</p><span>适合快速试制</span></div></div>
-<div class="wizard">
-<div class="steps-rail"><div class="rail-step active"><b>1</b><div><strong>输入故事</strong><p>一句话 / 剧本 / 模板</p></div></div><div class="rail-step active"><b>2</b><div><strong>智能解析</strong><p>角色、场景、爽点</p></div></div><div class="rail-step"><b>3</b><div><strong>确认剧集</strong><p>集数、标题、钩子</p></div></div><div class="rail-step"><b>4</b><div><strong>生成资产</strong><p>角色、场景、音色</p></div></div><div class="rail-step"><b>5</b><div><strong>生成第一集</strong><p>草稿 / 标准 / 投放级</p></div></div></div>
-<div class="panel form-grid">
-<div class="grid-2"><div class="field"><label for="story-input">故事输入</label><textarea id="story-input">女主重生后，在婚礼当天发现男主隐瞒真实身份。她决定不再做牺牲者，而是反向掌控所有人的命运。</textarea></div><div class="field"><label for="target-platform">目标平台</label><select id="target-platform"><option>抖音 9:16 竖屏</option><option>快手</option><option>红果</option><option>哔哩哔哩</option><option>视频号（预留）</option></select><label for="target-audience" style="margin-top:14px">目标人群</label><select id="target-audience"><option>女频 25-44 岁</option><option>男频爽文</option><option>下沉市场</option><option>出海用户</option></select></div></div>
-<div><label style="font-weight:850">题材与输出选择</label><div class="check-grid" style="margin-top:10px"><div class="check-card">甜宠 / 霸总</div><div class="check-card">重生复仇</div><div class="check-card">10 集大纲</div><div class="check-card">第一集分镜</div><div class="check-card">封面标题</div><div class="check-card">前3秒开头钩子</div></div></div>
-<div class="grid-3"><div class="card"><span class="mini-tag">角色</span><h3>4 个主要角色</h3><p>女主、男主、反派闺蜜、家族长辈。</p></div><div class="card"><span class="mini-tag">场景</span><h3>6 个核心场景</h3><p>婚礼现场、休息室、车内、别墅、医院、雨夜街道。</p></div><div class="card"><span class="mini-tag">爽点</span><h3>5 个高能节点</h3><p>身份反转、当众打脸、旧账曝光、短信钩子、二次选择。</p></div></div>
-<div class="panel" style="box-shadow:none"><h2>生成前成本预估</h2><div class="metric-row" style="margin-top:16px"><div class="metric"><b id="estimate-shots">38</b><small>分镜镜头</small></div><div class="metric"><b id="estimate-credits">420</b><small>预计积分</small></div><div class="metric"><b id="estimate-time">18 分钟</b><small>预计生成</small></div></div><div class="hero-actions" style="margin-top:20px"><a class="btn primary" href="creator-studio.html" data-create-project>创建项目并生成第一集</a><a class="btn secondary" href="pricing.html">查看积分规则</a></div></div>
-</div>
-</div>
-</section>
+<title>正在进入工作台 | AITV</title>
+<meta http-equiv="refresh" content="0; url=creator-studio.html"/>
+<link href="assets/styles.css?v=20260629-adminflow" rel="stylesheet"/>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f9ff;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  .redirect-card{width:min(420px,calc(100vw - 40px));padding:32px;border:1px solid #dbe7ff;border-radius:24px;background:#fff;box-shadow:0 24px 70px rgba(30,42,145,.12);text-align:center}
+  .redirect-card h1{margin:0 0 10px;font-size:24px}
+  .redirect-card p{margin:0 0 20px;color:#64748b;line-height:1.7}
+  .redirect-card a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;border-radius:999px;background:linear-gradient(135deg,#1e2a91,#6d3df2);color:#fff;text-decoration:none;font-weight:900}
+</style>
+<script>
+  window.location.replace('creator-studio.html' + window.location.search + window.location.hash);
+</script>
+</head>
+<body>
+<main class="redirect-card">
+  <h1>正在进入工作台</h1>
+  <p>旧入口已合并到统一创作工作台。</p>
+  <a href="creator-studio.html">立即进入</a>
 </main>
-<footer class="footer">
-<div class="container footer-grid">
-<div>
-<a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
-<p style="margin-top:14px;max-width:430px">面向中国创作者、内容机构、版权方和短剧团队的智能漫剧生产与投放增长平台。浅色官网承接转化，工作台支持深浅主题。</p>
-</div>
-<div><h4>产品</h4><a href="features.html">产品功能</a></div>
-<div><h4>账户</h4><a href="account.html">个人中心</a></div>
-<div><h4>开始</h4><a href="login.html">登录注册</a><a href="wizard.html">剧本生成向导</a><a href="creator-studio.html">创作工作台</a></div>
-</div>
-</footer>
-<script src="assets/site-overrides.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/easy-edit.js"></script>
 </body>
 </html>

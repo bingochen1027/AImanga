@@ -6,14 +6,13 @@
   document.querySelectorAll('[data-tabs]').forEach(group=>{group.querySelectorAll('[data-target]').forEach(btn=>btn.addEventListener('click',()=>{group.querySelectorAll('[data-target]').forEach(b=>b.classList.remove('active'));group.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');const panel=group.querySelector(btn.dataset.target);if(panel)panel.classList.add('active');}));});
   document.querySelectorAll('[data-filter-group]').forEach(group=>{const target=group.dataset.target;group.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{group.querySelectorAll('[data-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;document.querySelectorAll(target).forEach(card=>{const cat=card.dataset.category||'';card.style.display=(f==='all'||cat.includes(f))?'':'none';});}));});
   document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent='已复制';setTimeout(()=>btn.textContent='复制',1300)}catch(e){btn.textContent='复制失败'}}));
-
-  const loginModal=document.querySelector('[data-login-modal]');
-  const openLoginModal=()=>{if(loginModal){loginModal.classList.add('is-open');loginModal.setAttribute('aria-hidden','false')}};
-  const closeLoginModal=()=>{if(loginModal){loginModal.classList.remove('is-open');loginModal.setAttribute('aria-hidden','true')}};
-  document.querySelectorAll('[data-login-required]').forEach(trigger=>trigger.addEventListener('click',event=>{event.preventDefault();openLoginModal()}));
-  document.querySelectorAll('[data-login-modal-close]').forEach(trigger=>trigger.addEventListener('click',closeLoginModal));
-  if(loginModal) loginModal.addEventListener('click',event=>{if(event.target===loginModal) closeLoginModal()});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape') closeLoginModal()});
+  document.querySelectorAll('.coupon-line button').forEach(btn=>btn.addEventListener('click',event=>{
+    event.preventDefault();
+    const input=btn.closest('.coupon-line')?.querySelector('input');
+    const code=(input?.value||'').trim();
+    btn.textContent=code?'已应用':'请输入优惠码';
+    setTimeout(()=>{btn.textContent='使用'},1500);
+  }));
 
   document.querySelectorAll('[data-mobile-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
     document.body.classList.toggle('nav-open');
@@ -31,111 +30,396 @@
   document.documentElement.setAttribute('data-theme','light');
 })();
 
-// Connected demo: persist a lightweight customer journey across all pages.
+// Connected demo: shared localStorage data layer for invite, user and point flows.
 (function(){
-  const KEY='md-connected-state';
-  const INVITE_KEY='md-invite-codes';
-  const initial={user:null,credits:0,projects:[],events:[]};
-  const defaultInvites=[
-    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于首批内测用户注册',usageLog:[]},
-    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于体验第一阶段分镜视频生成',usageLog:[]},
-    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于内部团队验证',usageLog:[]}
-  ];
-  const read=()=>{try{return {...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...initial}}};
-  const write=(state)=>localStorage.setItem(KEY,JSON.stringify(state));
-  const track=(name,meta={})=>{const state=read();state.events=[...(state.events||[]),{name,meta,path:location.pathname.split('/').pop()||'index.html',at:new Date().toISOString()}].slice(-80);write(state)};
-  const toast=(title,detail)=>{const node=document.createElement('div');node.className='demo-toast';node.innerHTML=`<b>${title}</b><span>${detail}</span>`;document.body.appendChild(node);setTimeout(()=>node.remove(),2800)};
-  const normalizeInvite=value=>String(value||'').trim().toUpperCase().replace(/\s+/g,'');
-  const readInvites=()=>{
-    let invites;
-    try{invites=JSON.parse(localStorage.getItem(INVITE_KEY)||'null')}catch(e){invites=null}
-    if(!Array.isArray(invites)||!invites.length){
-      invites=defaultInvites.map(item=>({...item}));
-      localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
-    }
-    let updated=false;
-    invites.forEach(invite=>{
-      invite.maxUses=1;
-      invite.used=Number(invite.used||0);
-      invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
-      invite.users=Array.isArray(invite.users)?invite.users:[];
-      if(invite.used>=1) invite.status='已使用';
-      if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
-        invite.label='15秒分镜视频体验码';
-        invite.note='一次性邀请码，用于体验第一阶段分镜视频生成';
-        updated=true;
-      }
-      updated=true;
-    });
-    if(updated) saveInvites(invites);
-    return invites;
+  const KEYS={
+    connected:'md-connected-state',
+    invites:'md-invite-codes',
+    users:'md-admin-users',
+    points:'md-point-records',
+    logs:'md-admin-logs',
+    tasks:'md-admin-tasks',
+    currentUser:'md-current-user'
   };
-  const saveInvites=invites=>localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
-  const findInvite=code=>readInvites().find(item=>normalizeInvite(item.code)===normalizeInvite(code));
-  const validateInvite=code=>{
-    const invite=findInvite(code);
-    if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
-    if(invite.status!=='启用') return {ok:false,message:'该邀请码已使用或已停用，请联系运营重新开通。'};
-    if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
+  const connectedInitial={user:null,credits:0,projects:[],events:[]};
+  const escapeHtml=value=>String(value||'').replace(/[&<>"']/g,match=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
+  const normalizeInvite=value=>String(value||'').trim().toUpperCase().replace(/\s+/g,'');
+  const normalizeContact=value=>String(value||'').trim();
+  const isContact=value=>/^1\d{10}$/.test(normalizeContact(value))||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeContact(value));
+  const maskPhone=value=>/^1\d{10}$/.test(value)?value.slice(0,3)+'****'+value.slice(-4):value;
+  const formatNumber=value=>Number(value||0).toLocaleString('zh-CN');
+  const pad=value=>String(value).padStart(2,'0');
+  const formatDateTime=(date=new Date())=>{
+    const d=date instanceof Date?date:new Date(date);
+    if(Number.isNaN(d.getTime())) return formatDateTime(new Date());
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+  const dateInputValue=(days=30)=>{
+    const d=new Date();
+    d.setDate(d.getDate()+days);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  };
+  const inputDateToDateTime=value=>value?`${value} 23:59:59`:formatDateTime(new Date(Date.now()+30*86400000));
+  const isExpired=value=>{
+    if(!value) return false;
+    const normalized=String(value).replace(/-/g,'/');
+    const time=new Date(normalized).getTime();
+    return !Number.isNaN(time)&&time<Date.now();
+  };
+  const readJson=(key,fallback)=>{
+    try{
+      const value=JSON.parse(localStorage.getItem(key)||'null');
+      if(Array.isArray(fallback)) return Array.isArray(value)?value:fallback.map(item=>({...item}));
+      return {...fallback,...(value&&typeof value==='object'?value:{})};
+    }catch(e){
+      return Array.isArray(fallback)?fallback.map(item=>({...item})):{...fallback};
+    }
+  };
+  const writeJson=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+  const toast=(title,detail='')=>{
+    const node=document.createElement('div');
+    node.className='demo-toast';
+    node.innerHTML=`<b>${escapeHtml(title)}</b>${detail?`<span>${escapeHtml(detail)}</span>`:''}`;
+    document.body.appendChild(node);
+    setTimeout(()=>node.remove(),2600);
+  };
+
+  const defaultInvites=[
+    {code:'ESSTART2026',status:'未使用',createdAt:'2026-06-29 09:00:00',expiredAt:'2026-07-29 23:59:59',initialCredits:500,userType:'测试用户',note:'演示注册邀请码',usedByUserId:'',usedByName:'',usedByPhone:'',usedAt:''},
+    {code:'ESALES2026',status:'已使用',createdAt:'2026-06-25 10:00:00',expiredAt:'2026-07-25 23:59:59',initialCredits:500,userType:'测试用户',note:'首批内测用户注册',usedByUserId:'U1001',usedByName:'漫剧创作者',usedByPhone:'13800138000',usedAt:'2026-06-25 10:18:00'},
+    {code:'AIMANGA60',status:'未使用',createdAt:'2026-06-25 10:00:00',expiredAt:'2026-07-25 23:59:59',initialCredits:500,userType:'普通用户',note:'15秒分镜视频体验码',usedByUserId:'',usedByName:'',usedByPhone:'',usedAt:''},
+    {code:'TEAMTEST',status:'已禁用',createdAt:'2026-06-25 10:00:00',expiredAt:'2026-07-25 23:59:59',initialCredits:800,userType:'企业用户',note:'内部团队验证',usedByUserId:'',usedByName:'',usedByPhone:'',usedAt:''}
+  ];
+  const defaultUsers=[
+    {id:'U1001',name:'漫剧创作者',phone:'13800138000',email:'',userType:'测试用户',status:'正常',inviteCode:'ESALES2026',credits:1320,registeredAt:'2026-06-25 10:18:00',lastLoginAt:'2026-06-29 10:20:00'},
+    {id:'U1002',name:'团队测试账号',phone:'13900132108',email:'',userType:'企业用户',status:'正常',inviteCode:'TEAMTEST',credits:860,registeredAt:'2026-06-26 11:05:00',lastLoginAt:'2026-06-28 16:10:00'},
+    {id:'U1003',name:'渠道内测账号',phone:'13700006621',email:'',userType:'渠道用户',status:'待激活',inviteCode:'AIMANGA60',credits:240,registeredAt:'2026-06-27 09:30:00',lastLoginAt:''}
+  ];
+  const defaultTasks=[
+    {id:'T-2401',user:'漫剧创作者',type:'分镜视频',project:'月台第九分钟',cost:48,status:'排队中',time:'刚刚'},
+    {id:'T-2398',user:'团队测试账号',type:'角色场景道具',project:'星潮档案短片',cost:120,status:'已完成',time:'12 分钟前'},
+    {id:'T-2395',user:'渠道内测账号',type:'剧本生成',project:'赤线追踪试制',cost:15,status:'失败返还',time:'1 小时前'}
+  ];
+
+  const normalizeInviteItem=(item,index=0)=>{
+    const rawStatus=String(item.status||'未使用');
+    let status=rawStatus;
+    if(rawStatus==='启用') status='未使用';
+    if(rawStatus==='停用') status='已禁用';
+    if(Number(item.used||0)>=1||rawStatus==='已使用') status='已使用';
+    const createdAt=item.createdAt||formatDateTime(new Date(Date.now()-index*86400000));
+    const expiredAt=item.expiredAt||formatDateTime(new Date(Date.now()+30*86400000));
+    if(status==='未使用'&&isExpired(expiredAt)) status='已过期';
+    const usage=Array.isArray(item.usageLog)&&item.usageLog.length?item.usageLog[item.usageLog.length-1]:{};
+    const creditMatch=String(item.note||'').match(/(\d+)\s*积分/);
+    return {
+      code:normalizeInvite(item.code)||`ES${String(100000+index)}`,
+      status:['未使用','已使用','已过期','已禁用'].includes(status)?status:'未使用',
+      createdAt,
+      expiredAt,
+      initialCredits:Number(item.initialCredits??item.credit??item.credits??(creditMatch&&creditMatch[1])??500),
+      userType:item.userType||item.label||'测试用户',
+      note:item.note||item.label||'内测邀请',
+      usedByUserId:item.usedByUserId||'',
+      usedByName:item.usedByName||'',
+      usedByPhone:item.usedByPhone||item.lastUser||usage.phone||'',
+      usedAt:item.usedAt||item.lastUsedAt||usage.usedAt||''
+    };
+  };
+  const normalizeUserItem=(item,index=0)=>({
+    id:item.id||`U${1001+index}`,
+    name:item.name||'漫剧创作者',
+    phone:normalizeContact(item.phone||item.mobile||''),
+    email:item.email||'',
+    userType:item.userType||'测试用户',
+    status:['正常','禁用','待激活'].includes(item.status)?item.status:'正常',
+    inviteCode:normalizeInvite(item.inviteCode||item.invite||''),
+    credits:Number(item.credits||0),
+    registeredAt:item.registeredAt||item.createdAt||formatDateTime(new Date(Date.now()-index*86400000)),
+    lastLoginAt:item.lastLoginAt||''
+  });
+  const defaultPointRecords=users=>users.filter(user=>Number(user.credits||0)>0).map((user,index)=>({
+    id:`P20260629${String(index+1).padStart(4,'0')}`,
+    userId:user.id,
+    userName:user.name,
+    phone:user.phone||user.email,
+    type:'注册赠送',
+    source:'邀请码注册',
+    change:Number(user.credits||0),
+    before:0,
+    after:Number(user.credits||0),
+    operator:'system',
+    reason:index===0?'初始演示积分':'初始演示积分',
+    inviteCode:user.inviteCode||'',
+    note:'',
+    createdAt:user.registeredAt||formatDateTime()
+  }));
+  const readInvites=()=>readJson(KEYS.invites,defaultInvites).map(normalizeInviteItem);
+  const saveInvites=invites=>writeJson(KEYS.invites,invites.map(normalizeInviteItem));
+  const readUsers=()=>readJson(KEYS.users,defaultUsers).map(normalizeUserItem);
+  const saveUsers=users=>{
+    const normalized=users.map(normalizeUserItem);
+    writeJson(KEYS.users,normalized);
+    const current=readCurrentUser();
+    if(current){
+      const fresh=normalized.find(user=>user.id===current.id||normalizeContact(user.phone)===normalizeContact(current.phone));
+      if(fresh) syncConnectedState(fresh);
+    }
+  };
+  const readPointRecords=()=>{
+    const users=readUsers();
+    const fallback=defaultPointRecords(users);
+    const records=readJson(KEYS.points,fallback);
+    if(!Array.isArray(records)||!records.length){
+      writeJson(KEYS.points,fallback);
+      return fallback;
+    }
+    return records;
+  };
+  const savePointRecords=records=>writeJson(KEYS.points,records);
+  const readAdminLogs=()=>readJson(KEYS.logs,[{time:formatDateTime(),operator:'system',action:'初始化演示数据',detail:'本地静态后台已准备好'}]);
+  const saveAdminLogs=logs=>writeJson(KEYS.logs,logs);
+  const readTasks=()=>readJson(KEYS.tasks,defaultTasks);
+  const saveTasks=tasks=>writeJson(KEYS.tasks,tasks);
+  const readConnected=()=>readJson(KEYS.connected,connectedInitial);
+  const writeConnected=state=>writeJson(KEYS.connected,{...connectedInitial,...state});
+  const read=readConnected;
+  const write=writeConnected;
+  const readCurrentUser=()=>{
+    try{return JSON.parse(localStorage.getItem(KEYS.currentUser)||'null')}catch(e){return null}
+  };
+  const setCurrentUser=user=>{
+    if(!user){localStorage.removeItem(KEYS.currentUser);return}
+    localStorage.setItem(KEYS.currentUser,JSON.stringify({id:user.id,name:user.name,phone:user.phone,email:user.email||'',inviteCode:user.inviteCode||''}));
+    syncConnectedState(user);
+  };
+  const findUserByPhone=phone=>readUsers().find(user=>normalizeContact(user.phone)===normalizeContact(phone)||normalizeContact(user.email)===normalizeContact(phone));
+  const generateUserId=()=>{
+    const users=readUsers();
+    let id=`U${Date.now().toString().slice(-6)}`;
+    while(users.some(user=>user.id===id)) id=`U${Math.floor(100000+Math.random()*900000)}`;
+    return id;
+  };
+  const generatePointRecordId=()=>`P${Date.now()}${Math.floor(Math.random()*90+10)}`;
+  const generateInviteCode=(prefix='ES')=>{
+    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const safePrefix=normalizeInvite(prefix||'ES').slice(0,6)||'ES';
+    let code=safePrefix;
+    for(let i=0;i<8;i+=1) code+=alphabet[Math.floor(Math.random()*alphabet.length)];
+    return code;
+  };
+  const addAdminLog=(action,detail='',operator='admin')=>{
+    const logs=readAdminLogs();
+    logs.unshift({time:formatDateTime(),operator,action,detail});
+    saveAdminLogs(logs.slice(0,120));
+  };
+  const addPointRecord=record=>{
+    const records=readPointRecords();
+    records.unshift({id:generatePointRecordId(),createdAt:formatDateTime(),operator:'admin',note:'',...record});
+    savePointRecords(records.slice(0,500));
+  };
+  const syncConnectedState=userArg=>{
+    const user=userArg||readCurrentUser();
+    const users=readUsers();
+    const fresh=user&&users.find(item=>item.id===user.id||normalizeContact(item.phone)===normalizeContact(user.phone));
+    const state=readConnected();
+    if(fresh){
+      state.user={id:fresh.id,phone:fresh.phone,name:fresh.name,plan:'免费试用',inviteCode:fresh.inviteCode,status:fresh.status};
+      state.credits=Number(fresh.credits||0);
+    }else{
+      state.user=null;
+      state.credits=0;
+    }
+    writeConnected(state);
+    return state;
+  };
+  const track=(name,meta={})=>{
+    const state=readConnected();
+    state.events=[...(state.events||[]),{name,meta,path:location.pathname.split('/').pop()||'index.html',at:new Date().toISOString()}].slice(-100);
+    writeConnected(state);
+  };
+  const validateInviteForRegister=code=>{
+    const invite=readInvites().find(item=>normalizeInvite(item.code)===normalizeInvite(code));
+    if(!normalizeInvite(code)) return {ok:false,message:'请输入邀请码。'};
+    if(!invite) return {ok:false,message:'邀请码不存在，请联系管理员获取新的邀请码。'};
+    const status=normalizeInviteItem(invite).status;
+    if(status==='已使用') return {ok:false,message:'该邀请码已被使用，请联系管理员获取新的邀请码。'};
+    if(status==='已禁用') return {ok:false,message:'该邀请码已禁用，请联系管理员。'};
+    if(status==='已过期') return {ok:false,message:'该邀请码已过期，请联系管理员获取新的邀请码。'};
+    if(status!=='未使用') return {ok:false,message:'该邀请码当前不可用。'};
     return {ok:true,invite};
   };
-  const consumeInvite=(code,phone)=>{
-    const normalized=normalizeInvite(code);
-    const invites=readInvites();
-    const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
-    if(!invite) return null;
-    invite.users=Array.isArray(invite.users)?invite.users:[];
-    invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
-    if(!invite.users.includes(phone)){
-      invite.used=Number(invite.used||0)+1;
-      invite.users.push(phone);
-      invite.usageLog.push({phone,usedAt:new Date().toLocaleString('zh-CN',{hour12:false}),page:location.pathname.split('/').pop()||'index.html'});
-    }
-    invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
-    invite.lastUser=phone;
-    if(Number(invite.used||0)>=1) invite.status='已使用';
+  const registerUser=formData=>{
+    const phone=normalizeContact(formData.phone);
+    const name=String(formData.name||'').trim()||'漫剧创作者';
+    if(!isContact(phone)) return {ok:false,message:'请输入有效手机号或邮箱。'};
+    if(findUserByPhone(phone)) return {ok:false,message:'该账号已注册，请直接登录。'};
+    const inviteResult=validateInviteForRegister(formData.inviteCode);
+    if(!inviteResult.ok) return inviteResult;
+    const now=formatDateTime();
+    const invite=inviteResult.invite;
+    const before=0;
+    const credits=Number(invite.initialCredits||0);
+    const user={id:generateUserId(),name,phone,email:/@/.test(phone)?phone:'',userType:invite.userType||'测试用户',status:'正常',inviteCode:invite.code,credits,registeredAt:now,lastLoginAt:now};
+    const users=readUsers();
+    users.unshift(user);
+    writeJson(KEYS.users,users.map(normalizeUserItem));
+    const invites=readInvites().map(item=>{
+      if(normalizeInvite(item.code)!==normalizeInvite(invite.code)) return item;
+      return {...item,status:'已使用',usedByUserId:user.id,usedByName:user.name,usedByPhone:user.phone||user.email,usedAt:now};
+    });
     saveInvites(invites);
-    return invite;
+    if(credits>0){
+      addPointRecord({userId:user.id,userName:user.name,phone:user.phone||user.email,type:'注册赠送',source:'邀请码注册',change:credits,before,after:credits,operator:'system',reason:'邀请码注册赠送',inviteCode:user.inviteCode,note:''});
+    }
+    addAdminLog('用户注册成功',`${user.name} 使用邀请码 ${user.inviteCode} 注册`, 'system');
+    setCurrentUser(user);
+    track('invite_register',{inviteCode:user.inviteCode,userId:user.id});
+    return {ok:true,message:'注册成功，已发放初始积分。',user};
   };
+  const loginUser=phone=>{
+    if(!isContact(phone)) return {ok:false,message:'请输入有效手机号或邮箱。'};
+    const users=readUsers();
+    const index=users.findIndex(user=>normalizeContact(user.phone)===normalizeContact(phone)||normalizeContact(user.email)===normalizeContact(phone));
+    if(index<0) return {ok:false,message:'账号不存在，请先使用邀请码注册。'};
+    if(users[index].status==='禁用') return {ok:false,message:'账号已禁用，请联系管理员。'};
+    users[index]={...users[index],lastLoginAt:formatDateTime()};
+    saveUsers(users);
+    setCurrentUser(users[index]);
+    addAdminLog('用户登录',`${users[index].name} 登录前台`, 'system');
+    track('user_login',{userId:users[index].id});
+    return {ok:true,message:'登录成功。',user:users[index]};
+  };
+  const updateUserCredits=(userId,type,amount,reason,source,note='',operator='admin')=>{
+    const users=readUsers();
+    const index=users.findIndex(user=>user.id===userId);
+    if(index<0) return {ok:false,message:'用户不存在。'};
+    const delta=type==='扣减'?-Math.abs(Number(amount||0)):Math.abs(Number(amount||0));
+    if(!Math.abs(delta)) return {ok:false,message:'请输入积分数量。'};
+    const before=Number(users[index].credits||0);
+    const after=before+delta;
+    if(after<0) return {ok:false,message:'扣减积分不能超过当前积分。'};
+    users[index]={...users[index],credits:after};
+    saveUsers(users);
+    addPointRecord({userId:users[index].id,userName:users[index].name,phone:users[index].phone||users[index].email,type:delta<0?'扣减':'增加',source,change:delta,before,after,operator,reason,inviteCode:users[index].inviteCode||'',note});
+    return {ok:true,user:users[index],before,after,delta};
+  };
+  const updateUserStatus=(userId,status)=>{
+    const users=readUsers();
+    const index=users.findIndex(user=>user.id===userId);
+    if(index<0) return {ok:false,message:'用户不存在。'};
+    users[index]={...users[index],status};
+    saveUsers(users);
+    addAdminLog(status==='禁用'?'用户禁用':'用户启用',`${users[index].name} -> ${status}`);
+    return {ok:true,user:users[index]};
+  };
+  const ensureData=()=>{
+    saveInvites(readInvites());
+    saveUsers(readUsers());
+    if(!localStorage.getItem(KEYS.points)||!readPointRecords().length) savePointRecords(defaultPointRecords(readUsers()));
+    if(!localStorage.getItem(KEYS.logs)) saveAdminLogs([{time:formatDateTime(),operator:'system',action:'初始化演示数据',detail:'本地静态后台已准备好'}]);
+    if(!localStorage.getItem(KEYS.tasks)) saveTasks(defaultTasks);
+    syncConnectedState();
+  };
+
+  window.AITVData={
+    keys:KEYS,escapeHtml,normalizeInvite,normalizeContact,maskPhone,formatNumber,isContact,formatDateTime,dateInputValue,inputDateToDateTime,isExpired,
+    readJson,writeJson,toast,readConnected,writeConnected,track,
+    readInvites,saveInvites,validateInviteForRegister,generateInviteCode,
+    readUsers,saveUsers,findUserByPhone,generateUserId,loginUser,registerUser,updateUserCredits,updateUserStatus,
+    readPointRecords,savePointRecords,addPointRecord,generatePointRecordId,
+    readAdminLogs,saveAdminLogs,addAdminLog,readTasks,saveTasks,readCurrentUser,setCurrentUser,syncConnectedState,ensureData
+  };
+  ensureData();
 
   track('page_view',{referrer:document.referrer||'direct'});
   document.querySelectorAll('a.btn').forEach(a=>a.addEventListener('click',()=>track('cta_click',{label:a.textContent.trim(),href:a.getAttribute('href')})));
 
-  const login=document.querySelector('[data-demo-login]');
-  if(login){
+  document.querySelectorAll('[data-auth-tab]').forEach(button=>button.addEventListener('click',()=>{
+    const tab=button.dataset.authTab;
+    document.querySelectorAll('[data-auth-tab]').forEach(item=>item.classList.toggle('active',item.dataset.authTab===tab));
+    document.querySelectorAll('[data-auth-panel]').forEach(panel=>panel.classList.toggle('active',panel.dataset.authPanel===tab));
+    const message=document.getElementById('login-message');
+    if(message) message.textContent='';
+  }));
+  const nextUrl=()=>{
     const next=new URLSearchParams(location.search).get('next');
-    if(next==='wizard') login.setAttribute('href','wizard.html');
-    if(next==='studio'||next==='creator-studio') login.setAttribute('href','creator-studio.html');
-  }
-  if(login) login.addEventListener('click',(event)=>{
-    const phone=document.getElementById('login-phone').value.trim();
-    const code=document.getElementById('login-code').value.trim();
-    const inviteCode=document.getElementById('login-invite').value.trim();
-    const agreement=document.getElementById('login-agreement');
-    const inviteResult=validateInvite(inviteCode);
-    if(!/^1\d{10}$/.test(phone)||!/^\d{6}$/.test(code)){
-      event.preventDefault();
-      document.getElementById('login-message').textContent='请输入有效手机号和 6 位验证码。';
-      return;
-    }
-    if(agreement&&!agreement.checked){
-      event.preventDefault();
-      document.getElementById('login-message').textContent='请先阅读并同意用户协议和隐私政策。';
-      return;
-    }
-    if(!inviteResult.ok){
-      event.preventDefault();
-      document.getElementById('login-message').textContent=inviteResult.message;
-      return;
-    }
-    const invite=consumeInvite(inviteCode,phone.slice(0,3)+'****'+phone.slice(-4))||inviteResult.invite;
-    const state=read();
-    state.user={id:'USR-DEMO-01',phone:phone.slice(0,3)+'****'+phone.slice(-4),name:'漫剧创作者',plan:'免费试用',inviteCode:normalizeInvite(invite.code)};
-    if(!state.events.some(x=>x.name==='trial_credits_granted')) state.credits=(state.credits||0)+500;
-    state.events.push({name:'invite_login',meta:{inviteCode:normalizeInvite(invite.code)},path:'login.html',at:new Date().toISOString()});
-    state.events.push({name:'trial_credits_granted',meta:{credits:500,inviteCode:normalizeInvite(invite.code)},path:'login.html',at:new Date().toISOString()});
-    write(state);
+    if(next==='studio'||next==='creator-studio'||next==='wizard') return 'creator-studio.html';
+    return 'account.html';
+  };
+  document.querySelector('[data-login-submit]')?.addEventListener('click',event=>{
+    event.preventDefault();
+    const phone=document.getElementById('login-phone')?.value.trim()||'';
+    const code=document.getElementById('login-code')?.value.trim()||'';
+    const message=document.getElementById('login-message');
+    if(!/^\d{4,8}$/.test(code)){if(message) message.textContent='请输入验证码或密码。';return}
+    const result=loginUser(phone);
+    if(!result.ok){if(message) message.textContent=result.message;return}
+    toast('登录成功','已同步个人中心积分。');
+    location.href=nextUrl();
   });
+  document.querySelector('[data-register-submit]')?.addEventListener('click',event=>{
+    event.preventDefault();
+    const agreement=document.getElementById('register-agreement');
+    const message=document.getElementById('login-message');
+    if(agreement&&!agreement.checked){if(message) message.textContent='请先阅读并同意用户协议和隐私政策。';return}
+    const code=document.getElementById('register-code')?.value.trim()||'';
+    if(!/^\d{4,8}$/.test(code)){if(message) message.textContent='请输入验证码或密码。';return}
+    const result=registerUser({
+      phone:document.getElementById('register-phone')?.value.trim()||'',
+      name:document.getElementById('register-name')?.value.trim()||'',
+      code,
+      inviteCode:document.getElementById('register-invite')?.value.trim()||''
+    });
+    if(!result.ok){if(message) message.textContent=result.message;return}
+    toast('注册成功',`已发放 ${Number(result.user.credits||0)} 积分`);
+    location.href=nextUrl();
+  });
+
+  function renderAccountPage(){
+    if(document.body.dataset.page!=='account') return;
+    const current=readCurrentUser();
+    const fresh=current?readUsers().find(user=>user.id===current.id||normalizeContact(user.phone)===normalizeContact(current.phone)):null;
+    const set=(selector,value)=>{const node=document.querySelector(selector);if(node) node.textContent=value;};
+    const initial=name=>(name||'访').trim().slice(0,1).toUpperCase();
+    if(!fresh){
+      set('#account-name','未登录用户');
+      set('#account-meta','请先登录或使用邀请码注册。');
+      set('#account-avatar','访');
+      set('#account-nav-avatar','访');
+      set('#account-nav-credits','0');
+      set('#account-credits','0');
+      set('#account-wallet-note','登录后查看后台分配的积分余额。');
+      const profile=document.getElementById('account-profile-grid');
+      if(profile) profile.innerHTML=`<div><span>账号</span><b>未登录</b></div><div><span>状态</span><b>待登录</b></div><div><span>邀请码</span><b>-</b></div><div><span>最近登录</span><b>-</b></div>`;
+      const records=document.getElementById('account-records');
+      if(records) records.innerHTML=`<div class="account-simple-record-title">最近记录</div><div class="account-empty-state"><b>暂无积分记录</b><span>登录后将展示注册赠送、后台发放、扣减和失败返还记录。</span><a class="btn secondary small" href="login.html">去登录</a></div>`;
+      return;
+    }
+    setCurrentUser(fresh);
+    set('#account-name',fresh.name);
+    set('#account-meta',`${fresh.userType||'内测用户'} · ${fresh.status} · ${maskPhone(fresh.phone||fresh.email)}`);
+    set('#account-avatar',initial(fresh.name));
+    set('#account-nav-avatar',initial(fresh.name));
+    set('#account-nav-credits',formatNumber(fresh.credits));
+    set('#account-credits',formatNumber(fresh.credits));
+    set('#account-wallet-note',`来自邀请码 ${fresh.inviteCode||'-'}，积分由后台管理员统一分配。`);
+    const profile=document.getElementById('account-profile-grid');
+    if(profile) profile.innerHTML=[
+      ['账号',fresh.phone||fresh.email||'-'],
+      ['状态',fresh.status],
+      ['邀请码',fresh.inviteCode||'-'],
+      ['注册时间',fresh.registeredAt||'-'],
+      ['最近登录',fresh.lastLoginAt||'-'],
+      ['用户类型',fresh.userType||'-']
+    ].map(([label,value])=>`<div><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`).join('');
+    const userRecords=readPointRecords().filter(record=>record.userId===fresh.id||normalizeContact(record.phone)===normalizeContact(fresh.phone)).slice(0,12);
+    const records=document.getElementById('account-records');
+    if(records){
+      records.innerHTML=`<div class="account-simple-record-title">最近记录</div>${(userRecords.length?userRecords:[{reason:'暂无积分记录',source:'后台还没有为该账号产生流水',change:0,createdAt:'-'}]).map((record,index)=>`<div class="account-simple-record ${index>2?'is-more':''}"><div><b>${escapeHtml(record.reason||record.type||record.source||'积分记录')}</b><span>${escapeHtml(record.source||record.note||record.createdAt||'')}</span></div><strong class="${Number(record.change||0)>=0?'pos':'neg'}">${Number(record.change||0)>0?'+':''}${formatNumber(record.change||0)}</strong></div>`).join('')}${userRecords.length>3?'<button class="account-more-btn" id="account-more-btn" type="button" aria-expanded="false" aria-controls="account-records"><span>查看更多</span><i>⌄</i></button>':''}`;
+    }
+  }
+  renderAccountPage();
 
   document.querySelectorAll('[data-policy-open]').forEach(link=>link.addEventListener('click',event=>{
     event.preventDefault();
@@ -155,77 +439,10 @@
     modal.addEventListener('click',e=>{if(e.target===modal) modal.remove()});
   }));
 
-  function renderInvitePortal(){
-    const host=document.getElementById('invite-portal-root');
-    if(!host) return;
-    const invites=readInvites();
-    const total=invites.length;
-    const active=invites.filter(item=>item.status==='启用').length;
-    const used=invites.filter(item=>item.status==='已使用'||Number(item.used||0)>=1).length;
-    host.innerHTML=`<section class="portal-hero">
-      <div><span class="page-kicker">后台 Portal</span><h1>邀请码管理</h1><p>生成一次性邀请码，查看每个邀请码的启用、已使用、停用状态，并追踪使用人和使用时间。</p></div>
-      <div class="portal-stats"><div><span>全部邀请码</span><b>${total}</b></div><div><span>可使用</span><b>${active}</b></div><div><span>已使用</span><b>${used}</b></div></div>
-    </section>
-    <section class="portal-grid">
-      <form class="portal-card" id="invite-create-form">
-        <h2>生成邀请码</h2>
-        <label><span>用途备注</span><input id="invite-label" maxlength="30" placeholder="例如：渠道内测 / 客户试用"/></label>
-        <label><span>说明</span><textarea id="invite-note" maxlength="120" placeholder="选填，便于后续追踪来源"></textarea></label>
-        <button class="btn primary block" type="submit">生成一次性邀请码</button>
-        <p>每个邀请码只能登录 / 注册一次，使用后自动变为“已使用”。</p>
-      </form>
-      <div class="portal-card wide">
-        <div class="portal-card-head"><h2>邀请码状态</h2><button class="btn secondary small" type="button" data-invite-reset>重置演示数据</button></div>
-        <div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>邀请码</th><th>用途</th><th>状态</th><th>使用人</th><th>使用时间</th><th>操作</th></tr></thead><tbody>
-          ${invites.map(item=>`<tr>
-            <td><button type="button" data-copy="${escapePortal(item.code)}">${escapePortal(item.code)}</button></td>
-            <td><b>${escapePortal(item.label||'未命名')}</b><small>${escapePortal(item.note||'一次性邀请码')}</small></td>
-            <td><span class="invite-status ${item.status==='启用'?'active':item.status==='已使用'?'used':'off'}">${escapePortal(item.status||'启用')}</span></td>
-            <td>${escapePortal(item.lastUser||'-')}</td>
-            <td>${escapePortal(item.lastUsedAt||'-')}</td>
-            <td><button class="btn secondary small" type="button" data-invite-toggle="${escapePortal(item.code)}">${item.status==='启用'?'停用':'启用'}</button></td>
-          </tr>`).join('')}
-        </tbody></table></div>
-      </div>
-    </section>`;
-  }
-  function escapePortal(value){
-    return String(value||'').replace(/[&<>"']/g,match=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
-  }
-  function generateInviteCode(){
-    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code='ES';
-    for(let i=0;i<8;i+=1) code+=alphabet[Math.floor(Math.random()*alphabet.length)];
-    return code;
-  }
   if(document.getElementById('invite-portal-root')){
-    renderInvitePortal();
-    document.addEventListener('submit',event=>{
-      if(event.target.id!=='invite-create-form') return;
-      event.preventDefault();
-      const invites=readInvites();
-      let code=generateInviteCode();
-      while(invites.some(item=>normalizeInvite(item.code)===code)) code=generateInviteCode();
-      invites.unshift({code,label:document.getElementById('invite-label').value.trim()||'运营邀请码',status:'启用',maxUses:1,used:0,createdAt:new Date().toLocaleString('zh-CN',{hour12:false}),note:document.getElementById('invite-note').value.trim()||'后台生成的一次性邀请码',users:[],usageLog:[]});
-      saveInvites(invites);
-      toast('邀请码已生成',code);
-      renderInvitePortal();
-    });
-    document.addEventListener('click',event=>{
-      const toggle=event.target.closest('[data-invite-toggle]');
-      if(toggle){
-        const code=normalizeInvite(toggle.dataset.inviteToggle);
-        const invites=readInvites();
-        const invite=invites.find(item=>normalizeInvite(item.code)===code);
-        if(invite&&Number(invite.used||0)<1) invite.status=invite.status==='启用'?'停用':'启用';
-        saveInvites(invites);
-        renderInvitePortal();
-      }
-      if(event.target.closest('[data-invite-reset]')){
-        localStorage.removeItem(INVITE_KEY);
-        renderInvitePortal();
-      }
-    });
+    const host=document.getElementById('invite-portal-root');
+    host.innerHTML=`<section class="portal-hero"><div><span class="page-kicker">后台管理</span><h1>邀请码管理已合并</h1><p>请在统一后台中生成邀请码、查看使用状态并分配积分。</p></div><a class="btn primary" href="admin.html#invites">进入后台</a></section>`;
+    setTimeout(()=>{location.href='admin.html#invites'},900);
   }
 
   const checkCards=[...document.querySelectorAll('.check-card')];
@@ -247,7 +464,7 @@
     const title=story.includes('重生')?'重生婚礼逆袭':'我的智能漫剧项目';
     const project={id:'项目-'+Date.now().toString().slice(-6),title,stage:'剧本解析',progress:18,platform:(document.getElementById('target-platform')||{}).value||'抖音 9:16',createdAt:new Date().toISOString()};
     state.projects=[project,...(state.projects||[])].slice(0,10);
-    state.events.push({name:'project_created',meta:{projectId:project.id,title:project.title},path:'wizard.html',at:new Date().toISOString()});
+    state.events.push({name:'project_created',meta:{projectId:project.id,title:project.title},path:'creator-studio.html',at:new Date().toISOString()});
     write(state);
   }));
 
