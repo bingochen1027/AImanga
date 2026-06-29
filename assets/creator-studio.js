@@ -1,7 +1,6 @@
 (function(){
   const STORAGE_KEY='md-nami-workbench';
   const CONNECTED_KEY='md-connected-state';
-  const INVITE_KEY='md-invite-codes';
   const MAX_SCRIPT_LENGTH=10000;
   const VIDEO_CREDIT_COST=15;
   const DEFAULT_PROJECT_ID='1729382256911763547';
@@ -110,16 +109,15 @@
     scene:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 14l5-4 4 3 3-2 6 5"/></svg>',
     arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>'
   };
-  const defaultInvites=[
-    {code:'ESALES2026',label:'第一阶段内测码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于首批内测用户注册',usageLog:[]},
-    {code:'AIMANGA60',label:'15秒分镜视频体验码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于体验第一阶段分镜视频生成',usageLog:[]},
-    {code:'TEAMTEST',label:'团队测试码',status:'启用',maxUses:1,used:0,createdAt:'2026-06-25 10:00',note:'一次性邀请码，用于内部团队验证',usageLog:[]}
-  ];
   const body=document.body;
   const state=loadState();
   const initialParams=new URLSearchParams(location.search);
   const currentProjectId=initialParams.get('id')||DEFAULT_PROJECT_ID;
   let currentView=new URLSearchParams(location.search).get('menuKey')==='assets'?'assets':'creator';
+  if(['video','storyboard-video','shot-video'].includes(initialParams.get('stage'))||initialParams.get('menuKey')==='video'){
+    currentView='creator';
+    state.stage=4;
+  }
   const els={
     back:document.getElementById('studio-back'),
     next:document.getElementById('studio-next'),
@@ -162,13 +160,13 @@
       name:'视频设定',
       next:'场景角色道具',
       title:'视频设定',
-      desc:'确认单条分镜视频的画面比例、视觉风格、镜头密度和输出策略，后续阶段会沿用这些设定。',
+      desc:'确认单条分镜视频的视觉风格和输出策略，画面比例默认使用横屏 16:9，后续阶段会沿用这些设定。',
       guideTitle:'先确定视频基础参数',
-      guideCopy:'第一阶段单条分镜视频上限为 15 秒，可选择竖屏 9:16 或横屏 16:9，并选择都市写实、古风写实、赛博朋克等画面风格。',
+      guideCopy:'第一阶段单条分镜视频上限为 15 秒，画面比例默认横屏 16:9，可选择都市写实、古风写实、赛博朋克等画面风格。',
       action:'确认视频参数',
       status:()=>state.videoConfirmed?`15 秒上限 · ${state.videoRatio} · ${currentVideoStyleLabel()}`:'待确认视频参数',
-      rules:['单条分镜视频上限 15 秒','支持 9:16 / 16:9','支持指定视频风格'],
-      preview:['15 秒上限','画面比例','视频风格'],
+      rules:['单条分镜视频上限 15 秒','默认横屏 16:9','支持指定视频风格'],
+      preview:['15 秒上限','横屏 16:9','视频风格'],
       image:'assets/images/story-cases/case-xingchao-archive.png'
     },
     {
@@ -407,7 +405,7 @@
       idea:'',
       script:'',
       scriptModel:'Deepseek',
-      videoRatio:'9:16',
+      videoRatio:'16:9',
       videoModel:'neo-video-2-0',
       videoModelProvider:'DOUBAO',
       videoResolution:'480p',
@@ -455,6 +453,8 @@
       merged.stage=Math.min(Math.max(Number(merged.stage)||0,0),4);
       const allowedStyles=presetStyleOptions.map(item=>item.value);
       if(!allowedStyles.includes(merged.videoStyle)) merged.videoStyle='都市写实';
+      merged.videoRatio='16:9';
+      if(!merged.videoSettingRatio||merged.videoSettingRatio==='9:16') merged.videoSettingRatio='16:9';
       if(!['Deepseek','通义千问','Kimi','豆包','GPT-4o'].includes(merged.scriptModel)) merged.scriptModel='Deepseek';
       if(!assetStudioData[merged.assetTab]) merged.assetTab='role';
       Object.keys(defaultAssetItemStates).forEach(id=>{
@@ -495,71 +495,12 @@
   function setText(node,value){
     if(node) node.textContent=value;
   }
-  function normalizeInvite(value){
-    return String(value||'').trim().toUpperCase().replace(/\s+/g,'');
-  }
-  function maskPhone(phone){
-    return phone.slice(0,3)+'****'+phone.slice(-4);
-  }
   function readConnected(){
     const initial={user:null,credits:0,projects:[],events:[]};
     try{return {...initial,...JSON.parse(localStorage.getItem(CONNECTED_KEY)||'{}')}}catch(_){return initial}
   }
   function writeConnected(data){
     localStorage.setItem(CONNECTED_KEY,JSON.stringify(data));
-  }
-  function readInvites(){
-    let invites;
-    try{invites=JSON.parse(localStorage.getItem(INVITE_KEY)||'null')}catch(_){invites=null}
-    if(!Array.isArray(invites)||!invites.length){
-      invites=defaultInvites.map(item=>({...item}));
-      localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
-    }
-    let updated=false;
-    invites.forEach(invite=>{
-      invite.maxUses=1;
-      invite.used=Number(invite.used||0);
-      invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
-      invite.users=Array.isArray(invite.users)?invite.users:[];
-      if(invite.used>=1) invite.status='已使用';
-      if(normalizeInvite(invite.code)==='AIMANGA60'&&(/60秒|60 秒|短视频/.test(`${invite.label||''}${invite.note||''}`))){
-        invite.label='15秒分镜视频体验码';
-        invite.note='一次性邀请码，用于体验第一阶段分镜视频生成';
-        updated=true;
-      }
-      updated=true;
-    });
-    if(updated) saveInvites(invites);
-    return invites;
-  }
-  function saveInvites(invites){
-    localStorage.setItem(INVITE_KEY,JSON.stringify(invites));
-  }
-  function validateInvite(code){
-    const normalized=normalizeInvite(code);
-    const invite=readInvites().find(item=>normalizeInvite(item.code)===normalized);
-    if(!invite) return {ok:false,message:'邀请码不存在，请检查后重新输入。'};
-    if(invite.status!=='启用') return {ok:false,message:'该邀请码已使用或已停用，请联系运营重新开通。'};
-    if(Number(invite.maxUses||0)>0&&Number(invite.used||0)>=Number(invite.maxUses)) return {ok:false,message:'该邀请码已达到可用次数上限。'};
-    return {ok:true,invite};
-  }
-  function consumeInvite(code,phone){
-    const normalized=normalizeInvite(code);
-    const invites=readInvites();
-    const invite=invites.find(item=>normalizeInvite(item.code)===normalized);
-    if(!invite) return null;
-    invite.users=Array.isArray(invite.users)?invite.users:[];
-    invite.usageLog=Array.isArray(invite.usageLog)?invite.usageLog:[];
-    if(!invite.users.includes(phone)){
-      invite.used=Number(invite.used||0)+1;
-      invite.users.push(phone);
-      invite.usageLog.push({phone,usedAt:new Date().toLocaleString('zh-CN',{hour12:false}),page:'creator-studio.html'});
-    }
-    invite.lastUsedAt=new Date().toLocaleString('zh-CN',{hour12:false});
-    invite.lastUser=phone;
-    if(Number(invite.used||0)>=1) invite.status='已使用';
-    saveInvites(invites);
-    return invite;
   }
   function hasInviteSession(){
     const connected=readConnected();
@@ -575,23 +516,18 @@
       setMessage('请输入有效手机号和 6 位验证码。');
       return;
     }
-    const result=validateInvite(inviteCode);
-    if(!result.ok){
-      setMessage(result.message);
+    let result;
+    if(window.AITVData?.findUserByPhone(phone)){
+      result=window.AITVData.loginUser(phone);
+    }else{
+      result=window.AITVData?.registerUser({phone,name:'漫剧创作者',inviteCode});
+    }
+    if(!result?.ok){
+      setMessage(result?.message||'登录失败，请稍后重试。');
       return;
     }
-    const maskedPhone=maskPhone(phone);
-    const invite=consumeInvite(inviteCode,maskedPhone)||result.invite;
-    const connected=readConnected();
-    connected.user={id:'USR-DEMO-01',phone:maskedPhone,name:'漫剧创作者',plan:'免费试用',inviteCode:normalizeInvite(invite.code)};
-    connected.events=[...(connected.events||[]),{name:'invite_login',meta:{inviteCode:normalizeInvite(invite.code)},path:'creator-studio.html',at:new Date().toISOString()}].slice(-80);
-    if(!connected.events.some(event=>event.name==='trial_credits_granted')){
-      connected.credits=(connected.credits||0)+500;
-      connected.events.push({name:'trial_credits_granted',meta:{credits:500,inviteCode:normalizeInvite(invite.code)},path:'creator-studio.html',at:new Date().toISOString()});
-    }
-    writeConnected(connected);
     closeLogin();
-    toast('邀请码登录成功');
+    toast(result.message||'登录成功');
   }
   function completeFullVideoGeneration(){
     state.videoGenerated=true;
@@ -689,6 +625,22 @@
   }
   function assetUrl(){
     return 'creator-studio.html?menuKey=assets&id='+encodeURIComponent(currentProjectId);
+  }
+  function videoEditorUrl(){
+    return 'aitv-video-editor.html?embed=creator&from=creator-studio&v=20260629-docfix&id='+encodeURIComponent(currentProjectId);
+  }
+  function openVideoEditor(){
+    window.location.href=videoEditorUrl();
+  }
+  function triggerEmbeddedVideoAction(){
+    const frame=document.getElementById('nami-video-editor-frame');
+    const win=frame&&frame.contentWindow;
+    if(win&&typeof win.openCostModal==='function'){
+      win.openCostModal();
+      return true;
+    }
+    toast('分镜视频编辑器正在加载，请稍后再试');
+    return false;
   }
   function renderAssetsView(){
     body.dataset.stage='assets';
@@ -1062,13 +1014,6 @@
         <div class="nami-option-heading video-limit-card"><span>单条上限</span><b>15 秒</b><small>单个分镜视频生成时长上限为 15 秒，后续会按分镜逐条生成，方便单条重试和导出。</small></div>
       </div>
       <div class="nami-option-section">
-        <h3>画面比例</h3>
-        <div class="nami-settings-grid">
-          ${settingOption('ratio','9:16','竖屏 9:16','适合抖音、视频号、小红书等竖屏消费场景。')}
-          ${settingOption('ratio','16:9','横屏 16:9','适合横屏播放、官网展示和大屏预览。')}
-        </div>
-      </div>
-      <div class="nami-option-section">
         <h3>视频风格</h3>
         <div class="nami-settings-grid style-grid">
           ${presetStyleOptions.map(item=>settingOption('style',item.value,item.label,item.copy)).join('')}
@@ -1352,158 +1297,9 @@
   }
   function renderVideoGeneratePanel(){
     ensureStoryboards();
-    ensureVideoModelState(state);
-    const selected=videoSelectedShot();
-    const counts=storyboardCounts();
-    const dialogueCount=videoDialogueCount();
-    const cost=videoGenerationCost();
-    const connected=readConnected();
-    const credits=Number(connected.credits||3709);
-    const generated=Boolean(state.videoGenerated);
-    const shotNumber=selected.id.replace(/^D0*/,'')||selected.id;
-    const model=videoCurrentModel();
-    const voiceAvailable=model.supportAudio===1;
-    const selectedIndex=Math.max(0,state.storyboards.findIndex(item=>item.id===selected.id));
-    const promptText=selected.image||selected.line||'暂无镜头描述';
-    const promptLength=promptText.length;
-    const previewImage=videoFrameImage(selectedIndex);
-    const voiceStatus=state.videoVoiceEnabled?(state.videoVoiceCompleted?'配音已完成':'待设置声音'):'配音关闭';
     return `
-      <section class="nami-video-stage nami-video-editor-stage">
-        <div class="nami-video-head">
-          <div>
-            <span><b>5</b> 视频生成与预览</span>
-            <h2>分镜视频编辑器</h2>
-            <p>按分镜逐条检查镜头描述、视频模型、清晰度、配音和字幕，再在底部分镜条预览整片效果。</p>
-          </div>
-          <em>已自动保存</em>
-        </div>
-
-        <div class="nami-video-workspace" aria-label="分镜视频编辑器">
-          <aside class="nami-video-shot-panel" aria-label="左侧分镜列表">
-            <header class="nami-video-panel-head">
-              <div>
-                <h3>分镜列表</h3>
-                <p>${counts.total} 个镜头 · 当前分镜 ${escapeHtml(String(selectedIndex+1))}</p>
-              </div>
-              <span>${generated?'已生成':'待生成'}</span>
-            </header>
-            <div class="nami-video-shot-list">
-              ${state.storyboards.map((item,index)=>renderVideoShotListItem(item,index)).join('')}
-            </div>
-          </aside>
-
-          <main class="nami-video-stage-panel" aria-label="中央预览画布">
-            <header class="nami-video-stage-toolbar">
-              <div>
-                <h3>镜头 ${escapeHtml(shotNumber)} · 视频预览</h3>
-                <p>${escapeHtml(selected.dur||'3.0s')} · ${escapeHtml(videoDisplayRatio())} · ${escapeHtml(model.name)}</p>
-              </div>
-              <div>
-                <button class="nami-video-btn ghost" type="button" data-video-prev>上一步</button>
-                <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片'}</button>
-              </div>
-            </header>
-            <div class="nami-video-canvas-wrap">
-              <div class="nami-video-stage-canvas" style="background-image:linear-gradient(180deg,rgba(7,12,28,.08),rgba(7,12,28,.72)),url('${escapeHtml(previewImage)}')">
-                <span>当前镜头 · ${generated?'已生成':'待生成'}</span>
-                <button type="button" data-video-play aria-label="预览当前镜头">${assetStudioIcons.play}</button>
-                <p>${videoSubtitleLine(selected)}</p>
-              </div>
-              <div class="nami-video-playbar">
-                <button type="button" data-video-play aria-label="播放或暂停">▶</button>
-                <div><span style="width:${generated?'100':'42'}%"></span></div>
-                <b>${videoTotalDurationLabel()}</b>
-              </div>
-            </div>
-            <footer class="nami-video-stage-footer">
-              <div>
-                <b>本地功能已保留</b>
-                <span>分镜切换、视频模型、清晰度、时长、比例、配音、字幕、预览、生成和导出。</span>
-              </div>
-            </footer>
-          </main>
-
-          <aside class="nami-video-inspector-panel" aria-label="右侧属性面板">
-            <header class="nami-video-panel-head">
-              <div>
-                <h3>属性面板</h3>
-                <p>基础、生成、输出</p>
-              </div>
-              <span>可编辑</span>
-            </header>
-            <div class="nami-video-inspector-body">
-              <details class="nami-video-section" open>
-                <summary>镜头基础信息 <span>⌄</span></summary>
-                <div>
-                  <label class="nami-editor-prompt">
-                    <span>镜头描述</span>
-                    <textarea readonly aria-label="当前镜头描述">${escapeHtml(promptText)}</textarea>
-                    <em>${promptLength}/800</em>
-                    <button type="button" data-video-optimize>优化</button>
-                  </label>
-                  <div class="nami-video-shot-summary">
-                    <div><span>片段时长</span><b>${escapeHtml(selected.dur||'3.0s')}</b></div>
-                    <div><span>字幕状态</span><b>${state.videoSubtitleEnabled?'开启':'关闭'}</b></div>
-                    <div><span>配音状态</span><b>${escapeHtml(voiceStatus)}</b></div>
-                  </div>
-                </div>
-              </details>
-              <details class="nami-video-section" open>
-                <summary>视频模型 <span>⌄</span></summary>
-                <div>
-                  <div class="nami-video-block-head"><span>当前模型</span><b>${escapeHtml(model.name)}</b></div>
-                  <div class="nami-video-provider-tabs">${renderVideoProviderTabs(model)}</div>
-                  <div class="nami-video-model-list">${renderVideoModelChoices(model)}</div>
-                </div>
-              </details>
-              <details class="nami-video-section" open>
-                <summary>视频设置 <span>⌄</span></summary>
-                <div>
-                  ${renderVideoSettingChips('时长','duration',videoDurationOptions(model),String(state.videoSettingDuration))}
-                  ${renderVideoSettingChips('清晰度','resolution',model.resolutions,state.videoResolution)}
-                  ${renderVideoSettingChips('宽高比','aspect',model.aspectRatios,state.videoSettingRatio)}
-                </div>
-              </details>
-              <details class="nami-video-section" open>
-                <summary>配音与字幕 <span>⌄</span></summary>
-                <div class="nami-video-audio-grid">
-                  <div class="row"><span>生成配音</span><button class="nami-video-switch ${state.videoVoiceEnabled&&voiceAvailable?'':'off'}" type="button" data-video-toggle="voice" aria-label="生成配音开关" ${voiceAvailable?'':'disabled'}></button></div>
-                  <div class="row"><span>字幕</span><button class="nami-video-switch ${state.videoSubtitleEnabled?'':'off'}" type="button" data-video-toggle="subtitle" aria-label="字幕开关"></button></div>
-                  <small>${voiceAvailable?'当前模型支持生成音频':'当前模型无内置音频，字幕和后期配音仍可保留'}</small>
-                </div>
-              </details>
-              <details class="nami-video-section" open>
-                <summary>生成状态 <span>⌄</span></summary>
-                <div>
-                  <p class="nami-video-status-note">${generated?'第一集样片已就绪，可继续导出成片。':'当前还未生成整片，确认设置后可生成第一集样片。'}</p>
-                </div>
-              </details>
-            </div>
-          </aside>
-
-          <section class="nami-video-story-strip" aria-label="底部分镜缩略时间线">
-            <div class="nami-video-strip-meta">
-              <b>底部分镜条</b>
-              <span>点击分镜同步中央预览与右侧参数。</span>
-            </div>
-            <div class="nami-video-strip-list">
-              ${state.storyboards.map((item,index)=>renderVideoFrame(item,index)).join('')}
-            </div>
-            <div class="nami-video-strip-actions">
-              <button class="nami-video-btn ghost" type="button" data-video-play>整片预览</button>
-              <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片'}</button>
-              <span>${generated?'已生成':'待生成'} · ${videoTotalDurationLabel()}</span>
-            </div>
-          </section>
-        </div>
-
-        <div class="nami-video-mobile-actions">
-          <button class="nami-video-btn ghost" type="button" data-video-prev>上一步</button>
-          <button class="nami-video-btn primary" type="button" data-video-open-cost>${generated?'导出成片':'生成整片（'+counts.total+' 镜）'} <i>›</i></button>
-        </div>
-
-        ${renderVideoGenerationModal(credits,cost)}
+      <section class="nami-video-embed-stage" aria-label="分镜视频编辑器">
+        <iframe id="nami-video-editor-frame" class="nami-video-editor-frame" src="${escapeHtml(videoEditorUrl())}" title="分镜视频编辑器" loading="eager"></iframe>
       </section>
     `;
   }
@@ -1577,13 +1373,12 @@
     if(state.videoModal!=='cost') return '';
     return `<div class="nami-video-scrim" id="video-modal-scrim" role="dialog" aria-modal="true">
       <div class="nami-video-modal">
-        <header><h3>确认生成第一集样片</h3><p>生成开始前再确认一次镜头数量、预计耗时和字幕配音设置。结果仍可继续修改。</p></header>
+        <header><h3>确认生成第一集样片</h3><p>生成开始前再确认一次镜头数量、模型和字幕配音设置。结果仍可继续修改。</p></header>
         <div class="body">
           <div><span>生成内容</span><b>${state.storyboards.length} 镜整片</b></div>
-          <div><span>预计耗时</span><b>约 4 分钟</b></div>
           <div><span>视频设置</span><b>${escapeHtml(videoSettingSummary())}</b></div>
           <div><span>字幕配音</span><b>${state.videoVoiceEnabled?'配音开启':'配音关闭'} · ${state.videoSubtitleEnabled?'字幕开启':'字幕关闭'}</b></div>
-          <p>生成失败的镜头会保留重试入口。建议先生成低清样片，满意后再高清渲染。</p>
+          <p>确认后任务会进入生成队列，可在后台管理查看进度。</p>
         </div>
         <footer><button class="nami-video-btn ghost" type="button" data-video-modal-close>再检查一下</button><button class="nami-video-btn primary" type="button" data-video-confirm-generate>确认生成</button></footer>
       </div>
@@ -1793,7 +1588,7 @@
       render();
     }));
     document.querySelector('[data-stage-reset="video"]')?.addEventListener('click',()=>{
-      state.videoRatio='9:16';
+      state.videoRatio='16:9';
       state.videoModel='neo-video-2-0';
       state.videoModelProvider='DOUBAO';
       state.videoResolution='480p';
@@ -2136,9 +1931,8 @@
       }
     }
     if(state.stage===4){
-      state.videoModal=state.videoGenerated?'export':'cost';
       save();
-      render();
+      triggerEmbeddedVideoAction();
       return false;
     }
     save();
@@ -2174,11 +1968,11 @@
     if(window.history.length>1) window.history.back();
     else window.location.href='index.html';
   });
-  document.getElementById('shot-count-toggle')?.addEventListener('click',()=>toast('分镜数量：自动'));
   document.getElementById('asset-buy-top')?.addEventListener('click',()=>{
     if(currentView==='assets') return toast('请先登录后购买');
     openLogin('请先使用邀请码登录');
   });
+  document.querySelector('[data-code-send]')?.addEventListener('click',()=>toast('验证码已发送'));
   document.getElementById('save-exit')?.addEventListener('click',()=>toast('已保存项目'));
   document.getElementById('guide-question')?.addEventListener('click',()=>openLogin('请先使用邀请码登录'));
   window.addEventListener('popstate',()=>{

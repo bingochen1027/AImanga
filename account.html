@@ -5,7 +5,7 @@
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <title>个人中心｜漫剧工场</title>
   <meta content="集中管理你的漫剧项目与积分，从上次的下一步继续创作。" name="description"/>
-  <link href="assets/styles.css?v=20260627-doc123" rel="stylesheet"/>
+  <link href="assets/styles.css?v=20260629-adminflow" rel="stylesheet"/>
 </head>
 <body data-page="account" class="account-simple-page">
 <header class="site-header">
@@ -18,8 +18,9 @@
       <a href="creator-studio.html">工作台</a>
     </nav>
     <div class="nav-actions">
-      <a class="account-credit-chip" href="#wallet"><span></span><b>1,320</b><em>积分</em></a>
-      <a class="account-nav-avatar" href="account.html" aria-label="个人中心">创</a>
+      <a class="btn secondary" href="login.html">登录</a>
+      <a class="account-credit-chip" href="#wallet"><span></span><b id="account-nav-credits">0</b><em>积分</em></a>
+      <a class="account-nav-avatar" id="account-nav-avatar" href="account.html" aria-label="个人中心">创</a>
       <button aria-label="打开导航" class="icon-btn mobile-toggle" data-mobile-toggle>☰</button>
     </div>
   </div>
@@ -27,11 +28,22 @@
 
 <main class="account-simple-main">
   <section class="container account-simple-bar">
-    <div class="account-simple-avatar">创</div>
+    <div class="account-simple-avatar" id="account-avatar">创</div>
     <div>
-      <h1>漫剧创作者</h1>
-      <p>创作者会员 · <b>2026-07-20</b> 到期</p>
+      <h1 id="account-name">未登录用户</h1>
+      <p id="account-meta">请先登录或使用邀请码注册。</p>
     </div>
+  </section>
+
+  <section class="container account-simple-section" id="account-profile">
+    <div class="account-simple-head">
+      <div>
+        <h2>账号状态</h2>
+        <p>展示当前登录账号、邀请码和后台分配的积分权限。</p>
+      </div>
+      <a class="btn secondary" href="login.html">登录 / 注册</a>
+    </div>
+    <div class="account-profile-grid" id="account-profile-grid"></div>
   </section>
 
   <section class="container account-simple-section" id="projects">
@@ -89,8 +101,8 @@
     <div class="account-simple-wallet">
       <div class="account-simple-balance">
         <span>可用积分</span>
-        <b>1,320</b>
-        <p>预计可生成约 4 集标准视频</p>
+        <b id="account-credits">0</b>
+        <p id="account-wallet-note">登录后查看可用积分。</p>
       </div>
       <div class="account-simple-records" id="account-records">
         <div class="account-simple-record-title">最近记录</div>
@@ -112,11 +124,11 @@
     <div><a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a><p style="margin-top:14px;max-width:430px">从故事到剧本、资产、分镜、视频的一体化智能漫剧创作平台。</p></div>
     <div><h4>产品</h4><a href="features.html">产品功能</a></div>
     <div><h4>探索</h4><a href="account.html">个人中心</a></div>
-    <div><h4>开始</h4><a href="login.html">登录注册</a><a href="creator-studio.html">创作工作台</a></div>
+    <div><h4>开始</h4><a href="login.html">登录注册</a><a href="creator-studio.html">创作工作台</a><a href="admin.html">后台管理</a></div>
   </div>
 </footer>
 <script src="assets/site-overrides.js"></script>
-<script src="assets/app.js?v=20260627-doc123"></script>
+<script src="assets/app.js?v=20260629-adminflow"></script>
 <script src="assets/easy-edit.js"></script>
 <script>
 (function(){

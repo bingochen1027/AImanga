@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>引导式创作台｜漫剧工场</title>
   <meta content="轻松创作、进阶控制、专业编排三种控制深度共享同一条智能漫剧创作产线。" name="description"/>
-  <link href="assets/styles.css?v=20260628-reference-layout" rel="stylesheet"/>
+  <link href="assets/styles.css?v=20260629-adminflow" rel="stylesheet"/>
 </head>
 <body class="creator-studio-page nami-workbench" data-page="creator-studio" data-stage="0">
   <header class="studio-globalbar studio-sitebar">
@@ -23,7 +23,6 @@
       <button class="asset-header-buy" id="asset-buy-top" type="button">立即抢购</button>
       <a class="studio-login-link" href="login.html">登录</a>
       <div class="studio-flow-actions">
-        <div class="storyboard-count"><span>分镜数量:</span><button id="shot-count-toggle" type="button">自动</button></div>
         <button class="btn secondary studio-back" id="studio-back" disabled>上一步</button>
         <button class="btn primary vc-header-next-step" id="studio-next">下一步：视频设定</button>
       </div>
@@ -67,7 +66,7 @@
       <div class="nami-login-content">
         <div class="login-tab-panel active" data-login-panel="invite">
           <label><span>+86</span><input id="studio-login-phone" inputmode="tel" maxlength="11" placeholder="手机号"/></label>
-          <div class="login-code-row"><input id="studio-login-code" inputmode="numeric" maxlength="6" placeholder="验证码" value="888888"/><button type="button">获取验证码</button></div>
+          <div class="login-code-row"><input id="studio-login-code" inputmode="numeric" maxlength="6" placeholder="验证码" value="888888"/><button type="button" data-code-send>获取验证码</button></div>
           <input id="studio-login-invite" type="text" maxlength="24" placeholder="邀请码"/>
           <button class="nami-login-submit" type="button" id="studio-invite-login">登录</button>
           <p id="studio-login-message" role="status">第一阶段仅支持邀请码内测注册，每个邀请码只能使用一次。</p>
@@ -77,8 +76,8 @@
     </div>
   </div>
   <script src="assets/site-overrides.js"></script>
-  <script src="assets/app.js?v=20260627-doc123"></script>
-  <script src="assets/creator-studio.js?v=20260628-reference-layout"></script>
+  <script src="assets/app.js?v=20260629-adminflow"></script>
+  <script src="assets/creator-studio.js?v=20260629-adminflow"></script>
   <script src="assets/easy-edit.js"></script>
 </body>
 </html>

@@ -4,6 +4,11 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>AITV 视频编辑器 · 顶部统一版</title>
+  <script>
+    if(new URLSearchParams(location.search).get('embed')==='creator'){
+      document.documentElement.dataset.embed='creator';
+    }
+  </script>
   <style>
     :root{
       --bg:#f7faff;--panel:#fff;--panel-soft:#f3f7ff;--ink:#0f172a;--muted:#64748b;--line:#dbe7ff;
@@ -139,7 +144,7 @@
     .audio-row{display:flex;align-items:center;justify-content:space-between;height:42px}.neo-switch{width:48px;height:28px;border-radius:999px;background:#2a2d37;position:relative;border:1px solid #343847}.neo-switch:after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;left:3px;top:2px;background:#fff;transition:.18s}.neo-switch.on{background:var(--neo-purple);border-color:var(--neo-purple)}.neo-switch.on:after{left:21px}.audio-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.neo-chip{height:34px;border-radius:8px;background:#1a1d24;border:1px solid #262a35;color:#a7acbb;font-size:12px;font-weight:900}.neo-chip.active{background:rgba(116,104,255,.16);border-color:var(--neo-purple);color:#fff}.neo-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.neo-btn{height:42px;border-radius:8px;font-weight:900;font-size:13px}.neo-btn.ghost{background:#1a1d24;color:#dce0eb;border:1px solid #2d303a}.neo-btn.primary{background:linear-gradient(135deg,#6f5cff,#4f6bff);color:#fff}.neo-btn:hover{filter:brightness(1.07)}
 
     .actionbar{position:static;height:68px;flex:none;background:var(--glass);backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 34px}.status{color:var(--muted);font-size:13px}.status b{color:var(--ink)}.actionbar .cost{margin-left:auto;color:var(--purple);background:var(--grad-soft);border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-weight:900;font-size:13px}
-    .toast{position:fixed;right:22px;bottom:92px;background:#0f172a;color:#fff;border-radius:16px;padding:13px 16px;box-shadow:0 20px 55px rgba(15,23,42,.28);opacity:0;transform:translateY(10px);transition:.2s;z-index:20}.toast.show{opacity:1;transform:none}
+    .toast{position:fixed;right:22px;bottom:92px;max-width:320px;background:#fff;color:#1f2d4a;border:1px solid #dbe7ff;border-radius:16px;padding:12px 16px;box-shadow:0 18px 50px rgba(30,42,145,.14);opacity:0;transform:translateY(10px);transition:.2s;z-index:20;font-weight:900}.toast.show{opacity:1;transform:none}
     .scrim{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);z-index:30;padding:20px}.scrim.show{display:flex}.modal{width:min(460px,94vw);background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}.mh{padding:24px 26px 16px;border-bottom:1px solid var(--line)}.mh h2{margin:0 0 8px}.mh p{margin:0;color:var(--muted);line-height:1.6}.mb{padding:18px 26px}.costline{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.costline b{color:var(--purple)}.refund{margin-top:14px;border-radius:16px;background:var(--grad-soft);border:1px solid var(--line);padding:12px;color:var(--muted);font-size:13px;line-height:1.55}.mf{padding:16px 26px 22px;display:flex;gap:10px;justify-content:flex-end}
 
     @media(max-width:1280px){.studio{grid-template-columns:minmax(520px,1fr) 380px}}
@@ -2137,18 +2142,87 @@
     .actionbar .status{flex:1!important;min-width:0!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important}
 
     @media(max-width:1360px){.vs-panel{width:314px!important}.start-frame-thumb{min-height:122px!important}.shot-volume-popover{width:292px!important}}
+    html[data-embed="creator"] body{overflow:hidden!important;background:transparent!important}
+    html[data-embed="creator"] .app{display:block!important;height:100vh!important;min-height:0!important;overflow:hidden!important}
+    html[data-embed="creator"] .top,
+    html[data-embed="creator"] .side{display:none!important}
+    html[data-embed="creator"] .main{display:flex!important;flex-direction:column!important;height:100vh!important;min-height:0!important;overflow:hidden!important;background:transparent!important}
+    html[data-embed="creator"] .studio{flex:1 1 auto!important;min-height:0!important;height:auto!important;padding:0!important;gap:16px!important;grid-template-columns:minmax(560px,1fr) 420px!important;overflow:hidden!important}
+    html[data-embed="creator"] .player,
+    html[data-embed="creator"] .neowow-panel{height:100%!important;min-height:0!important}
+    html[data-embed="creator"] .actionbar{flex:0 0 58px!important;height:58px!important;margin:0!important;padding:0 18px!important;border-radius:0!important;background:rgba(255,255,255,.96)!important}
+    html[data-embed="creator"] .toast{display:none!important}
+    @media(max-width:1120px){
+      html[data-embed="creator"] body{overflow:auto!important}
+      html[data-embed="creator"] .app,
+      html[data-embed="creator"] .main{height:auto!important;min-height:100vh!important;overflow:visible!important}
+      html[data-embed="creator"] .studio{grid-template-columns:1fr!important;overflow:visible!important}
+      html[data-embed="creator"] .player,
+      html[data-embed="creator"] .neowow-panel{height:auto!important;min-height:360px!important}
+    }
+    /* Final embed fix: use the full creator-studio work area and keep audio only in the right panel. */
+    html[data-embed="creator"] .app,
+    html[data-embed="creator"] .main,
+    html[data-embed="creator"] .studio{width:100vw!important;max-width:none!important}
+    html[data-embed="creator"] .studio{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(420px,440px)!important;
+      gap:18px!important;
+      padding:12px 16px 0!important;
+      box-sizing:border-box!important;
+    }
+    html[data-embed="creator"] .player{min-width:0!important;width:100%!important}
+    html[data-embed="creator"] .neowow-panel{width:100%!important;max-width:none!important;overflow:hidden!important}
+    html[data-embed="creator"] .neo-body{padding-bottom:92px!important}
+    html[data-embed="creator"] .controls{display:none!important}
+    html[data-embed="creator"] #volumeBtn{display:none!important}
+    html[data-embed="creator"] .canvas{margin:0!important}
+    html[data-embed="creator"] .shot-volume-popover{
+      position:fixed!important;
+      left:var(--volume-popover-left,16px)!important;
+      top:var(--volume-popover-top,16px)!important;
+      right:auto!important;
+      bottom:auto!important;
+      z-index:240!important;
+    }
+    html[data-embed="creator"] .strip{
+      min-height:118px!important;
+      padding:10px 10px 12px!important;
+      gap:10px!important;
+      grid-template-columns:repeat(8,124px)!important;
+      align-items:stretch!important;
+    }
+    html[data-embed="creator"] .frame{
+      min-width:124px!important;
+      min-height:102px!important;
+      grid-template-rows:70px 32px!important;
+      border-radius:16px!important;
+    }
+    html[data-embed="creator"] .thumb-art{height:70px!important}
+    html[data-embed="creator"] .frame .ft{padding:7px 9px!important}
+    html[data-embed="creator"] .frame b,
+    html[data-embed="creator"] .frame span{font-size:12px!important}
+    html[data-embed="creator"] .dyn{font-size:11px!important;padding:4px 7px!important}
+    .image-ratio-option{position:relative!important;z-index:2!important;pointer-events:auto!important}
+    .toast{pointer-events:none!important}
+    @media(max-width:1120px){
+      html[data-embed="creator"] .app,
+      html[data-embed="creator"] .main,
+      html[data-embed="creator"] .studio{width:100%!important}
+      html[data-embed="creator"] .studio{grid-template-columns:1fr!important;padding:12px!important}
+    }
 
   </style>
 </head>
 <body>
   <div class="app">
     <header class="top editor-sitebar compact-editor-top aitv-editor-top">
-      <a class="editor-logo" href="index.html" aria-label="AITV 首页"><span class="logo-mark" aria-hidden="true"></span><span>AITV</span></a>
+      <a class="editor-logo" href="../index.html" aria-label="AITV 首页"><span class="logo-mark" aria-hidden="true"></span><span>AITV</span></a>
       <nav class="editor-main-nav" aria-label="主导航">
-        <a href="index.html">首页</a>
-        <a href="features.html">产品功能</a>
-        <a class="is-active" href="creator-studio.html">工作台</a>
-        <a href="account.html">个人中心</a>
+        <a href="../index.html">首页</a>
+        <a href="../features.html">产品功能</a>
+        <a class="is-active" href="../creator-studio.html">工作台</a>
+        <a href="../account.html">个人中心</a>
       </nav>
       <div class="editor-nav-actions compact-actions">
         <button class="editor-chip points" type="button" onclick="toast('当前剩余积分：6,719')">✦ 6,719</button>
@@ -2171,14 +2245,10 @@
       <section class="studio">
         <div class="player">
           <div class="canvas">
-            <div class="top-tools"><button type="button" onclick="toast('已切换画面填充模式')">▣ 填充-填充</button><button type="button" onclick="toast('已预留延长新分镜能力')">▣ 延长新分镜</button><button type="button" onclick="toast('高清生成将在导出时应用')">✦ 视频高清</button><button type="button" onclick="toast('多人对口型为高级功能')">♙ 多人对口型 <em>VIP</em></button></div>
             <div class="play">▶</div>
             <div class="subtitle" id="canvasSubtitle">镜头固定不动，李明身体微微前倾，双眼紧盯着屏幕，画面肌肉紧绷，呼吸缓慢而沉重。</div>
           </div>
           <div class="strip" id="shotStrip"></div>
-          <div class="controls">
-            <button class="tag control-btn" id="volumeBtn" data-volume-trigger type="button" onclick="toggleShotVolume(event)">分镜音量 <b id="playerVolumeValue">81%</b></button>
-          </div>
           <div class="shot-volume-popover" id="shotVolumePopover" role="dialog" aria-label="分镜音量设置">
             <div class="shot-volume-title">分镜音量</div>
             <div class="volume-row single" data-volume-row="video">
@@ -2372,7 +2442,6 @@
       updateCount();
       syncStoryForm(index);
       syncStartFrame(shot[0],shot[1],shot[2]);
-      toast(`已选择分镜 ${shot[0]}`);
     }
     function setEditorView(mode){
       document.body.dataset.editorView=mode;
@@ -2470,7 +2539,6 @@
       const index=shots.findIndex(s=>s[0]===id);
       if(index>-1) syncStoryForm(index);
       syncStartFrame(id,dur,text);
-      toast(`已切换到分镜 ${id}`);
     }
     function toggleTheme(){const html=document.documentElement;html.dataset.theme=html.dataset.theme==='light'?'dark':'light'}
     function updateCount(){const t=document.getElementById('promptText');document.getElementById('charCount').textContent=`${t.value.length}/800`}
@@ -2552,9 +2620,9 @@
     ];
     let vsDur=4, vsRes='480p', vsRatio='16:9';
     const vsBase=x=>x.split(' ')[0];
-    function renderVsScale(){let h='';for(let s=4;s<=15;s++)h+=`<span class="vs-tick ${s===vsDur?'active':''}" onclick="setDur(${s})">${s}s</span>`;document.getElementById('vsScale').innerHTML=h;}
-    function renderVsRes(){document.getElementById('vsRes').innerHTML=VS_RES.map(x=>`<button class="vs-opt ${vsBase(x)===vsRes?'active':''}" type="button" onclick="setRes('${vsBase(x)}')">${x}</button>`).join('');}
-    function renderVsRatio(){document.getElementById('vsRatio').innerHTML=VS_RATIO.map(a=>`<button class="vs-opt ratio ${a.r===vsRatio?'active':''}" type="button" onclick="setRatio('${a.r}')"><span class="vs-ic"><i style="width:${a.w}px;height:${a.h}px"></i></span><span>${a.r}</span></button>`).join('');}
+    function renderVsScale(){let h='';for(let s=4;s<=15;s++)h+=`<span class="vs-tick ${s===vsDur?'active':''}" onclick="setDur(${s},event)">${s}s</span>`;document.getElementById('vsScale').innerHTML=h;}
+    function renderVsRes(){document.getElementById('vsRes').innerHTML=VS_RES.map(x=>`<button class="vs-opt ${vsBase(x)===vsRes?'active':''}" type="button" onclick="setRes('${vsBase(x)}',event)">${x}</button>`).join('');}
+    function renderVsRatio(){document.getElementById('vsRatio').innerHTML=VS_RATIO.map(a=>`<button class="vs-opt ratio ${a.r===vsRatio?'active':''}" type="button" onclick="setRatio('${a.r}',event)"><span class="vs-ic"><i style="width:${a.w}px;height:${a.h}px"></i></span><span>${a.r}</span></button>`).join('');}
     function vsOrient(){const a=VS_RATIO.find(x=>x.r===vsRatio);return a?a.o:'横屏';}
     function updateVsSummary(){
       const summary=`${vsRes} · ${vsDur}s · ${vsOrient()} (${vsRatio})`;
@@ -2565,9 +2633,9 @@
       if(cost) cost.textContent=`预计 ${Math.max(48,vsDur*12)} 积分 · 约 ${Math.max(2,Math.ceil(vsDur/2))} 分钟`;
     }
     function onDur(){vsDur=parseInt(document.getElementById('vsDur').value,10);document.getElementById('vsDurVal').textContent=vsDur+'s';renderVsScale();updateVsSummary();markVsTouched();}
-    function setDur(s){vsDur=s;document.getElementById('vsDur').value=s;document.getElementById('vsDurVal').textContent=s+'s';renderVsScale();updateVsSummary();markVsTouched();}
-    function setRes(r){vsRes=r;renderVsRes();updateVsSummary();markVsTouched();}
-    function setRatio(r){vsRatio=r;renderVsRatio();updateVsSummary();markVsTouched();}
+    function setDur(s,event){event?.stopPropagation();vsDur=s;document.getElementById('vsDur').value=s;document.getElementById('vsDurVal').textContent=s+'s';renderVsScale();updateVsSummary();markVsTouched();}
+    function setRes(r,event){event?.stopPropagation();vsRes=r;renderVsRes();updateVsSummary();markVsTouched();}
+    function setRatio(r,event){event?.stopPropagation();vsRatio=r;renderVsRatio();updateVsSummary();markVsTouched();}
     function markVsTouched(){
       const p=document.getElementById('vsPanel');
       p.classList.add('touched');
@@ -2576,7 +2644,6 @@
     function confirmVs(){
       updateVsSummary();
       closeVsPanel();
-      toast(`视频设置已确认：${vsRes} · ${vsDur}s · ${vsRatio}`);
     }
     function positionVsPanel(){
       const trg=document.querySelector('#vsSelect .vs-trigger'),panel=document.getElementById('vsPanel');
@@ -2606,7 +2673,12 @@
       closeVsPanel();
     },true);
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModelMenu();closeVsPanel();closeImageModelMenu();}});
-    document.addEventListener('click',e=>{if(!e.target.closest('#vsSelect'))closeVsPanel(); if(!e.target.closest('#modelSelect'))closeModelMenu(); if(!e.target.closest('#imageModelSelect'))closeImageModelMenu(); if(!e.target.closest('#shotVolumePopover')&&!e.target.closest('[data-volume-trigger]'))closeShotVolumePanel();});
+    document.addEventListener('click',e=>{
+      if(!e.target.closest('#vsSelect')&&!e.target.closest('#vsPanel')) closeVsPanel();
+      if(!e.target.closest('#modelSelect')&&!e.target.closest('#modelMenu')) closeModelMenu();
+      if(!e.target.closest('#imageModelSelect')&&!e.target.closest('#imageModelMenu')) closeImageModelMenu();
+      if(!e.target.closest('#shotVolumePopover')&&!e.target.closest('[data-volume-trigger]')) closeShotVolumePanel();
+    });
 
     /* 起始帧和图片模型：右侧视频生成面板增强 */
     const IMAGE_MODEL_OPTIONS=[
@@ -2699,12 +2771,28 @@
     /* 分镜音量：只保留视频音量，滑动条与百分比实时同步 */
     const shotVolumeState={video:81};
     const volumeIdMap={video:'volVideo'};
+    function positionShotVolumePanel(trigger){
+      const panel=document.getElementById('shotVolumePopover');
+      if(!panel||!trigger) return;
+      const rect=trigger.getBoundingClientRect();
+      const panelWidth=panel.offsetWidth||306;
+      const panelHeight=panel.offsetHeight||96;
+      const pad=12;
+      let left=Math.min(window.innerWidth-pad-panelWidth,Math.max(pad,rect.left));
+      let top=rect.bottom+8;
+      if(top+panelHeight>window.innerHeight-pad) top=Math.max(pad,rect.top-panelHeight-8);
+      panel.style.setProperty('--volume-popover-left',left+'px');
+      panel.style.setProperty('--volume-popover-top',top+'px');
+    }
     function toggleShotVolume(event){
       event.stopPropagation();
       closeModelMenu();closeVsPanel();closeImageModelMenu();
       const panel=document.getElementById('shotVolumePopover');
-      panel?.classList.toggle('open');
       renderShotVolume();
+      if(!panel) return;
+      const shouldOpen=!panel.classList.contains('open');
+      panel.classList.toggle('open',shouldOpen);
+      if(shouldOpen) requestAnimationFrame(()=>positionShotVolumePanel(event.currentTarget||event.target));
     }
     function closeShotVolumePanel(){document.getElementById('shotVolumePopover')?.classList.remove('open')}
     function renderShotVolume(){
@@ -2744,6 +2832,12 @@
       toast(btn.classList.contains('on')?'字幕已开启':'字幕已关闭');
     }
 
+    document.getElementById('imageRatioGrid')?.addEventListener('click',event=>{
+      const button=event.target.closest('.image-ratio-option');
+      if(!button) return;
+      event.preventDefault();
+      setImageRatio(button.dataset.ratio);
+    });
     setImageRatio('16:9', true);
     renderShotVolume();
 
@@ -2751,9 +2845,12 @@
     function closeModal(){scrim.classList.remove('show')}
     function showModal(html){modal.innerHTML=html;scrim.classList.add('show')}
     function openCostModal(){
-      const cost=Math.max(48,vsDur*12);
-      const minutes=Math.max(2,Math.ceil(vsDur/2));
-      showModal(`<div class="mh"><h2>确认生成整片</h2><p>生成开始前再确认一次产物、模型和视频设置。结果仍可继续修改。</p></div><div class="mb"><div class="costline"><span>当前模型</span><strong>${curModel}</strong></div><div class="costline"><span>视频设置</span><strong>${vsRes} · ${vsDur}s · ${vsRatio}</strong></div><div class="costline"><span>预计积分</span><b>${cost}</b></div><div class="costline"><span>预计耗时</span><strong>约 ${minutes} 分钟</strong></div><div class="costline"><span>生成后剩余</span><strong>${(6719-cost).toLocaleString('zh-CN')}</strong></div><div class="refund">生成失败将按镜返还积分。建议先生成低清样片，满意后再高清渲染。</div></div><div class="mf"><button class="btn secondary" onclick="closeModal()">再检查一下</button><button class="btn primary" onclick="closeModal();toast('已开始生成，可在任务队列查看进度')">确认生成</button></div>`);
+      showModal(`<div class="mh"><h2>确认生成整片</h2><p>生成开始前确认一次模型和视频设置，确认后任务会进入后台生成队列。</p></div><div class="mb"><div class="costline"><span>当前模型</span><strong>${curModel}</strong></div><div class="costline"><span>视频设置</span><strong>${vsRes} · ${vsDur}s · ${vsRatio}</strong></div><div class="refund">生成任务提交后，可在后台管理的生成任务中查看进度；结果仍可继续修改。</div></div><div class="mf"><button class="btn secondary" onclick="closeModal()">再检查一下</button><button class="btn primary" onclick="confirmGenerateTask()">确认生成</button></div>`);
+    }
+    function confirmGenerateTask(){
+      closeModal();
+      const status=document.getElementById('actionStatus');
+      if(status) status.innerHTML=`<b>任务已提交</b> · 可在后台任务队列查看生成进度 · 当前模型 ${curModel} · ${vsRes} · ${vsDur}s · ${vsRatio}`;
     }
   </script>
 </body>

@@ -1,0 +1,515 @@
+<!doctype html>
+<html data-theme="light" lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>后台管理｜AITV</title>
+  <meta content="AITV 静态后台管理台：管理员登录、邀请码、积分、用户、任务和操作记录。" name="description"/>
+  <link href="assets/styles.css?v=20260629-adminflow" rel="stylesheet"/>
+</head>
+<body data-page="admin" class="admin-page">
+<header class="site-header">
+  <div class="container nav">
+    <a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="features.html">产品功能</a>
+      <a href="account.html">个人中心</a>
+      <a href="creator-studio.html">工作台</a>
+      <a class="is-active" href="admin.html">后台管理</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn secondary" href="login.html">登录</a>
+      <a class="btn primary" href="creator-studio.html">免费生成第一集</a>
+      <button aria-label="打开导航" class="icon-btn mobile-toggle" data-mobile-toggle>☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="admin-shell">
+  <section class="admin-login-card" id="admin-login-card">
+    <span class="page-kicker">管理员登录</span>
+    <h1>运营后台管理台</h1>
+    <p>第一阶段仅保留邀请码、积分、用户、任务和操作记录，便于静态页面演示并后续接入真实后台。</p>
+    <div class="admin-login-grid">
+      <label><span>管理员账号</span><input id="admin-user" value="admin" autocomplete="username"/></label>
+      <label><span>登录密码</span><input id="admin-pass" value="AITV2026" type="password" autocomplete="current-password"/></label>
+      <button class="btn primary" id="admin-login-btn" type="button">进入后台</button>
+    </div>
+    <small id="admin-login-message" role="status">演示账号：admin / AITV2026</small>
+  </section>
+
+  <section class="admin-console" id="admin-console" hidden>
+    <aside class="admin-sidebar">
+      <div>
+        <span class="page-kicker">Admin</span>
+        <h2>后台管理</h2>
+      </div>
+      <button class="on" type="button" data-admin-tab="overview">总览</button>
+      <button type="button" data-admin-tab="invites">邀请码</button>
+      <button type="button" data-admin-tab="points">积分管理</button>
+      <button type="button" data-admin-tab="records">积分流水</button>
+      <button type="button" data-admin-tab="users">用户账号</button>
+      <button type="button" data-admin-tab="tasks">生成任务</button>
+      <button type="button" data-admin-tab="logs">操作记录</button>
+      <button class="admin-logout" id="admin-logout" type="button">退出登录</button>
+    </aside>
+    <section class="admin-content" id="admin-content"></section>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div><a class="logo" href="index.html"><span class="logo-mark">漫</span><span>漫剧工场</span></a><p style="margin-top:14px;max-width:430px">后台仅保留 MVP 必要能力：邀请码、积分、用户、任务和记录，便于继续接真实服务。</p></div>
+    <div><h4>前台</h4><a href="index.html">首页</a><a href="creator-studio.html">创作工作台</a></div>
+    <div><h4>账户</h4><a href="login.html">登录注册</a><a href="account.html">个人中心</a></div>
+    <div><h4>后台</h4><a href="admin.html">后台管理</a></div>
+  </div>
+</footer>
+
+<script src="assets/site-overrides.js"></script>
+<script src="assets/app.js?v=20260629-adminflow"></script>
+<script>
+(function(){
+  const api=window.AITVData;
+  const AUTH_KEY='md-admin-auth';
+  const $=selector=>document.querySelector(selector);
+  if(!api){
+    $('#admin-login-message').textContent='后台数据模块加载失败，请刷新页面。';
+    return;
+  }
+  const esc=api.escapeHtml;
+  const allowedTabs=['overview','invites','points','records','users','tasks','logs'];
+  let currentTab=allowedTabs.includes(location.hash.replace('#',''))?location.hash.replace('#',''):'overview';
+  const state={recordType:'全部',recordKeyword:'',userKeyword:'',userType:'全部',userStatus:'全部',userInvite:'',selectedUsers:new Set()};
+
+  function showConsole(){
+    $('#admin-login-card').hidden=true;
+    $('#admin-console').hidden=false;
+    setTab(currentTab,false);
+  }
+  function setTab(tab,push=true){
+    currentTab=allowedTabs.includes(tab)?tab:'overview';
+    if(push) history.replaceState(null,'','#'+currentTab);
+    document.querySelectorAll('[data-admin-tab]').forEach(button=>button.classList.toggle('on',button.dataset.adminTab===currentTab));
+    render();
+  }
+  function statusClass(status){
+    if(status==='未使用'||status==='正常'||status==='已完成') return 'active';
+    if(status==='已使用'||status==='排队中'||status==='生成中') return 'used';
+    return 'off';
+  }
+  function statusBadge(status){
+    return `<span class="invite-status ${statusClass(status)}">${esc(status||'-')}</span>`;
+  }
+  function formatNumber(value){
+    return Number(value||0).toLocaleString('zh-CN');
+  }
+  function users(){
+    return api.readUsers();
+  }
+  function invites(){
+    return api.readInvites();
+  }
+  function records(){
+    return api.readPointRecords();
+  }
+  function tasks(){
+    return api.readTasks();
+  }
+  function logs(){
+    return api.readAdminLogs();
+  }
+  function metricCard(label,value,tab){
+    return `<button class="admin-metric-button" type="button" data-admin-go="${tab}"><span>${esc(label)}</span><b>${esc(value)}</b></button>`;
+  }
+  function render(){
+    api.ensureData();
+    const content=$('#admin-content');
+    if(currentTab==='overview') return renderOverview(content);
+    if(currentTab==='invites') return renderInvites(content);
+    if(currentTab==='points') return renderPoints(content);
+    if(currentTab==='records') return renderRecords(content);
+    if(currentTab==='users') return renderUsers(content);
+    if(currentTab==='tasks') return renderTasks(content);
+    if(currentTab==='logs') return renderLogs(content);
+  }
+  function renderOverview(content){
+    const allInvites=invites();
+    const allUsers=users();
+    const allRecords=records();
+    const allTasks=tasks();
+    const today=new Date().toISOString().slice(0,10);
+    const todayPoints=allRecords.filter(item=>String(item.createdAt||'').startsWith(today)&&Number(item.change||0)>0).reduce((sum,item)=>sum+Number(item.change||0),0);
+    const latestUser=allUsers.slice().sort((a,b)=>String(b.registeredAt||'').localeCompare(String(a.registeredAt||'')))[0];
+    const latestRecord=allRecords[0];
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">总览</span><h1>系统运行概览</h1><p>统一查看内测邀请码、账号积分、生成任务和最近后台操作。</p></div><a class="btn primary" href="creator-studio.html">打开前台工作台</a></div>
+    <div class="admin-metrics">
+      ${metricCard('总用户数',allUsers.length,'users')}
+      ${metricCard('未使用邀请码',allInvites.filter(item=>item.status==='未使用').length,'invites')}
+      ${metricCard('已使用邀请码',allInvites.filter(item=>item.status==='已使用').length,'invites')}
+      ${metricCard('已禁用邀请码',allInvites.filter(item=>item.status==='已禁用').length,'invites')}
+      ${metricCard('已过期邀请码',allInvites.filter(item=>item.status==='已过期').length,'invites')}
+      ${metricCard('用户总积分',formatNumber(allUsers.reduce((sum,user)=>sum+Number(user.credits||0),0)),'points')}
+      ${metricCard('今日分配积分',formatNumber(todayPoints),'records')}
+      ${metricCard('积分流水',allRecords.length,'records')}
+    </div>
+    <div class="admin-two-col"><section class="admin-card"><h2>最近注册用户</h2>${latestUser?`<div class="admin-mini-summary"><b>${esc(latestUser.name)}</b><span>${esc(latestUser.phone||latestUser.email)} · ${esc(latestUser.registeredAt||'-')}</span></div>`:'暂无注册用户'}<h2 style="margin-top:18px">最近任务</h2>${taskTable(allTasks.slice(0,4))}</section><section class="admin-card"><h2>最近积分操作</h2>${latestRecord?recordTable([latestRecord]):'暂无积分流水'}<h2 style="margin-top:18px">最近操作</h2>${logList(logs().slice(0,5))}</section></div>`;
+  }
+  function renderInvites(content){
+    const list=invites();
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">邀请码</span><h1>邀请码管理</h1><p>邀请码仅支持一次性使用：未使用、已使用、已过期、已禁用。注册成功后自动变为已使用。</p></div></div>
+    <section class="admin-card admin-form-card"><h2>批量生成邀请码</h2>
+      <div class="admin-form-row">
+        <label><span>生成数量</span><input id="invite-count" type="number" min="1" max="100" value="10"/></label>
+        <label><span>前缀</span><input id="invite-prefix" maxlength="6" value="ES"/></label>
+        <label><span>有效期</span><input id="invite-expired" type="date" value="${api.dateInputValue(30)}"/></label>
+        <label><span>初始积分</span><input id="invite-credit" type="number" min="0" value="500"/></label>
+        <label><span>用户类型</span><select id="invite-user-type"><option>测试用户</option><option>普通用户</option><option>企业用户</option><option>渠道用户</option></select></label>
+        <label><span>备注</span><input id="invite-note" maxlength="60" value="内测邀请"/></label>
+        <button class="btn primary" type="button" data-admin-action="batch-invite">生成</button>
+      </div>
+    </section>
+    <section class="admin-card"><div class="admin-card-head"><h2>邀请码列表</h2><button class="btn secondary small" type="button" data-admin-action="export-invites">复制未使用邀请码</button></div><div class="portal-table-wrap">${inviteTable(list)}</div></section>`;
+  }
+  function renderPoints(content){
+    const allUsers=users();
+    const filtered=filterUsers(allUsers);
+    const first=allUsers[0];
+    const userTypes=['全部',...new Set(allUsers.map(user=>user.userType||'普通用户'))];
+    const userInvites=['全部',...new Set(allUsers.map(user=>user.inviteCode).filter(Boolean))];
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">积分</span><h1>积分发放 / 扣减</h1><p>支持单个账号调整，也可筛选后批量分配或扣减积分，所有操作会进入积分流水。</p></div></div>
+    <section class="admin-card admin-form-card"><h2>单个账号积分</h2>
+      <div class="admin-form-row">
+        <label><span>用户</span><select id="point-user">${allUsers.map(user=>`<option value="${esc(user.id)}">${esc(user.name)} · ${esc(user.phone||user.email)} · ${formatNumber(user.credits)}积分</option>`).join('')}</select></label>
+        <div class="point-current"><span>当前积分</span><b id="point-current">${formatNumber(first?.credits||0)}</b></div>
+        <label><span>操作</span><select id="point-type"><option>增加</option><option>扣减</option></select></label>
+        <label><span>积分数量</span><input id="point-amount" type="number" min="1" value="100"/></label>
+        <label><span>原因</span><input id="point-reason" value="运营分配"/></label>
+        <label><span>备注</span><input id="point-note" placeholder="选填"/></label>
+        <button class="btn primary" type="button" data-admin-action="single-point">确认调整</button>
+      </div>
+    </section>
+    <section class="admin-card"><div class="admin-card-head"><h2>批量积分</h2><span>${state.selectedUsers.size} 个已选择</span></div>
+      <div class="admin-filter-row">
+        <input id="user-keyword" value="${esc(state.userKeyword)}" placeholder="搜索姓名 / 手机 / 用户ID"/>
+        <select id="user-type-filter">${userTypes.map(type=>`<option ${state.userType===type?'selected':''}>${esc(type)}</option>`).join('')}</select>
+        <select id="user-status-filter">${['全部','正常','禁用','待激活'].map(status=>`<option ${state.userStatus===status?'selected':''}>${esc(status)}</option>`).join('')}</select>
+        <select id="user-invite-filter">${userInvites.map(code=>`<option ${state.userInvite===code?'selected':''}>${esc(code)}</option>`).join('')}</select>
+        <button class="btn secondary small" type="button" data-admin-action="filter-users">搜索</button>
+        <button class="btn secondary small" type="button" data-admin-action="select-all-users">全选当前列表</button>
+        <button class="btn secondary small" type="button" data-admin-action="clear-selected-users">清空选择</button>
+      </div>
+      <div class="portal-table-wrap">${batchUserTable(filtered)}</div>
+      <div class="admin-action-row">
+        <select id="batch-point-type"><option>增加</option><option>扣减</option></select>
+        <input id="batch-point-amount" type="number" min="1" value="100" placeholder="积分数量"/>
+        <input id="batch-point-reason" value="批量运营分配" placeholder="原因"/>
+        <button class="btn primary" type="button" data-admin-action="batch-point">批量执行</button>
+      </div>
+    </section>`;
+  }
+  function renderRecords(content){
+    const list=records().filter(record=>{
+      const matchesType=state.recordType==='全部'||record.type===state.recordType||record.source===state.recordType;
+      const text=`${record.userName||''}${record.phone||''}${record.reason||''}${record.source||''}${record.inviteCode||''}`.toLowerCase();
+      return matchesType&&text.includes(state.recordKeyword.toLowerCase());
+    });
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">流水</span><h1>积分使用记录</h1><p>查看注册赠送、后台发放、扣减、失败返还等积分变化。</p></div></div>
+    <section class="admin-card">
+      <div class="admin-filter-row">
+        <select id="record-type"><option>全部</option><option>注册赠送</option><option>增加</option><option>扣减</option></select>
+        <input id="record-keyword" value="${esc(state.recordKeyword)}" placeholder="搜索用户、手机号、邀请码、原因"/>
+        <button class="btn secondary small" type="button" data-admin-action="filter-records">筛选</button>
+        <button class="btn secondary small" type="button" data-admin-action="reset-records">重置</button>
+      </div>
+      <div class="portal-table-wrap">${recordTable(list)}</div>
+    </section>`;
+    const type=$('#record-type');
+    if(type) type.value=state.recordType;
+  }
+  function renderUsers(content){
+    const allUsers=users();
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">用户</span><h1>用户账号</h1><p>查看账号的邀请码、积分、注册和登录状态，可禁用异常账号或快速进入积分分配。</p></div></div>
+    <section class="admin-card"><div class="portal-table-wrap">${userTable(allUsers)}</div></section>`;
+  }
+  function renderTasks(content){
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">任务</span><h1>生成任务</h1><p>查看前台短视频生成、角色场景道具和剧本任务状态。</p></div><button class="btn secondary" type="button" data-admin-action="refresh-task">刷新任务</button></div><section class="admin-card">${taskTable(tasks())}</section>`;
+  }
+  function renderLogs(content){
+    content.innerHTML=`<div class="admin-head"><div><span class="page-kicker">日志</span><h1>操作记录</h1><p>记录邀请码、积分、用户状态和管理员登录操作。</p></div><button class="btn secondary" type="button" data-admin-action="clear-log">清空记录</button></div><section class="admin-card">${logList(logs())}</section>`;
+  }
+  function filterUsers(list){
+    const keyword=state.userKeyword.toLowerCase();
+    return list.filter(user=>{
+      const text=`${user.id}${user.name}${user.phone}${user.email}${user.inviteCode}`.toLowerCase();
+      const matchesKeyword=!keyword||text.includes(keyword);
+      const matchesType=state.userType==='全部'||(user.userType||'普通用户')===state.userType;
+      const matchesStatus=state.userStatus==='全部'||user.status===state.userStatus;
+      const matchesInvite=state.userInvite==='全部'||!state.userInvite||user.inviteCode===state.userInvite;
+      return matchesKeyword&&matchesType&&matchesStatus&&matchesInvite;
+    });
+  }
+  function inviteTable(list){
+    return `<table class="portal-table admin-table"><thead><tr><th>邀请码</th><th>状态</th><th>生成时间</th><th>有效期</th><th>初始积分</th><th>用户类型</th><th>使用人</th><th>使用时间</th><th>备注</th><th>操作</th></tr></thead><tbody>${list.map(item=>`<tr>
+      <td><button type="button" data-admin-copy="${esc(item.code)}">${esc(item.code)}</button></td>
+      <td>${statusBadge(item.status)}</td>
+      <td>${esc(item.createdAt||'-')}</td>
+      <td>${esc(item.expiredAt||'-')}</td>
+      <td><b>${formatNumber(item.initialCredits)}</b></td>
+      <td>${esc(item.userType||'-')}</td>
+      <td><b>${esc(item.usedByName||'-')}</b><small>${esc(item.usedByPhone||'')}</small></td>
+      <td>${esc(item.usedAt||'-')}</td>
+      <td>${esc(item.note||'-')}</td>
+      <td><div class="admin-inline-actions"><button class="btn secondary small" type="button" data-admin-invite-detail="${esc(item.code)}">详情</button>${item.status==='已使用'||item.status==='已过期'?'<button class="btn secondary small" type="button" disabled>不可切换</button>':`<button class="btn secondary small" type="button" data-admin-toggle-invite="${esc(item.code)}">${item.status==='已禁用'?'启用':'禁用'}</button>`}</div></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  function batchUserTable(list){
+    return `<table class="portal-table admin-table"><thead><tr><th>选择</th><th>用户</th><th>状态</th><th>邀请码</th><th>积分</th><th>注册时间</th></tr></thead><tbody>${list.map(user=>`<tr>
+      <td class="admin-check-cell"><input type="checkbox" data-user-check="${esc(user.id)}" ${state.selectedUsers.has(user.id)?'checked':''}/></td>
+      <td><b>${esc(user.name)}</b><small>${esc(user.id)} · ${esc(user.phone||user.email)}</small></td>
+      <td>${statusBadge(user.status)}</td>
+      <td>${esc(user.inviteCode||'-')}</td>
+      <td><b>${formatNumber(user.credits)}</b></td>
+      <td>${esc(user.registeredAt||'-')}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  function userTable(list){
+    return `<table class="portal-table admin-table"><thead><tr><th>用户</th><th>状态</th><th>邀请码</th><th>积分</th><th>最近登录</th><th>操作</th></tr></thead><tbody>${list.map(user=>`<tr>
+      <td><b>${esc(user.name)}</b><small>${esc(user.id)} · ${esc(user.phone||user.email)}</small></td>
+      <td>${statusBadge(user.status)}</td>
+      <td>${esc(user.inviteCode||'-')}</td>
+      <td><b>${formatNumber(user.credits)}</b></td>
+      <td>${esc(user.lastLoginAt||'-')}</td>
+      <td><div class="admin-inline-actions"><button class="btn secondary small" type="button" data-admin-user-detail="${esc(user.id)}">详情</button><button class="btn secondary small" type="button" data-admin-user-point="${esc(user.id)}">分配积分</button><button class="btn secondary small" type="button" data-admin-toggle-user="${esc(user.id)}">${user.status==='禁用'?'启用':'禁用'}</button></div></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  function recordTable(list){
+    return `<table class="portal-table admin-table"><thead><tr><th>流水编号</th><th>时间</th><th>用户</th><th>类型</th><th>来源</th><th>变化</th><th>变更前后</th><th>邀请码</th><th>原因</th><th>操作人</th></tr></thead><tbody>${(list.length?list:[{empty:true}]).map(record=>record.empty?`<tr><td colspan="10">暂无匹配流水</td></tr>`:`<tr>
+      <td><b>${esc(record.id||'-')}</b></td>
+      <td>${esc(record.createdAt||'-')}</td>
+      <td><b>${esc(record.userName||'-')}</b><small>${esc(record.phone||'')}</small></td>
+      <td>${esc(record.type||record.source||'-')}</td>
+      <td>${esc(record.source||'-')}</td>
+      <td><b class="delta ${Number(record.change||0)>=0?'pos':'neg'}">${Number(record.change||0)>0?'+':''}${formatNumber(record.change)}</b></td>
+      <td>${formatNumber(record.before)} -> ${formatNumber(record.after)}</td>
+      <td>${esc(record.inviteCode||'-')}</td>
+      <td><b>${esc(record.reason||'-')}</b><small>${esc(record.note||'')}</small></td>
+      <td>${esc(record.operator||'-')}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  function taskTable(list){
+    return `<table class="portal-table admin-table"><thead><tr><th>任务</th><th>用户</th><th>类型</th><th>项目</th><th>积分</th><th>状态</th><th>时间</th></tr></thead><tbody>${list.map(task=>`<tr><td><b>${esc(task.id)}</b></td><td>${esc(task.user)}</td><td>${esc(task.type)}</td><td>${esc(task.project)}</td><td>${formatNumber(task.cost)}</td><td>${statusBadge(task.status)}</td><td>${esc(task.time)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  function logList(list){
+    return `<div class="admin-log-list">${(list.length?list:[{time:'-',operator:'system',action:'暂无操作记录',detail:''}]).map(item=>`<div><span>${esc(item.time)}</span><b>${esc(item.action)}</b><small>${esc(item.operator||item.user||'system')}</small><em>${esc(item.detail||'')}</em></div>`).join('')}</div>`;
+  }
+  function showDialog(title,rows){
+    document.querySelector('.admin-dialog')?.remove();
+    const dialog=document.createElement('div');
+    dialog.className='admin-dialog';
+    dialog.innerHTML=`<div class="admin-dialog-card" role="dialog" aria-modal="true"><button class="modal-close" type="button" data-admin-dialog-close>×</button><h2>${esc(title)}</h2><div class="admin-detail-list">${rows.map(([label,value])=>`<div><span>${esc(label)}</span><b>${esc(value||'-')}</b></div>`).join('')}</div><button class="btn primary block" type="button" data-admin-dialog-close>我知道了</button></div>`;
+    document.body.appendChild(dialog);
+    dialog.querySelectorAll('[data-admin-dialog-close]').forEach(button=>button.addEventListener('click',()=>dialog.remove()));
+    dialog.addEventListener('click',event=>{if(event.target===dialog) dialog.remove()});
+  }
+  function copyText(text,title='已复制'){
+    navigator.clipboard?.writeText(text).catch(()=>{});
+    api.toast(title,text);
+  }
+  function createInvites(){
+    const count=Math.max(1,Math.min(100,Number($('#invite-count')?.value||1)));
+    const prefix=$('#invite-prefix')?.value||'ES';
+    const expiredAt=api.inputDateToDateTime($('#invite-expired')?.value||'');
+    const initialCredits=Number($('#invite-credit')?.value||0);
+    const userType=$('#invite-user-type')?.value||'测试用户';
+    const note=$('#invite-note')?.value.trim()||'内测邀请';
+    const list=invites();
+    for(let index=0;index<count;index+=1){
+      let code=api.generateInviteCode(prefix);
+      while(list.some(item=>api.normalizeInvite(item.code)===api.normalizeInvite(code))) code=api.generateInviteCode(prefix);
+      list.unshift({code,status:'未使用',createdAt:api.formatDateTime(),expiredAt,initialCredits,userType,note,usedByUserId:'',usedByName:'',usedByPhone:'',usedAt:''});
+    }
+    api.saveInvites(list);
+    api.addAdminLog('批量生成邀请码',`${count} 个，初始积分 ${initialCredits}`);
+    api.toast('邀请码已生成',`${count} 个新码已加入列表`);
+    render();
+  }
+  function toggleInvite(code){
+    const list=invites();
+    const item=list.find(invite=>api.normalizeInvite(invite.code)===api.normalizeInvite(code));
+    if(!item) return api.toast('邀请码不存在');
+    if(item.status==='已使用'||item.status==='已过期') return api.toast('该状态不可切换',item.status);
+    item.status=item.status==='已禁用'?'未使用':'已禁用';
+    api.saveInvites(list);
+    api.addAdminLog('切换邀请码状态',`${item.code} -> ${item.status}`);
+    api.toast('状态已更新',`${item.code} ${item.status}`);
+    render();
+  }
+  function adjustPoint(userId,type,amount,reason,note='',source='后台积分调整'){
+    const result=api.updateUserCredits(userId,type,amount,reason,source,note);
+    if(!result.ok) return result;
+    api.addAdminLog('调整用户积分',`${result.user.name} ${result.delta>0?'+':''}${result.delta}`);
+    return result;
+  }
+  function runSinglePoint(){
+    const selected=users().find(user=>user.id===($('#point-user')?.value||''));
+    const type=$('#point-type')?.value||'增加';
+    const amount=Number($('#point-amount')?.value||0);
+    if(!amount) return api.toast('请输入积分数量');
+    if(!selected) return api.toast('请选择用户');
+    if(!confirm(`确认给 ${selected.name} ${type} ${amount} 积分？`)) return;
+    const result=adjustPoint(selected.id,type,amount,$('#point-reason')?.value.trim()||'后台调整',$('#point-note')?.value.trim()||'','单个分配');
+    if(!result.ok) return api.toast('积分调整失败',result.message);
+    api.toast('积分已更新',`${result.user.name}: ${formatNumber(result.before)} -> ${formatNumber(result.after)}`);
+    render();
+  }
+  function runBatchPoint(){
+    const ids=[...state.selectedUsers];
+    const amount=Number($('#batch-point-amount')?.value||0);
+    if(!ids.length) return api.toast('请先选择用户');
+    if(!amount) return api.toast('请输入积分数量');
+    const type=$('#batch-point-type')?.value||'增加';
+    const total=ids.length*amount;
+    if(!confirm(`本次将为 ${ids.length} 名用户每人${type} ${amount} 积分，合计 ${total} 积分，是否确认？`)) return;
+    let success=0;
+    ids.forEach(id=>{
+      const result=adjustPoint(id,type,amount,$('#batch-point-reason')?.value.trim()||'批量后台调整','批量操作','批量分配');
+      if(result.ok) success+=1;
+    });
+    api.addAdminLog('批量调整积分',`${success}/${ids.length} 个账号成功`);
+    api.toast('批量积分已处理',`${success} 个账号已更新`);
+    state.selectedUsers.clear();
+    render();
+  }
+  function toggleUser(userId){
+    const user=users().find(item=>item.id===userId);
+    if(!user) return api.toast('用户不存在');
+    const next=user.status==='禁用'?'正常':'禁用';
+    const result=api.updateUserStatus(userId,next);
+    if(!result.ok) return api.toast('状态更新失败',result.message);
+    api.toast('用户状态已更新',`${result.user.name} ${next}`);
+    render();
+  }
+  api.ensureData();
+  if(localStorage.getItem(AUTH_KEY)==='yes') showConsole();
+  $('#admin-login-btn')?.addEventListener('click',()=>{
+    const user=$('#admin-user').value.trim();
+    const pass=$('#admin-pass').value.trim();
+    if(user!=='admin'||pass!=='AITV2026'){
+      $('#admin-login-message').textContent='账号或密码错误。';
+      return;
+    }
+    localStorage.setItem(AUTH_KEY,'yes');
+    api.addAdminLog('管理员登录后台','admin');
+    showConsole();
+    api.toast('登录成功','已进入后台管理台');
+  });
+  $('#admin-logout')?.addEventListener('click',()=>{
+    localStorage.removeItem(AUTH_KEY);
+    api.addAdminLog('管理员退出后台','admin');
+    location.reload();
+  });
+  document.addEventListener('change',event=>{
+    const pointUser=event.target.closest('#point-user');
+    if(pointUser){
+      const user=users().find(item=>item.id===pointUser.value);
+      const node=$('#point-current');
+      if(node) node.textContent=formatNumber(user?.credits||0);
+      return;
+    }
+    const checkbox=event.target.closest('[data-user-check]');
+    if(!checkbox) return;
+    if(checkbox.checked) state.selectedUsers.add(checkbox.dataset.userCheck);
+    else state.selectedUsers.delete(checkbox.dataset.userCheck);
+    const count=document.querySelector('.admin-card-head span');
+    if(count&&currentTab==='points') count.textContent=`${state.selectedUsers.size} 个已选择`;
+  });
+  document.addEventListener('click',event=>{
+    const tab=event.target.closest('[data-admin-tab]');
+    if(tab) return setTab(tab.dataset.adminTab);
+    const go=event.target.closest('[data-admin-go]');
+    if(go) return setTab(go.dataset.adminGo);
+    const copy=event.target.closest('[data-admin-copy]');
+    if(copy) return copyText(copy.dataset.adminCopy,'已复制邀请码');
+    const action=event.target.closest('[data-admin-action]')?.dataset.adminAction;
+    if(action==='batch-invite') return createInvites();
+    if(action==='export-invites'){
+      const text=invites().filter(item=>item.status==='未使用').map(item=>item.code).join('\n');
+      return copyText(text||'暂无未使用邀请码','未使用邀请码已复制');
+    }
+    if(action==='single-point') return runSinglePoint();
+    if(action==='filter-users'){
+      state.userKeyword=$('#user-keyword')?.value.trim()||'';
+      state.userType=$('#user-type-filter')?.value||'全部';
+      state.userStatus=$('#user-status-filter')?.value||'全部';
+      state.userInvite=$('#user-invite-filter')?.value||'全部';
+      return render();
+    }
+    if(action==='select-all-users'){
+      filterUsers(users()).forEach(user=>state.selectedUsers.add(user.id));
+      return render();
+    }
+    if(action==='clear-selected-users'){
+      state.selectedUsers.clear();
+      return render();
+    }
+    if(action==='batch-point') return runBatchPoint();
+    if(action==='filter-records'){
+      state.recordType=$('#record-type')?.value||'全部';
+      state.recordKeyword=$('#record-keyword')?.value.trim()||'';
+      return render();
+    }
+    if(action==='reset-records'){
+      state.recordType='全部';
+      state.recordKeyword='';
+      return render();
+    }
+    if(action==='refresh-task'){
+      const list=tasks();
+      list.unshift({id:'T-'+String(Date.now()).slice(-4),user:'漫剧创作者',type:'状态刷新',project:'当前项目',cost:0,status:'已完成',time:'刚刚'});
+      api.saveTasks(list.slice(0,30));
+      api.addAdminLog('刷新任务队列','新增一条静态刷新记录');
+      api.toast('任务队列已刷新');
+      return render();
+    }
+    if(action==='clear-log'){
+      if(!confirm('确认清空操作记录？')) return;
+      api.saveAdminLogs([{time:api.formatDateTime(),operator:'admin',action:'清空历史操作记录',detail:'保留本条记录'}]);
+      api.toast('操作记录已清空');
+      return render();
+    }
+    const toggleInviteButton=event.target.closest('[data-admin-toggle-invite]');
+    if(toggleInviteButton) return toggleInvite(toggleInviteButton.dataset.adminToggleInvite);
+    const inviteDetail=event.target.closest('[data-admin-invite-detail]');
+    if(inviteDetail){
+      const item=invites().find(invite=>api.normalizeInvite(invite.code)===api.normalizeInvite(inviteDetail.dataset.adminInviteDetail));
+      if(item) showDialog('邀请码详情',[
+        ['邀请码',item.code],['状态',item.status],['有效期',item.expiredAt],['初始积分',item.initialCredits],['用户类型',item.userType],['使用用户',item.usedByName||item.usedByPhone||'-'],['使用时间',item.usedAt],['备注',item.note]
+      ]);
+      return;
+    }
+    const userDetail=event.target.closest('[data-admin-user-detail]');
+    if(userDetail){
+      const user=users().find(item=>item.id===userDetail.dataset.adminUserDetail);
+      const recent=records().filter(record=>record.userId===user?.id).slice(0,3).map(record=>`${record.createdAt} ${record.change>0?'+':''}${record.change} ${record.reason}`).join(' / ');
+      if(user) showDialog('用户详情',[
+        ['用户ID',user.id],['昵称',user.name],['账号',user.phone||user.email],['状态',user.status],['邀请码',user.inviteCode],['积分',user.credits],['注册时间',user.registeredAt],['最近登录',user.lastLoginAt]
+        ,['最近流水',recent||'暂无']
+      ]);
+      return;
+    }
+    const userPoint=event.target.closest('[data-admin-user-point]');
+    if(userPoint){
+      setTab('points');
+      const select=$('#point-user');
+      if(select) select.value=userPoint.dataset.adminUserPoint;
+      return api.toast('已切换到积分管理','可直接为该用户分配积分');
+    }
+    const userToggle=event.target.closest('[data-admin-toggle-user]');
+    if(userToggle) return toggleUser(userToggle.dataset.adminToggleUser);
+  });
+})();
+</script>
+</body>
+</html>

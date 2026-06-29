@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>登录注册 | 漫剧工场｜智能漫剧增长工作台</title>
-<link href="assets/styles.css?v=20260627-doc123" rel="stylesheet"/>
+<link href="assets/styles.css?v=20260629-adminflow" rel="stylesheet"/>
 <meta content="漫剧工场｜智能漫剧增长工作台：面向中国创作者、内容机构与版权方的智能漫剧生产、抖音视频素材和个人中心付费闭环原型。" name="description"/></head>
 <body data-page="login">
 <header class="site-header">
@@ -27,15 +27,26 @@
 <div class="grid-3"><div class="card"><h3>1</h3><p>选择身份：个人、团队、内容机构、版权方或品牌方。</p></div><div class="card"><h3>2</h3><p>选择目标：第一集、小说改编或品牌漫剧。</p></div><div class="card"><h3>3</h3><p>一句话生成或上传剧本。</p></div></div>
 </div>
 <div class="card login-card">
-<span class="page-kicker">邀请码登录 / 注册</span><h2 style="margin:14px 0 22px">使用邀请码登陆<br/>开启你的创作</h2>
-<div class="form-grid">
-<div class="field"><label for="login-phone">手机号</label><input id="login-phone" inputmode="tel" maxlength="11" placeholder="请输入手机号" value="13800138000"/></div>
-<div class="field"><label for="login-code">验证码</label><input id="login-code" inputmode="numeric" maxlength="6" placeholder="演示环境任意 6 位" value="888888"/></div>
-<div class="field"><label for="login-invite">邀请码</label><input id="login-invite" maxlength="24" autocomplete="one-time-code" placeholder="请输入运营分配的邀请码"/></div>
+<span class="page-kicker">邀请码内测</span><h2 style="margin:14px 0 16px">登录或注册<br/>开启你的创作</h2>
+<div class="auth-tabs" role="tablist" aria-label="登录注册切换">
+<button class="active" type="button" data-auth-tab="login">账号登录</button>
+<button type="button" data-auth-tab="register">邀请码注册</button>
+</div>
 <p class="form-message" id="login-message" role="status"></p>
-<label class="agreement login-agreement"><input id="login-agreement" type="checkbox"/> <span>我已阅读并同意 <a href="#" data-policy-open="terms">《用户协议》</a> 和 <a href="#" data-policy-open="privacy">《隐私政策》</a>，授权平台用于账号登录、项目创建和必要服务通知。</span></label>
-<a class="btn primary block" href="account.html" data-demo-login>登录</a>
-<p style="font-size:13px">第一阶段仅支持邀请码内测注册；没有邀请码请联系运营开通。</p>
+<div class="auth-panel active" data-auth-panel="login" role="tabpanel">
+<div class="field"><label for="login-phone">手机号 / 邮箱</label><input id="login-phone" inputmode="tel" placeholder="请输入已注册账号" value="13800138000"/></div>
+<div class="field"><label for="login-code">验证码</label><input id="login-code" inputmode="numeric" maxlength="8" placeholder="演示环境任意 4-8 位" value="888888"/></div>
+<button class="btn primary block" type="button" data-login-submit>登录</button>
+<p class="auth-hint">老用户无需邀请码。账号被禁用时会阻止登录。</p>
+</div>
+<div class="auth-panel" data-auth-panel="register" role="tabpanel">
+<div class="field"><label for="register-name">昵称</label><input id="register-name" maxlength="20" placeholder="例如：漫剧创作者"/></div>
+<div class="field"><label for="register-phone">手机号 / 邮箱</label><input id="register-phone" inputmode="tel" placeholder="请输入新账号"/></div>
+<div class="field"><label for="register-code">验证码</label><input id="register-code" inputmode="numeric" maxlength="8" placeholder="演示环境任意 4-8 位" value="888888"/></div>
+<div class="field"><label for="register-invite">邀请码</label><input id="register-invite" maxlength="24" autocomplete="one-time-code" placeholder="请输入未使用的邀请码"/></div>
+<label class="agreement login-agreement"><input id="register-agreement" type="checkbox"/> <span>我已阅读并同意 <a href="#" data-policy-open="terms">《用户协议》</a> 和 <a href="#" data-policy-open="privacy">《隐私政策》</a>，授权平台用于账号注册、项目创建和必要服务通知。</span></label>
+<button class="btn primary block" type="button" data-register-submit>注册并进入</button>
+<p class="auth-hint">注册会消耗一个邀请码，并自动发放后台配置的初始积分。</p>
 </div>
 </div>
 </div>
@@ -48,11 +59,11 @@
 </div>
 <div><h4>产品</h4><a href="features.html">产品功能</a></div>
 <div><h4>账户</h4><a href="account.html">个人中心</a></div>
-<div><h4>开始</h4><a href="login.html">登录注册</a><a href="wizard.html">剧本生成向导</a><a href="creator-studio.html">创作工作台</a></div>
+<div><h4>开始</h4><a href="login.html">登录注册</a><a href="creator-studio.html">创作工作台</a><a href="admin.html">后台管理</a></div>
 </div>
 </footer>
 <script src="assets/site-overrides.js"></script>
-	<script src="assets/app.js?v=20260627-doc123"></script>
+	<script src="assets/app.js?v=20260629-adminflow"></script>
 <script src="assets/easy-edit.js"></script>
 </body>
 </html>
